@@ -1,5 +1,4 @@
-﻿namespace WarehouseWPF.Domain;
-
+﻿namespace WMS.Domain;
 public class Stock
 {
     public Guid Id { get; private set; }

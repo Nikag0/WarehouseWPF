@@ -1,4 +1,4 @@
-﻿namespace WarehouseWPF.Domain;
+﻿namespace WMS.Domain;
 
 public class Component
 {
