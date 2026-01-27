@@ -9,6 +9,9 @@ namespace WMS.Application.Abstractions
 {
     public interface IComponentRepository
     {
+        Task<List<Component>> GetAllAsync();
+        Task AddAsync(Component component);
         Task<Component?> GetByIdAsync(Guid id);
+        Task<bool> ExistsByArticle(string article);
     }
 }

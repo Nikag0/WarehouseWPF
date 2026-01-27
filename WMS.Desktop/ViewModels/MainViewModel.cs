@@ -11,27 +11,13 @@ namespace WMS.Desktop.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private readonly IssueService _issueService;
-        public ICommand IssueCommand { get; }
+        public ComponentsViewModel Components { get; }
 
-        public MainViewModel(IssueService issueService)
+        public MainViewModel(ComponentsViewModel components)
         {
-            _issueService = issueService;
-            IssueCommand = new RelayCommand(IssueTest);
+            Components = components;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        public async Task IssueTest()
-        {
-            await _issueService.IssueAsync(new[]
-            {
-            new StockOperationDto(
-                ComponentId: Guid.Parse("..."),
-                CellId: Guid.Parse("..."),
-                Quantity: 2)
-        });
-        }
     }
-
 }

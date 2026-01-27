@@ -35,7 +35,8 @@ namespace WMS.Desktop
 
             // репозитории
             services.AddScoped<IStockRepository, StockRepository>();
-            //services.AddScoped<IComponentRepository, ComponentRepository>();
+            services.AddScoped<IComponentRepository, ComponentRepository>();
+            services.AddScoped<ComponentService>();
             services.AddScoped<IOperationRepository, OperationRepository>();
 
             // application services
@@ -44,6 +45,7 @@ namespace WMS.Desktop
             services.AddScoped<ReceiptService>();
 
             // view models
+            services.AddTransient<ComponentsViewModel>();
             services.AddTransient<MainViewModel>();
 
             Services = services.BuildServiceProvider();
