@@ -21,39 +21,53 @@ namespace WMS.Application.Services
             _operationRepo = operationRepo;
         }
 
-        public async Task IssueAsync(
-            IReadOnlyCollection<StockOperationDto> items,
-            string? comment = null)
+        public async Task IssueAsync(StockOperationDto item)
         {
-            if (items.Count == 0)
-                throw new Exception("Список выдачи пуст");
+            var stock = await _stockRepo
+                .GetAsync(item.ComponentId, item.CellId);
 
-            var operation = Operation.Create(OperationType.Issue, comment);
+            if (stock is null)
+                throw new Exception(
+                    "Товар в указанной ячейке не найден");
 
-            foreach (var item in items)
-            {
-                var stock = await _stockRepo
-                    .GetAsync(item.ComponentId, item.CellId);
+            stock.Issue(item.Quantity);
 
-                if (stock is null)
-                    throw new Exception(
-                        "Товар в указанной ячейке не найден");
-
-                var before = stock.Quantity;
-
-                stock.Issue(item.Quantity);
-
-                await _stockRepo.UpdateAsync(stock);
-
-                operation.AddItem(
-                    item.ComponentId,
-                    item.CellId,
-                    before,
-                    stock.Quantity);
-            }
-
-            operation.Validate();
-            await _operationRepo.AddAsync(operation);
+            await _stockRepo.UpdateAsync(stock);
         }
+
+        //public async Task IssueAsync(
+        //    IReadOnlyCollection<StockOperationDto> items,
+        //    string? comment = null)
+        //{
+        //    if (items.Count == 0)
+        //        throw new Exception("Список выдачи пуст");
+
+        //    var operation = Operation.Create(OperationType.Issue, comment);
+
+        //    foreach (var item in items)
+        //    {
+        //        var stock = await _stockRepo
+        //            .GetAsync(item.ComponentId, item.CellId);
+
+        //        if (stock is null)
+        //            throw new Exception(
+        //                "Товар в указанной ячейке не найден");
+
+        //        var before = stock.Quantity;
+
+        //        stock.Issue(item.Quantity);
+
+        //        await _stockRepo.UpdateAsync(stock);
+
+        //        operation.AddItem(
+        //            item.ComponentId,
+        //            item.CellId,
+        //            before,
+        //            stock.Quantity);
+        //    }
+
+        //    operation.Validate();
+        //    await _operationRepo.AddAsync(operation);
+        //}
     }
 }

@@ -23,6 +23,6 @@ namespace WMS.Domain
             Position = position;
         }
 
-        public string Code => $"R{Row}-S{Rack}-C{Position}";
+        public string Code => $"{Row}-{Rack}-{Position}";
     }
 }

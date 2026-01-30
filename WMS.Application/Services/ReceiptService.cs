@@ -19,7 +19,7 @@ namespace WMS.Application.Services
             _operationRepo = operationRepo;
         }
 
-        public async Task ReceiveAsync(ReceiptItemDto item)
+        public async Task ReceiveAsync(StockOperationDto item)
         {
             if (item == null)
                 return;

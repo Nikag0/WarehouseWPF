@@ -9,11 +9,39 @@
     <Grid>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" Margin="2">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <ComboBox Grid.Column="0" Margin="2" 
+                      ItemsSource="{Binding Components}" DisplayMemberPath="Name"
+                      SelectedValuePath="Id" SelectedValue="{Binding SelectedComponentId, Mode=TwoWay}"/>
+
+            <ComboBox Grid.Column="1" Margin="2" ItemsSource="{Binding Rows}" SelectedItem="{Binding SelectedRow}"/>
+
+            <ComboBox Grid.Column="2" Margin="2" ItemsSource="{Binding Racks}" SelectedItem="{Binding SelectedRack}"/>
+
+            <ComboBox Grid.Column="3" Margin="2" ItemsSource="{Binding Positions}" SelectedItem="{Binding SelectedPosition}"/>
+
+            <TextBox Grid.Column="4" Margin="2" Text="{Binding ReceiveQuantity}"/>
+            <Button Grid.Column="5" Margin="2" Content="Приёмка" Command="{Binding ReceiveCommand}"/>
+            <Button Grid.Column="6" Margin="2" Content="Обновить" Command="{Binding RefreshCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="2">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -21,19 +49,14 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <ComboBox Grid.Column="0" Margin="2" 
-                      ItemsSource="{Binding Components}" SelectedValue="{Binding SelectedComponentId}" DisplayMemberPath="Name"/>
-            <ComboBox Grid.Column="1" Margin="2"
-                      ItemsSource="{Binding Cells}" SelectedValue="{Binding SelectedCellId}" DisplayMemberPath="Code"/>
-            <TextBox Grid.Column="2" Margin="2" Text="{Binding Quantity}"/>
-            <Button Grid.Column="3" Margin="2" Content="Приёмка" Command="{Binding ReceiveCommand}"/>
-            <Button Grid.Column="4" Margin="2" Content="Обновить" Command="{Binding RefreshCommand}"/>
-        </Grid>
 
-        <Grid Grid.Row="1">
+            <TextBox Grid.Column="3" Margin="2" Text="{Binding IssueQuantity}"/>
+            <Button Grid.Column="4" Margin="2" Content="Выдача" Command="{Binding IssueCommand}"/>
+        </Grid>
+        
+        <Grid Grid.Row="2">
             <DataGrid ItemsSource="{Binding Stocks}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />
