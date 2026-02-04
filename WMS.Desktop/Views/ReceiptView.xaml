@@ -1,20 +1,27 @@
-﻿<UserControl x:Class="WMS.Desktop.Views.StockView"
+﻿<UserControl x:Class="WMS.Desktop.Views.ReceiptView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WMS.Desktop.Views"
+             xmlns:local="clr-namespace:WMS.Desktop.Views" 
+             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
+             d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="2">
+        <Grid Grid.Row="0">
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                Text="Приём заказов" FontSize="45" Foreground="White"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -41,28 +48,13 @@
             <Button Grid.Column="6" Margin="2" Content="Обновить" Command="{Binding RefreshCommand}"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="2">
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-
-
-            <TextBox Grid.Column="3" Margin="2" Text="{Binding IssueQuantity}"/>
-            <Button Grid.Column="4" Margin="2" Content="Выдача" Command="{Binding IssueCommand}"/>
-        </Grid>
-        
         <Grid Grid.Row="2">
             <DataGrid ItemsSource="{Binding Stocks}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />
                     <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" />
                     <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" />
-                    <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" />
+                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

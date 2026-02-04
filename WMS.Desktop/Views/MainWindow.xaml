@@ -3,21 +3,85 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="clr-namespace:WMS.Desktop.Views"
+        xmlns:views="clr-namespace:WMS.Desktop.Views" 
+        xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
+        d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
     <Grid>
-        <TabControl>
-            <!-- Вкладка 1: Справочник компонентов -->
-            <TabItem Header="Components">
-                <views:ComponentsView DataContext="{Binding Components}"/>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="750*"/>
+        </Grid.ColumnDefinitions>
+
+        <TabControl Grid.ColumnSpan="2"
+            TabStripPlacement="Left"
+            Background="#1E1E1E"
+            BorderThickness="0">
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Сообщения" FontSize="11"
+                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+
             </TabItem>
 
-            <!-- Вкладка 2: Остатки -->
-            <TabItem Header="Stock">
-                <views:StockView DataContext="{Binding Stocks}"/>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Каталог" FontSize="11"
+                               HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <views:ComponentsView DataContext="{Binding Components}"/>
+
             </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Выдача" FontSize="11"
+                               HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <views:IssueView DataContext="{Binding Issue}"/>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Приёмка" FontSize="11"
+                             HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <views:ReceiptView DataContext="{Binding Receipt}"/>
+                
+            </TabItem>
+
+            <TabItem >
+                <TabItem.Header>
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="⚙️" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Настройки" FontSize="11"
+                             HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+            </TabItem>
+
         </TabControl>
+
     </Grid>
 </Window>

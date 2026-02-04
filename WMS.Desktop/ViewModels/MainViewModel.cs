@@ -12,13 +12,16 @@ namespace WMS.Desktop.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         public ComponentsViewModel Components { get; }
-        public StockViewModel Stocks { get; }
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public IssueViewModel Issue { get; }
+        public ReceiptViewModel Receipt { get; }
 
-        public MainViewModel(ComponentsViewModel components, StockViewModel stocks)
+        public MainViewModel(ComponentsViewModel components, IssueViewModel issues, ReceiptViewModel receipt)
         {
             Components = components;
-            Stocks = stocks;
+            Issue = issues;
+            Receipt = receipt;
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

@@ -13,37 +13,49 @@ namespace WMS.Desktop.ViewModels
 {
     public class ComponentsViewModel : INotifyCollectionChanged
     {
-        private readonly ComponentService _service;
+        private readonly ComponentService _componentService;
+        private bool _isLoading;
 
-        public ObservableCollection<Component> Components { get; }
-        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public ObservableCollection<Component> Components { get; } = new();
 
         public string NewArticle { get; set; }
         public string NewName { get; set; }
+        public string NewManufacturer { get; set; }
 
         public ICommand LoadCommand { get; set; }
         public ICommand AddCommand { get; set; }
 
-        public ComponentsViewModel(ComponentService service)
+        public ComponentsViewModel(ComponentService componentService)
         {
-            _service = service;
-            Components = new();
+            _componentService = componentService;
             LoadCommand = new RelayCommand(LoadAsync);
             AddCommand = new RelayCommand(AddAsync);
         }
 
         public async Task LoadAsync()
         {
-            Components.Clear();
-            var items = await _service.GetAllAsync();
-            foreach (var item in items)
-                Components.Add(item);
+            if (_isLoading) return;
+
+            try
+            {
+                _isLoading = true;
+                Components.Clear();
+                var items = await _componentService.GetAllAsync();
+                foreach (var item in items)
+                    Components.Add(item);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         public async Task AddAsync()
         {
-            await _service.AddAsync(NewArticle, NewName);
+            await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
             await LoadAsync();
         }
+
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
     }
 }

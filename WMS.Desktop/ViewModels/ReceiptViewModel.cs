@@ -15,7 +15,7 @@ using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
 {
-    public class StockViewModel : INotifyPropertyChanged
+    public class ReceiptViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<StockItemDto> Stocks { get; } = new ();
         public ObservableCollection<Component> Components { get; } = new ();
@@ -65,55 +65,54 @@ namespace WMS.Desktop.ViewModels
         }
 
         public int ReceiveQuantity { get; set; }
-        public int IssueQuantity { get; set; }
+
+        private bool _isLoading;
 
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
-        private readonly IssueService _issueService;
         private readonly ComponentService _componentService;
         private readonly CellService _cellService;
 
         public ICommand RefreshCommand { get; } 
         public ICommand ReceiveCommand { get; }
-        public ICommand IssueCommand { get; }
         
-        public StockViewModel(
+        public ReceiptViewModel(
             StockService stockService, 
             ReceiptService receiptService,
-            IssueService issueService,
             ComponentService componentService,
             CellService cellService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
-            _issueService = issueService;
+            
             _componentService = componentService;
             _cellService = cellService;
 
             RefreshCommand = new RelayCommand(RefreshAsync);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
-            IssueCommand = new RelayCommand(IssueAsync);
         }
 
         public async Task RefreshAsync()
         {
-            Stocks.Clear();
-            var items = await _stockService.GetAllAsync();
-            foreach (var item in items)
-                Stocks.Add(item);
+            if (_isLoading) return;
+            
+            try
+            {
+                Stocks.Clear();
+                var items = await _stockService.GetAllAsync();
+                foreach (var item in items)
+                    Stocks.Add(item);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         public async Task ReceiveAsync()
         {
             var receiptDto = new StockOperationDto(SelectedComponentId, SelectedCellId, ReceiveQuantity);
             await _receiptService.ReceiveAsync(receiptDto);
-            await RefreshAsync();
-        }
-
-        public async Task IssueAsync()
-        {
-            var issueDto = new StockOperationDto(SelectedComponentId, SelectedCellId, IssueQuantity);
-            await _issueService.IssueAsync(issueDto);
             await RefreshAsync();
         }
 

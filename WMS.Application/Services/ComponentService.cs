@@ -22,7 +22,7 @@ namespace WMS.Application.Services
             return await _repo.GetAllAsync();
         }
 
-        public async Task AddAsync(string article, string name)
+        public async Task AddAsync(string article, string name, string manufacturer)
         {
             if (await _repo.ExistsByArticle(article))
                 throw new Exception("Компонент с таким артиклом уже существует");
@@ -30,7 +30,7 @@ namespace WMS.Application.Services
             var component = Component.Create(
                 article,
                 name,
-                "Unknow",
+                manufacturer,
                 DateOnly.FromDateTime(DateTime.Today),
                 10
             );

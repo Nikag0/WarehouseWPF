@@ -1,4 +1,6 @@
-﻿namespace WMS.Domain;
+﻿using System.ComponentModel;
+
+namespace WMS.Domain;
 
 public class Component
 {

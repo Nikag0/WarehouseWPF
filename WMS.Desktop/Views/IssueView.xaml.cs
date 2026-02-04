@@ -12,25 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
     /// <summary>
-    /// Interaction logic for ComponentsView.xaml
+    /// Interaction logic for IssueViews.xaml
     /// </summary>
-    public partial class ComponentsView : UserControl
+    public partial class IssueView : UserControl
     {
-        public ComponentsView()
+        public IssueView()
         {
             InitializeComponent();
-            this.Loaded += ComponentsViewLoaded;
-        }
-
-        private async void ComponentsViewLoaded(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is ComponentsViewModel viewModel)
-                await viewModel.LoadAsync();
         }
     }
 }

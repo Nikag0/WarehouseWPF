@@ -19,17 +19,17 @@ namespace WMS.Desktop.Views
     /// <summary>
     /// Interaction logic for StockView.xaml
     /// </summary>
-    public partial class StockView : UserControl
+    public partial class ReceiptView : UserControl
     {
-        public StockView()
+        public ReceiptView()
         {
             InitializeComponent();
-            this.Loaded += StockViewLoaded;
+            this.Loaded += ReceiptViewLoaded;
         }
 
-        private async void StockViewLoaded(object sender, RoutedEventArgs e)
+        private async void ReceiptViewLoaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is StockViewModel viewModel)
+            if (DataContext is ReceiptViewModel viewModel)
             {
                 await viewModel.RefreshAsync();
                 await viewModel.LoadLookupsAsync();

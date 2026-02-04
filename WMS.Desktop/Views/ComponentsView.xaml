@@ -3,22 +3,75 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WMS.Desktop.Views"
+             xmlns:local="clr-namespace:WMS.Desktop.Views" 
+             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
+             
+             d:DataContext="{d:DesignInstance Type=viewmodels:ComponentsViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="750*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="Артикул"  Foreground="White"/>
+            <TextBox Grid.Column="1" Margin="2" Text="{Binding NewArticle}"/>
+            
+            <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Text="Название" Foreground="White"/>
+            <TextBox Grid.Column="3" Margin="2" Text="{Binding NewName}"/>
+            
+            <TextBlock Grid.Column="4" Text="Компания" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="White"/>
+            <TextBox Grid.Column="5" Margin="2" Text="{Binding NewManufacturer}"/>
+
+            <Button Content="Добавить" Grid.Column="6" Margin="2" Command="{Binding AddCommand}" />
+            <Button Content="Обновить" Grid.Column="7" Margin="2" Command="{Binding LoadCommand}" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Text="Поиск"  Foreground="White"/>
+            <TextBox Grid.Column="1" Margin="2"/>
+            <!--Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"-->
+
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <DataGrid ItemsSource="{Binding Components}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Артикль" Binding="{Binding Article}"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}"/>
+                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}"/>
+                    <DataGridTextColumn Header="Мин. количество" Binding="{Binding MinQuantity}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+    </Grid>
     
-      <DockPanel Margin="10">
-
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Артикул"/>
-            <TextBox Width="100" Text="{Binding NewArticle}"/>
-            <TextBlock Text="Название"/>
-            <TextBox Width="200" Margin="5,0" Text="{Binding NewName}"/>
-            <Button Content="Добавить" Command="{Binding AddCommand}" />
-            <Button Content="Обновить" Margin="5,0" Command="{Binding LoadCommand}" />
-        </StackPanel>
-
-        <DataGrid ItemsSource="{Binding Components}" AutoGenerateColumns="True"/>
-    </DockPanel>
-
 </UserControl>

@@ -39,12 +39,13 @@ namespace WMS.Desktop
             services.AddScoped<InventoryService>();
             services.AddScoped<ReceiptService>();
             services.AddScoped<StockService>();
-            services.AddScoped < CellService>();
+            services.AddScoped <CellService>();
 
             // view models
             services.AddTransient<MainViewModel>();
-            services.AddTransient<StockViewModel>();
+            services.AddTransient<ReceiptViewModel>();
             services.AddTransient<ComponentsViewModel>();
+            services.AddTransient<IssueViewModel>();
 
             Services = services.BuildServiceProvider();
 
