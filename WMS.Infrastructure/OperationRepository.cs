@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +11,19 @@ namespace WMS.Infrastructure
 {
     public class OperationRepository : IOperationRepository
     {
-        private readonly WmsDbContext _db;
+        private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public OperationRepository(WmsDbContext db)
+        public OperationRepository(IDbContextFactory<WmsDbContext> factory)
         {
-            _db = db;
+            _factory = factory;
         }
 
         public async Task AddAsync(Operation op)
         {
-            _db.Operations.Add(op);
-            await _db.SaveChangesAsync();
+            using var db = _factory.CreateDbContext();
+
+            db.Operations.Add(op);
+            await db.SaveChangesAsync();
         }
     }
 }

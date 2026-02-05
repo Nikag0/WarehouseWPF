@@ -11,32 +11,40 @@ namespace WMS.Infrastructure
 {
     public class ComponentRepository : IComponentRepository
     {
-        private readonly WmsDbContext _db;
+        private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public ComponentRepository(WmsDbContext db)
+        public ComponentRepository(IDbContextFactory<WmsDbContext> factory)
         {
-            _db = db;
+            _factory = factory;
         }
 
         public async Task<List<Component>> GetAllAsync()
         {
-            return await _db.Components.ToListAsync();
+            using var db = _factory.CreateDbContext();
+
+            return await db.Components.ToListAsync();
         }
 
         public async Task AddAsync(Component component)
         {
-            _db.Components.Add(component);
-            await _db.SaveChangesAsync();
+            using var db = _factory.CreateDbContext();
+
+            db.Components.Add(component);
+            await db.SaveChangesAsync();
         }
 
         public async Task<Component?> GetByIdAsync(Guid id)
         {
-            return await _db.Components.FindAsync(id);
+            using var db = _factory.CreateDbContext();
+
+            return await db.Components.FindAsync(id);
         }
 
         public async Task<bool> ExistsByArticle(string article)
         {
-            return await _db.Components.AnyAsync(x => x.Article == article);
+            using var db = _factory.CreateDbContext();
+
+            return await db.Components.AnyAsync(x => x.Article == article);
         }
     }
 }

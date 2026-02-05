@@ -35,10 +35,5 @@ namespace WMS.Desktop.Views
                 await viewModel.LoadLookupsAsync();
             }
         }
-
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
     }
 }

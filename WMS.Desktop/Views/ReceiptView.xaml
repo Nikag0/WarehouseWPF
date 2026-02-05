@@ -12,7 +12,8 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
@@ -49,6 +50,14 @@
         </Grid>
 
         <Grid Grid.Row="2">
+
+            <TextBox Grid.Column="0" Margin="2"
+                    Style="{StaticResource WatermarkTextBox}"
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+        </Grid>
+
+        <Grid Grid.Row="3">
             <DataGrid ItemsSource="{Binding Stocks}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />

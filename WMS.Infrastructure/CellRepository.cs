@@ -12,16 +12,18 @@ namespace WMS.Infrastructure
 {
     public class CellRepository : ICellRepository
     {
-        private readonly WmsDbContext _db;
+        private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public CellRepository(WmsDbContext db) 
+        public CellRepository(IDbContextFactory<WmsDbContext> factory) 
         {
-            _db = db;
+            _factory = factory;
         }
 
         public async Task<List<Cell>> GetAllAsync()
         {
-            return await _db.Cells.ToListAsync();
+            using var db = _factory.CreateDbContext();
+
+            return await db.Cells.ToListAsync();
         }
     }
 }

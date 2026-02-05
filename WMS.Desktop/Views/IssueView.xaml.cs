@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
@@ -23,6 +24,13 @@ namespace WMS.Desktop.Views
         public IssueView()
         {
             InitializeComponent();
+            this.Loaded += StockItemDtoViewLoaded;
+        }
+
+        private async void StockItemDtoViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is IssueViewModel viewModel)
+                await viewModel.RefreshAsync();
         }
     }
 }

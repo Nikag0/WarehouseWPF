@@ -12,18 +12,20 @@ namespace WMS.Infrastructure
 {
     public class StockRepository : IStockRepository
     {
-        private readonly WmsDbContext _db;
+        private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public StockRepository(WmsDbContext db)
+        public StockRepository(IDbContextFactory<WmsDbContext> factory)
         {
-            _db = db;
+            _factory = factory;
         }
 
         public async Task<IReadOnlyList<StockItemDto>> GetAllAsync()
         {
-            var query = from s in _db.Stocks
-                        join c in _db.Components on s.ComponentId equals c.Id
-                        join cell in _db.Cells on s.CellId equals cell.Id
+            using var db = _factory.CreateDbContext();
+
+            var query = from s in db.Stocks
+                        join c in db.Components on s.ComponentId equals c.Id
+                        join cell in db.Cells on s.CellId equals cell.Id
                         where s.Quantity > 0
                         select new StockItemDto(
                             c.Article,
@@ -37,7 +39,10 @@ namespace WMS.Infrastructure
 
         public Task<Stock?> GetAsync(Guid componentId, Guid cellId)
         {
-            return _db.Stocks
+
+            using var db = _factory.CreateDbContext();
+
+            return db.Stocks
                 .FirstOrDefaultAsync(x =>
                     x.ComponentId == componentId &&
                     x.CellId == cellId);
@@ -45,14 +50,18 @@ namespace WMS.Infrastructure
 
         public async Task AddAsync(Stock stock)
         {
-            _db.Stocks.Add(stock);
-            await _db.SaveChangesAsync();
+            using var db = _factory.CreateDbContext();
+
+            db.Stocks.Add(stock);
+            await db.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Stock stock)
         {
-            _db.Stocks.Update(stock);
-            await _db.SaveChangesAsync();
+            using var db = _factory.CreateDbContext();
+
+            db.Stocks.Update(stock);
+            await db.SaveChangesAsync();
         }
     }
 }

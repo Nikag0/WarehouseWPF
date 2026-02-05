@@ -23,9 +23,8 @@ namespace WMS.Desktop
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            services.AddDbContext<WmsDbContext>(opt =>
-                opt.UseNpgsql(
-                    config.GetConnectionString("Warehouse")));
+            services.AddDbContextFactory<WmsDbContext>(opt =>
+                opt.UseNpgsql(config.GetConnectionString("Warehouse")));
 
             // репозитории
             services.AddScoped<IStockRepository, StockRepository>();

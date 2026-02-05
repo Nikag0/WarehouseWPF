@@ -13,12 +13,18 @@
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="750*"/>
         </Grid.RowDefinitions>
-        
+
         <Grid Grid.Row="0">
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
+                Text="Список товаров" FontSize="45" Foreground="White"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
@@ -47,22 +53,16 @@
             <Button Content="Обновить" Grid.Column="7" Margin="2" Command="{Binding LoadCommand}" />
         </Grid>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Поиск"  Foreground="White"/>
-            <TextBox Grid.Column="1" Margin="2"/>
-            <!--Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"-->
+            <TextBox Grid.Column="0" Margin="2"
+                    Style="{StaticResource WatermarkTextBox}"
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
         </Grid>
 
-        <Grid Grid.Row="2">
-            <DataGrid ItemsSource="{Binding Components}">
+        <Grid Grid.Row="3">
+            <DataGrid ItemsSource="{Binding FilteredComponents}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикль" Binding="{Binding Article}"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding Name}"/>
