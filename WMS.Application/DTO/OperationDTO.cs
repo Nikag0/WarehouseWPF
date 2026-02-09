@@ -1,4 +1,4 @@
-﻿public record StockOperationDto(
+﻿public record OperationDTO(
    Guid ComponentId,
    Guid CellId,
    int Quantity

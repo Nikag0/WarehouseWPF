@@ -4,82 +4,177 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS.Desktop.Views" 
+             xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
              d:DataContext="{d:DesignInstance Type=viewmodels:IssueViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+        <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
+    </UserControl.Resources>
+    
     <Grid>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="75"/>
             <RowDefinition Height="100"/>
-            <RowDefinition Height="40"/>
-            <RowDefinition/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"
-                Text="Список остатков" FontSize="40" Foreground="White"/>
+                Text="Поиск для выдачи" FontSize="35" Foreground="White"/>
         </Grid>
 
         <Grid Grid.Row="1">
 
-            <TextBox Grid.Column="0" Margin="2"
+            <TextBox x:Name="SearchInput" Grid.Column="0" Margin="15" IsTabStop="False"
                     Style="{StaticResource WatermarkTextBox}"
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
+            <Popup PlacementTarget="{Binding ElementName=SearchInput}" 
+                       Placement="Bottom" 
+                       AllowsTransparency="True"
+                       StaysOpen="False"
+                       HorizontalOffset="0"
+                       VerticalOffset="2">
+
+                <Popup.Style>
+                    <Style TargetType="Popup">
+                        <Setter Property="IsOpen" Value="False"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+
+                                    <!-- Есть введённый текст -->
+                                    <Condition Binding="{Binding ElementName=SearchInput, Path=Text.Length,
+                                          Converter={StaticResource GreaterThanZero}}"
+                                        Value="True"/>
+
+                                    <!-- Есть результаты -->
+                                    <Condition Binding="{Binding FilteredStocks.Count,
+                                          Converter={StaticResource GreaterThanZero}}"
+                                        Value="True"/>
+
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsOpen" Value="True"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Popup.Style>
+
+                <!-- Border задает ширину, как у TextBox -->
+                <Border Background="White" 
+                BorderBrush="#DDD" 
+                BorderThickness="1" 
+                Width="{Binding ElementName=SearchInput, Path=ActualWidth}">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
+                    </Border.Effect>
+
+                    <ListBox ItemsSource="{Binding FilteredStocks}"
+                        BorderThickness="0"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="  Производительт: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="  Ячейка: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                    <Button Content="Добавить к выдаче"
+                                        Command="{Binding DataContext.AddSelectedStockCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                                                        Path=IsMouseOver}" 
+                                                        Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Popup>
         </Grid>
 
         <Grid Grid.Row="2">
-            <DataGrid ItemsSource="{Binding FilteredStockItemDto}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />
-                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" />
-                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" />
-                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" />
 
-                <!-- Кнопка -->
-                    <DataGridTemplateColumn Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Добавить к выдаче"
-                                    Command="{Binding DataContext.AddStockToIssueCommand, 
-                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding}">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <!-- По умолчанию кнопка скрыта -->
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <!-- Обращаемся к строке DataGridRow -->
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, 
-                                                    Path=IsMouseOver}" 
-                                                    Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Text="ФИО оператора" FontSize="15" Foreground="White"/>
+
+                <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Text="..." FontSize="20" Foreground="White"/>
+                
+                <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Text="Дата выдачи" FontSize="15" Foreground="White"/>
+
+                <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Text="..." FontSize="20" Foreground="White"/>
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Text="Комментарйи к выдаче" FontSize="15" Foreground="White"/>
+
+                <TextBox Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Width="350"/>
+
+                <Button Grid.Column="3" 
+                    Content="Выдать" FontSize="20" Margin="30,5"
+                    Command="{Binding IssueCommand}"/>
+            </Grid>
+            
         </Grid>
 
         <Grid Grid.Row="3">
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"
-            Text="К выдаче" FontSize="40" Foreground="White"/>
-        </Grid>
-        
-        <Grid Grid.Row="4">
-
-            <DataGrid>
-                
+            <DataGrid ItemsSource="{Binding IssueItems}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />
+                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" />
+                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" />
+                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" />
+                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" />
+                    <DataGridTextColumn Header="" Width="100"/>
+                    <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" />
+                </DataGrid.Columns>
             </DataGrid>
-            
         </Grid>
 
     </Grid>

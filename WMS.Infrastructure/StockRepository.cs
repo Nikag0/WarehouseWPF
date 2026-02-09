@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,30 +20,19 @@ namespace WMS.Infrastructure
             _factory = factory;
         }
 
-        public async Task<IReadOnlyList<StockItemDto>> GetAllAsync()
+        public async Task<IReadOnlyList<Stock>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
 
-            var query = from s in db.Stocks
-                        join c in db.Components on s.ComponentId equals c.Id
-                        join cell in db.Cells on s.CellId equals cell.Id
-                        where s.Quantity > 0
-                        select new StockItemDto(
-                            c.Article,
-                            c.Name,
-                            cell.Code,
-                            s.Quantity
-                        );
-
-            return await query.ToListAsync();
+            return await db.Stocks.ToListAsync();
         }
 
-        public Task<Stock?> GetAsync(Guid componentId, Guid cellId)
+        public async Task<Stock?> GetAsync(Guid componentId, Guid cellId)
         {
-
             using var db = _factory.CreateDbContext();
 
-            return db.Stocks
+            return await db.Stocks
+                .AsNoTracking() // Разрывает связь с контекстом сразу
                 .FirstOrDefaultAsync(x =>
                     x.ComponentId == componentId &&
                     x.CellId == cellId);

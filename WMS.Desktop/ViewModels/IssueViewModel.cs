@@ -16,11 +16,8 @@ namespace WMS.Desktop.ViewModels
 {
     public class IssueViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<StockItemDto> Stocks { get; } = new();
-        public ObservableCollection<StockItemDto> FilteredStockItemDto { get; } = new();
-        public ObservableCollection<StockItemDto> IssueStockItemDto { get; } = new();
-
-        public int IssueQuantity { get; set; }
+        public ObservableCollection<IssueStockDto> IssueItems { get; } = new();
+        public ObservableCollection<IssueStockDto> FilteredStocks { get; } = new();
         public string SearchText
         {
             get => _searchText;
@@ -32,16 +29,15 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public Guid SelectedComponentId { get; set; }
-        public Guid SelectedCellId { get; set; }
+        private Collection<IssueStockDto> Stocks = new();
+        private bool _isLoading;
+        private string _searchText;
 
         public ICommand IssueCommand { get; }
-        public ICommand AddStockToIssueCommand { get; }
+        public ICommand AddSelectedStockCommand { get; }
 
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
-        private bool _isLoading;
-        private string _searchText;
 
         public IssueViewModel(
             StockService stockService, 
@@ -50,25 +46,35 @@ namespace WMS.Desktop.ViewModels
             _issueService = issueService;
             _stockService = stockService;
             IssueCommand = new RelayCommand(IssueAsync);
-            AddStockToIssueCommand = new RelayCommand(IssueAsync);
-
+            AddSelectedStockCommand = new RelayCommand(AddSelectedStock);
         }
 
         public async Task IssueAsync()
         {
-            var issueDto = new StockOperationDto(SelectedComponentId, SelectedCellId, IssueQuantity);
-            await _issueService.IssueAsync(issueDto);
+            Collection<OperationDTO> issueOperation = new();
+
+            foreach (var item in IssueItems)
+            {
+                issueOperation.Add(new OperationDTO(
+                    item.ComponentId,
+                    item.CellId,
+                    item.IssueQuantity));
+            }
+
+            await _issueService.IssueAsync(issueOperation);
             await RefreshAsync();
+            IssueItems.Clear();
         }
 
         public async Task RefreshAsync()
         {
             if (_isLoading) return;
+            _isLoading = true;
 
             try
             {
                 Stocks.Clear();
-                var items = await _stockService.GetAllAsync();
+                var items = await _issueService.GetAllAsync();
                 foreach (var item in items)
                     Stocks.Add(item);
 
@@ -82,7 +88,7 @@ namespace WMS.Desktop.ViewModels
 
         private void ApplyFilter()
         {
-            FilteredStockItemDto.Clear();
+            FilteredStocks.Clear();
 
             var query = Stocks.AsEnumerable();
 
@@ -91,13 +97,25 @@ namespace WMS.Desktop.ViewModels
                 var text = SearchText.ToLower();
 
                 query = query.Where(c =>
+                        c.Quantity > 0 &&(
                         c.Article != null && c.Article.ToLower().Contains(text) ||
                         c.ComponentName != null && c.ComponentName.ToLower().Contains(text) ||
-                        c.CellCode != null && c.CellCode.ToLower().Contains(text));
+                        c.CellCode != null && c.CellCode.ToLower().Contains(text)));
             }
 
             foreach (var item in query)
-                FilteredStockItemDto.Add(item);
+                FilteredStocks.Add(item);
+        }
+
+        private void AddSelectedStock(object obj)
+        {
+            if (obj is not IssueStockDto item)
+                return;
+
+            if (IssueItems.Contains(item))
+                return;
+
+            IssueItems.Add(item);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

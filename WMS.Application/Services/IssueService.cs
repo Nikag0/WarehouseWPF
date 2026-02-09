@@ -11,63 +11,75 @@ namespace WMS.Application.Services
     public class IssueService
     {
         private readonly IStockRepository _stockRepo;
+        private readonly IComponentRepository _componentRepo;
+        private readonly ICellRepository _cellRepo;
         private readonly IOperationRepository _operationRepo;
 
         public IssueService(
             IStockRepository stockRepo,
+            IComponentRepository componentRepo,
+            ICellRepository cellRepo,
             IOperationRepository operationRepo)
         {
             _stockRepo = stockRepo;
+            _componentRepo = componentRepo;
+            _cellRepo = cellRepo;
             _operationRepo = operationRepo;
         }
 
-        public async Task IssueAsync(StockOperationDto item)
+        public async Task<List<IssueStockDto>> GetAllAsync()
         {
-            var stock = await _stockRepo
-                .GetAsync(item.ComponentId, item.CellId);
+            var stocks = await _stockRepo.GetAllAsync(); 
+            var components = await _componentRepo.GetAllAsync();
+            var cells = await _cellRepo.GetAllAsync();
 
-            if (stock is null)
-                throw new Exception(
-                    "Товар в указанной ячейке не найден");
 
-            stock.Issue(item.Quantity);
-
-            await _stockRepo.UpdateAsync(stock);
+            return stocks
+                .Join(components, s => s.ComponentId, c => c.Id, (s, c) => new { s, c })
+                .Join(cells, sc => sc.s.CellId, cell => cell.Id, (sc, cell) => new IssueStockDto(
+                    sc.s.ComponentId,
+                    sc.s.CellId,
+                    sc.c.Article,
+                    sc.c.Name,
+                    sc.c.Manufacturer,
+                    cell.Code,
+                    sc.s.Quantity,
+                    0)).ToList();
         }
 
-        //public async Task IssueAsync(
-        //    IReadOnlyCollection<StockOperationDto> items,
-        //    string? comment = null)
-        //{
-        //    if (items.Count == 0)
-        //        throw new Exception("Список выдачи пуст");
+        public async Task IssueAsync(
+            IReadOnlyCollection<OperationDTO> items,
+            string? comment = null)
+        {
+            if (items.Count == 0)
+                throw new Exception("Список выдачи пуст");
 
-        //    var operation = Operation.Create(OperationType.Issue, comment);
+            //var operation = Operation.Create(OperationType.Issue, comment);
 
-        //    foreach (var item in items)
-        //    {
-        //        var stock = await _stockRepo
-        //            .GetAsync(item.ComponentId, item.CellId);
+            foreach (var item in items)
+            {
+                var stock = await _stockRepo
+                    .GetAsync(item.ComponentId, item.CellId);
 
-        //        if (stock is null)
-        //            throw new Exception(
-        //                "Товар в указанной ячейке не найден");
+                if (stock is null)
+                    throw new Exception(
+                        "Товар в указанной ячейке не найден");
 
-        //        var before = stock.Quantity;
+                var before = stock.Quantity;
 
-        //        stock.Issue(item.Quantity);
+                stock.Issue(item.Quantity);
 
-        //        await _stockRepo.UpdateAsync(stock);
+                await _stockRepo.UpdateAsync(stock);
 
-        //        operation.AddItem(
-        //            item.ComponentId,
-        //            item.CellId,
-        //            before,
-        //            stock.Quantity);
-        //    }
+                //operation.AddItem(
+                //    item.ComponentId,
+                //    item.CellId,
+                //    before,
+                //    stock.Quantity);
+            }
 
-        //    operation.Validate();
-        //    await _operationRepo.AddAsync(operation);
-        //}
+            //operation.Validate();
+            //await _operationRepo.AddAsync(operation);
+        }
     }
 }

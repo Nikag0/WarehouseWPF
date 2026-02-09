@@ -32,7 +32,6 @@ namespace WMS.Desktop.Views
             if (DataContext is ReceiptViewModel viewModel)
             {
                 await viewModel.RefreshAsync();
-                await viewModel.LoadLookupsAsync();
             }
         }
     }

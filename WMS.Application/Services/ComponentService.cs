@@ -10,21 +10,28 @@ namespace WMS.Application.Services
 {
     public class ComponentService
     {
-        private readonly IComponentRepository _repo;
+        private readonly IComponentRepository _componentRepo;
 
-        public ComponentService(IComponentRepository repo)
+        public ComponentService(IComponentRepository componentRepo)
         {
-            _repo = repo;
+            _componentRepo = componentRepo;
         }
 
-        public async Task<List<Component>> GetAllAsync()
+        public async Task<List<ComponentDTO>> GetAllAsync()
         {
-            return await _repo.GetAllAsync();
+            var components =  await _componentRepo.GetAllAsync();
+
+            return components.Select(c => new ComponentDTO(
+                c.Article,
+                c.Name,
+                c.Manufacturer,
+                c.MinQuantity
+            )).ToList();
         }
 
         public async Task AddAsync(string article, string name, string manufacturer)
         {
-            if (await _repo.ExistsByArticle(article))
+            if (await _componentRepo.ExistsByArticle(article))
                 throw new Exception("Компонент с таким артиклом уже существует");
 
             var component = Component.Create(
@@ -35,7 +42,7 @@ namespace WMS.Application.Services
                 10
             );
 
-            await _repo.AddAsync(component);
+            await _componentRepo.AddAsync(component);
         }
     }
 }

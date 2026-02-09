@@ -17,79 +17,66 @@ namespace WMS.Desktop.ViewModels
 {
     public class ReceiptViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<StockItemDto> Stocks { get; } = new ();
-        public ObservableCollection<Component> Components { get; } = new ();
-        public ObservableCollection<Cell> Cells { get; } = new ();
-        public ObservableCollection<string> Rows { get; } = new();
-        public ObservableCollection<int> Racks { get; } = new();
-        public ObservableCollection<int> Positions { get; } = new();
-
-        public Guid SelectedComponentId { get; set; }
-        public Guid SelectedStockId { get; set; }
-        public Guid SelectedCellId { get; set; }
-
-        private string? _selectedRow;
-        public string? SelectedRow
+        public ObservableCollection<StockDto> Stocks { get; } = new ();
+        public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new ();
+        public ReceiptStockDto ItemToReceipt
         {
-            get => _selectedRow;
+            get => _itemToReceipt;
             set
             {
-                _selectedRow = value;
+                if (_itemToReceipt != value)
+                {
+                    _itemToReceipt = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
                 OnPropertyChanged();
-                LoadRacks();
+                ApplyFilter();
             }
         }
 
-        private int? _selectedRack;
-        public int? SelectedRack
-        {
-            get => _selectedRack;
-            set
-            {
-                _selectedRack = value;
-                OnPropertyChanged();
-                LoadPositions();
-            }
-        }
-
-        private int? _selectedPosition;
-        public int? SelectedPosition
-        {
-            get => _selectedPosition;
-            set
-            {
-                _selectedPosition = value;
-                OnPropertyChanged();
-                ResolveCellId();
-            }
-        }
-
-        public int ReceiveQuantity { get; set; }
-
+        private Collection<ReceiptStockDto> Components = new();
+        private ReceiptStockDto _itemToReceipt;
         private bool _isLoading;
+        private string _searchText;
 
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
-        private readonly ComponentService _componentService;
         private readonly CellService _cellService;
 
         public ICommand RefreshCommand { get; } 
         public ICommand ReceiveCommand { get; }
-        
+        public ICommand AddSelectedComponentCommand { get; }
+
         public ReceiptViewModel(
             StockService stockService, 
             ReceiptService receiptService,
-            ComponentService componentService,
             CellService cellService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
-            
-            _componentService = componentService;
             _cellService = cellService;
 
             RefreshCommand = new RelayCommand(RefreshAsync);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
+            AddSelectedComponentCommand = new RelayCommand(AddSelectedStock);
+        }
+
+        public async Task ReceiveAsync()
+        {
+            var receiptDto = new OperationDTO(
+                ItemToReceipt.ComponentId,
+                ItemToReceipt.CellId,
+                ItemToReceipt.Quantity);
+            await _receiptService.ReceiveAsync(receiptDto);
+            await RefreshAsync();
         }
 
         public async Task RefreshAsync()
@@ -98,10 +85,17 @@ namespace WMS.Desktop.ViewModels
             
             try
             {
+                Components.Clear();
+                var itemCpmponent = await _receiptService.GetAllComponentsAsync();
+                foreach (var item in itemCpmponent)
+                    Components.Add(item);
+
                 Stocks.Clear();
-                var items = await _stockService.GetAllAsync();
-                foreach (var item in items)
+                var itemStock = await _stockService.GetAllAsync();
+                foreach (var item in itemStock)
                     Stocks.Add(item);
+
+                ApplyFilter();
             }
             finally
             {
@@ -109,76 +103,32 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task ReceiveAsync()
+        private void ApplyFilter()
         {
-            var receiptDto = new StockOperationDto(SelectedComponentId, SelectedCellId, ReceiveQuantity);
-            await _receiptService.ReceiveAsync(receiptDto);
-            await RefreshAsync();
+            FilteredComponents.Clear();
+
+            var query = Components.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var text = SearchText.ToLower();
+
+                query = query.Where(c =>
+                        c.Article != null && c.Article.ToLower().Contains(text) ||
+                        c.ComponentName!= null && c.ComponentName.ToLower().Contains(text) ||
+                        c.Manufacturer != null && c.Manufacturer.ToLower().Contains(text));
+            }
+
+            foreach (var item in query)
+                FilteredComponents.Add(item);
         }
 
-        public async Task LoadLookupsAsync()
+        private void AddSelectedStock(object obj)
         {
-            Components.Clear();
-            var comps = await _componentService.GetAllAsync();
-            foreach (var copm in comps)
-                Components.Add(copm);
-
-            Cells.Clear();
-            var cells = await _cellService.GetAllAsync();
-            foreach (var cell in cells)
-                Cells.Add(cell);
-
-            LoadRows();
-        }
-
-        private void ResolveCellId()
-        {
-            if (SelectedRow == null || SelectedRack == null || SelectedPosition == null)
+            if (obj is not ReceiptStockDto item)
                 return;
 
-            var cell = Cells.FirstOrDefault(x =>
-                x.Row == SelectedRow &&
-                x.Rack == SelectedRack &&
-                x.Position == SelectedPosition);
-
-            SelectedCellId = cell?.Id ?? Guid.Empty;
-        }
-
-        private void LoadRows()
-        {
-            Rows.Clear();
-            foreach (var r in Cells.Select(x => x.Row).Distinct())
-                Rows.Add(r);
-        }
-
-        private void LoadRacks()
-        {
-            Racks.Clear();
-            Positions.Clear();
-            SelectedRack = null;
-            SelectedPosition = null;
-
-            if (SelectedRow == null) return;
-
-            foreach (var r in Cells
-                .Where(x => x.Row == SelectedRow)
-                .Select(x => x.Rack)
-                .Distinct())
-                Racks.Add(r);
-        }
-
-        private void LoadPositions()
-        {
-            Positions.Clear();
-            SelectedPosition = null;
-
-            if (SelectedRow == null || SelectedRack == null) return;
-
-            foreach (var p in Cells
-                .Where(x => x.Row == SelectedRow && x.Rack == SelectedRack)
-                .Select(x => x.Position)
-                .Distinct())
-                Positions.Add(p);
+            ItemToReceipt = item;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

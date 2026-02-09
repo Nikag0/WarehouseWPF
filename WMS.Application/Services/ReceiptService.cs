@@ -7,19 +7,36 @@ namespace WMS.Application.Services
     {
         private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepo;
+        private readonly ICellRepository _cellRepo;
         private readonly IOperationRepository _operationRepo;
 
         public ReceiptService(
             IComponentRepository componentRepo,
-            IStockRepository stockRepo,
+            IStockRepository stockRepo, 
+            ICellRepository cellRepo,
             IOperationRepository operationRepo)
         {
             _componentRepo = componentRepo;
             _stockRepo = stockRepo;
+            _cellRepo = cellRepo;
             _operationRepo = operationRepo;
         }
 
-        public async Task ReceiveAsync(StockOperationDto item)
+        public async Task<List<ReceiptStockDto>> GetAllComponentsAsync()
+        {
+            var components = await _componentRepo.GetAllAsync();
+
+            return components.Select(c => new ReceiptStockDto(
+                    c.Id,
+                    Guid.Empty,
+                    c.Article,
+                    c.Name,
+                    c.Manufacturer,
+                    "",
+                    0)).ToList();
+        }
+
+        public async Task ReceiveAsync(OperationDTO item)
         {
             if (item == null)
                 return;
@@ -29,7 +46,6 @@ namespace WMS.Application.Services
             if (component is null)
                     throw new Exception($"Компонент {item.ComponentId} не найден");
 
-            // 2. Получаем или создаём остаток
             Stock? stock = await _stockRepo.GetAsync(item.ComponentId, item.CellId);
 
             if (stock is null)
@@ -45,7 +61,6 @@ namespace WMS.Application.Services
                 await _stockRepo.UpdateAsync(stock);
             }
         }
-
 
         // Расширенный метод с фиксированием истории операций и добавление списка приёмки.
         //public async Task ReceiveAsync(

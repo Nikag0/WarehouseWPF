@@ -16,8 +16,7 @@ namespace WMS.Desktop.ViewModels
 {
     public class ComponentsViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Component> Components { get; } = new();
-        public ObservableCollection<Component> FilteredComponents { get; } = new();
+        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
 
         public string NewArticle { get; set; }
         public string NewName { get; set; }
@@ -33,12 +32,13 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public ICommand LoadCommand { get; set; }
-        public ICommand AddCommand { get; set; }
-
+        private ObservableCollection<ComponentDTO> components = new();
         private readonly ComponentService _componentService;
         private bool _isLoading;
         private string _searchText;
+
+        public ICommand LoadCommand { get; set; }
+        public ICommand AddCommand { get; set; }
 
         public ComponentsViewModel(ComponentService componentService)
         {
@@ -54,10 +54,10 @@ namespace WMS.Desktop.ViewModels
             try
             {
                 _isLoading = true;
-                Components.Clear();
+                components.Clear();
                 var items = await _componentService.GetAllAsync();
                 foreach (var item in items)
-                    Components.Add(item);
+                    components.Add(item);
 
                 ApplyFilter();
             }
@@ -77,7 +77,7 @@ namespace WMS.Desktop.ViewModels
         {
             FilteredComponents.Clear();
 
-            var query = Components.AsEnumerable();
+            var query = components.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
