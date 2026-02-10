@@ -10,16 +10,36 @@ namespace WMS.Application.Services
 {
     public class CellService
     {
-        private readonly ICellRepository _repo;
+        private readonly ICellRepository _cellRepo;
+        private readonly IStockRepository _stockRepo;
 
-        public CellService(ICellRepository repo)
+        public CellService(
+            ICellRepository cellRepo, 
+            IStockRepository stockRepo)
         {
-            _repo = repo;
+            _cellRepo = cellRepo;
+            _stockRepo = stockRepo;
         }
 
         public async Task<List<Cell>> GetAllAsync()
         {
-            return await _repo.GetAllAsync();
+            return await _cellRepo.GetAllAsync();
+        }
+
+        public async Task<List<Cell>> GetFreeCellsAsync()
+        {
+            var cells = await _cellRepo.GetAllAsync();  
+            var stocks = await _stockRepo.GetAllAsync();
+
+            var busyCells = stocks
+                .Select(s => s.CellId)
+                .ToHashSet();
+
+            var freeCells = cells
+                .Where(c => !busyCells.Contains(c.Id))
+                .ToList();
+
+            return freeCells;
         }
     }
 }

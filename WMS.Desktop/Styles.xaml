@@ -65,4 +65,54 @@
         </Setter>
     </Style>
 
+    <Style x:Key="LeftMenuTabControl" TargetType="TabControl">
+        <Setter Property="Background" Value="#1E1E1E"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Style.Resources>
+
+            <!-- Меняем ТОЛЬКО заголовки вкладок -->
+            <Style TargetType="TabItem">
+                <Setter Property="Foreground" Value="#AAAAAA"/>
+                <Setter Property="Padding" Value="12"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+
+                <Setter Property="HeaderTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Border x:Name="Bd"
+                                Background="Transparent"
+                                Padding="12,10">
+
+                                <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                            </Border>
+
+                            <DataTemplate.Triggers>
+
+                                <DataTrigger Binding="{Binding IsMouseOver,
+                                           RelativeSource={RelativeSource AncestorType=TabItem}}"
+                                         Value="True">
+                                    <Setter TargetName="Bd" Property="Background"
+                                        Value="#2A2A2A"/>
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding IsSelected,
+                                           RelativeSource={RelativeSource AncestorType=TabItem}}"
+                                         Value="True">
+                                    <Setter TargetName="Bd" Property="Background"
+                                        Value="#3A7AFE"/>
+                                </DataTrigger>
+
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+
+            </Style>
+
+        </Style.Resources>
+    </Style>
+
 </ResourceDictionary>

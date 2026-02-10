@@ -7,7 +7,8 @@
         xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
         d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        d:DesignHeight="1080" d:DesignWidth="1920">
+
 
     <Grid>
 
@@ -20,7 +21,7 @@
             TabStripPlacement="Left"
             Background="#1E1E1E"
             BorderThickness="0">
-
+            
             <TabItem>
                 <TabItem.Header>
                     <StackPanel HorizontalAlignment="Center">
