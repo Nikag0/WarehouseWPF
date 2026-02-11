@@ -26,20 +26,21 @@ namespace WMS.Application.Services
             return await _cellRepo.GetAllAsync();
         }
 
-        public async Task<List<Cell>> GetFreeCellsAsync()
+        public async Task<List<Cell>> GetFreeCellsAsync(Guid? componentId = null)
         {
-            var cells = await _cellRepo.GetAllAsync();  
+            var cells = await _cellRepo.GetAllAsync();
             var stocks = await _stockRepo.GetAllAsync();
 
             var busyCells = stocks
-                .Select(s => s.CellId)
-                .ToHashSet();
+            .Where(s => componentId == null || s.ComponentId != componentId)
+            .Select(s => s.CellId)
+            .ToHashSet();
 
-            var freeCells = cells
-                .Where(c => !busyCells.Contains(c.Id))
-                .ToList();
+            var result = cells
+            .Where(c => !busyCells.Contains(c.Id))
+            .ToList();
 
-            return freeCells;
+            return result;
         }
     }
 }

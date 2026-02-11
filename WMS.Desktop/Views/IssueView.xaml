@@ -41,31 +41,8 @@
                        AllowsTransparency="True"
                        StaysOpen="False"
                        HorizontalOffset="0"
-                       VerticalOffset="2">
-
-                <Popup.Style>
-                    <Style TargetType="Popup">
-                        <Setter Property="IsOpen" Value="False"/>
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-
-                                    <!-- Есть введённый текст -->
-                                    <Condition Binding="{Binding ElementName=SearchInput, Path=Text.Length,
-                                          Converter={StaticResource GreaterThanZero}}"
-                                        Value="True"/>
-
-                                    <!-- Есть результаты -->
-                                    <Condition Binding="{Binding FilteredStocks.Count,
-                                          Converter={StaticResource GreaterThanZero}}"
-                                        Value="True"/>
-
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="IsOpen" Value="True"/>
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Popup.Style>
+                       VerticalOffset="2"
+                       Style="{StaticResource FilterInputPopupStyle}">
 
                 <!-- Border задает ширину, как у TextBox -->
                 <Border Background="White" 
@@ -91,6 +68,7 @@
                                     <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="  Ячейка: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                     <Button Content="Добавить к выдаче"
                                         Command="{Binding DataContext.AddSelectedStockCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                         CommandParameter="{Binding}">
@@ -162,16 +140,16 @@
                 <ColumnDefinition Width="500"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            
+
             <DataGrid ItemsSource="{Binding IssueItems}" AutoGenerateColumns="False" FontSize="15">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" />
-                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" />
-                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" />
-                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" />
-                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" />
-                    <DataGridTextColumn Header="" Width="40"/>
-                    <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" />
+                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="" Width="40" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" IsReadOnly="False"/>
                 </DataGrid.Columns>
             </DataGrid>
 

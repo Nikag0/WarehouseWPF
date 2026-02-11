@@ -34,5 +34,11 @@ namespace WMS.Desktop.Views
                 await viewModel.RefreshAsync();
             }
         }
+
+        private void RootGrid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            // Убираем фокус с любого TextBox
+            Keyboard.ClearFocus();
+        }
     }
 }

@@ -1,5 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:WMS.Desktop.Converters">
+
+    <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
 
     <Style x:Key="WatermarkTextBox" TargetType="TextBox">
         <!-- базовые свойства -->
@@ -52,67 +55,68 @@
                                 Property="Visibility"
                                 Value="Collapsed"/>
                         </Trigger>
-
-                        <!-- наведение -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border"
-                                Property="BorderBrush"
-                                Value="#888"/>
-                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="LeftMenuTabControl" TargetType="TabControl">
-        <Setter Property="Background" Value="#1E1E1E"/>
-        <Setter Property="BorderThickness" Value="0"/>
+    <Style x:Key="SideMenuTabItemStyle" TargetType="TabItem">
+        <Setter Property="Foreground" Value="#333333"/>
 
-        <Style.Resources>
+        <Style.Triggers>
 
-            <!-- Меняем ТОЛЬКО заголовки вкладок -->
-            <Style TargetType="TabItem">
-                <Setter Property="Foreground" Value="#AAAAAA"/>
-                <Setter Property="Padding" Value="12"/>
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <!-- Выбран -->
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Foreground" Value="#1f91dc"/>
+            </Trigger>
 
-                <Setter Property="HeaderTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <Border x:Name="Bd"
-                                Background="Transparent"
-                                Padding="12,10">
+        </Style.Triggers>
+    </Style>
 
-                                <ContentPresenter
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"/>
-                            </Border>
 
-                            <DataTemplate.Triggers>
+    <Style x:Key="FilterInputPopupStyle" TargetType="Popup">
+        <Setter Property="IsOpen" Value="False"/>
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
 
-                                <DataTrigger Binding="{Binding IsMouseOver,
-                                           RelativeSource={RelativeSource AncestorType=TabItem}}"
-                                         Value="True">
-                                    <Setter TargetName="Bd" Property="Background"
-                                        Value="#2A2A2A"/>
-                                </DataTrigger>
+                    <!-- Есть введённый текст -->
+                    <Condition Binding="{Binding ElementName=SearchInput, Path=Text.Length,
+            Converter={StaticResource GreaterThanZero}}"
+        Value="True"/>
 
-                                <DataTrigger Binding="{Binding IsSelected,
-                                           RelativeSource={RelativeSource AncestorType=TabItem}}"
-                                         Value="True">
-                                    <Setter TargetName="Bd" Property="Background"
-                                        Value="#3A7AFE"/>
-                                </DataTrigger>
+                    <!-- Есть результаты -->
+                    <Condition Binding="{Binding FilteredComponents.Count,
+            Converter={StaticResource GreaterThanZero}}"
+        Value="True"/>
 
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="IsOpen" Value="True"/>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
 
-            </Style>
+    <Style x:Key="FilterCellPopupStyle" TargetType="Popup">
+        <Setter Property="IsOpen" Value="False"/>
+        <Style.Triggers>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
 
-        </Style.Resources>
+                    <!-- Есть введённый текст -->
+                    <Condition Binding="{Binding ElementName=SearchCell, Path=Text.Length,
+                        Converter={StaticResource GreaterThanZero}}"
+                    Value="True"/>
+
+                    <!-- Есть результаты -->
+                    <Condition Binding="{Binding FilteredFreeCells.Count,
+                            Converter={StaticResource GreaterThanZero}}"
+                        Value="True"/>
+
+                </MultiDataTrigger.Conditions>
+                <Setter Property="IsOpen" Value="True"/>
+            </MultiDataTrigger>
+        </Style.Triggers>
     </Style>
 
 </ResourceDictionary>

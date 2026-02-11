@@ -122,11 +122,12 @@ namespace WMS.Desktop.ViewModels
                     Stocks.Add(item);
 
                 FreeCells.Clear();
-                var query = await _cellService.GetFreeCellsAsync();
+                var query = await _cellService.GetFreeCellsAsync(ItemToReceipt?.ComponentId);
                 foreach (var item in query)
                     FreeCells.Add(item);
 
                 ApplyFilter();
+                ApplyCellFilter();
             }
             finally
             {
@@ -172,12 +173,14 @@ namespace WMS.Desktop.ViewModels
                 FilteredFreeCells.Add(item);
         }
 
-        private void AddSelectedStock(object obj)
+        private async Task AddSelectedStock(object obj)
         {
             if (obj is not ReceiptStockDto item)
                 return;
 
             ItemToReceipt = item;
+            SearchText = null;
+            await RefreshAsync();
         }
 
         private void AddSelectedCell(object obj)
@@ -187,6 +190,7 @@ namespace WMS.Desktop.ViewModels
 
             CellId = item.Id;
             SearchFreeCell = item.Code; 
+
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

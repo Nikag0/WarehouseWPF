@@ -19,15 +19,17 @@
 
         <TabControl Grid.ColumnSpan="2"
             TabStripPlacement="Left"
-            Background="#1E1E1E"
-            BorderThickness="0">
+            Background="#36495b"
+            BorderThickness="0"
+            ItemContainerStyle="{StaticResource SideMenuTabItemStyle}">
             
-            <TabItem>
+            <TabItem >
                 <TabItem.Header>
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Сообщения" FontSize="11"
-                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"
+                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                        <TextBlock Text="Сообщения" FontSize="11" HorizontalAlignment="Center"
+                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
                     </StackPanel>
                 </TabItem.Header>
 
@@ -36,9 +38,10 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Каталог" FontSize="11"
-                               HorizontalAlignment="Center"/>
+                        <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                        <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"
+                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
                     </StackPanel>
                 </TabItem.Header>
 
