@@ -14,6 +14,8 @@
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
+        <converters:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+        <converters:RackHighlightConverter x:Key="RackHighlightConverter"/>
     </UserControl.Resources>
     
     <Grid>
@@ -32,23 +34,22 @@
 
         <Grid Grid.Row="1">
 
-            <TextBox x:Name="SearchInput" Grid.Column="0" Margin="10" IsTabStop="False"
+            <TextBox x:Name="SearchIssue" Grid.Column="0" Margin="10" IsTabStop="False"
                     Style="{StaticResource WatermarkTextBox}"
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Popup PlacementTarget="{Binding ElementName=SearchInput}" 
+            <Popup PlacementTarget="{Binding ElementName=SearchIssue}" 
                        Placement="Bottom" 
                        AllowsTransparency="True"
                        StaysOpen="False"
                        HorizontalOffset="0"
                        VerticalOffset="2"
-                       Style="{StaticResource FilterInputPopupStyle}">
+                       Style="{StaticResource FilterIssuePopupStyle}">
 
-                <!-- Border задает ширину, как у TextBox -->
                 <Border Background="White" 
                 BorderBrush="#DDD" 
                 BorderThickness="1" 
-                Width="{Binding ElementName=SearchInput, Path=ActualWidth}">
+                Width="{Binding ElementName=SearchIssue, Path=ActualWidth}">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                     </Border.Effect>
@@ -141,7 +142,10 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid ItemsSource="{Binding IssueItems}" AutoGenerateColumns="False" FontSize="15">
+            <DataGrid x:Name="IssueGrid" 
+                      ItemsSource="{Binding IssueItems}" 
+                      AutoGenerateColumns="False" 
+                      FontSize="15">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" IsReadOnly="True"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}" IsReadOnly="True"/>
@@ -158,6 +162,65 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="20,0,0,0">
+                        <TextBlock Text="A" Foreground="White" FontWeight="Bold" Margin="50,0"/>
+                        <TextBlock Text="B" Foreground="White" FontWeight="Bold" Margin="50,0"/>
+                        <TextBlock Text="С" Foreground="White" FontWeight="Bold" Margin="50,0"/>
+                        <TextBlock Text="D" Foreground="White" FontWeight="Bold" Margin="50,0"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,20,0,0">
+                        <TextBlock Text="1" Foreground="White" FontWeight="Bold" Margin="5,50"/>
+                        <TextBlock Text="2" Foreground="White" FontWeight="Bold" Margin="5,50"/>
+                        <TextBlock Text="3" Foreground="White" FontWeight="Bold" Margin="5,50"/>
+                        <TextBlock Text="4" Foreground="White" FontWeight="Bold" Margin="5,50"/>
+                    </StackPanel>
+
+                    <Grid Margin="50,30,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="60"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="90"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Rectangle Grid.Row="0" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-1}"/>
+                        
+                        <Rectangle Grid.Row="0" Grid.Column="1" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-1}"/>
+                        
+                        <Rectangle Grid.Row="0" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-1}"/>
+
+                        <Rectangle Grid.Row="1" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-2}"/>
+                        
+                        <Rectangle Grid.Row="1" Grid.Column="1" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-2}"/>
+                        
+                        <Rectangle Grid.Row="1" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-2}"/>
+
+                        <Rectangle Grid.Row="2" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-3}"/>
+                        
+                        <Rectangle Grid.Row="2" Grid.Column="1" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-3}"/>
+                        
+                        <Rectangle Grid.Row="2" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
+                            Fill="{Binding ActiveRackCode, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-3}"/>
+                    </Grid>
+
+                    
+                </Grid>
             </Grid>
         </Grid>
 

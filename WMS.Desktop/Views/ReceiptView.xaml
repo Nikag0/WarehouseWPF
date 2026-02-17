@@ -34,29 +34,28 @@
 
         <Grid Grid.Row="1">
 
-            <TextBox x:Name="SearchInput" Grid.Column="0" Margin="10" IsTabStop="False"
+            <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="10" IsTabStop="False"
                 Style="{StaticResource WatermarkTextBox}"
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Popup x:Name="Pop" 
-               PlacementTarget="{Binding ElementName=SearchInput}" 
-               Placement="Bottom" 
-               AllowsTransparency="True"
-               StaysOpen="False"
-               HorizontalOffset="0"
-               VerticalOffset="2"
-               Style="{StaticResource FilterInputPopupStyle}">
+                PlacementTarget="{Binding ElementName=SearchReceipt}" 
+                Placement="Bottom" 
+                AllowsTransparency="True"
+                StaysOpen="False"
+                HorizontalOffset="0"
+                VerticalOffset="2"
+                Style="{StaticResource FilterReceiptPopupStyle}">
 
-                <!-- Border задает ширину, как у TextBox -->
                 <Border Background="White" 
                     BorderBrush="#DDD" 
                     BorderThickness="1" 
-                    Width="{Binding ElementName=SearchInput, Path=ActualWidth}">
+                    Width="{Binding ElementName=SearchReceipt, Path=ActualWidth}">
                     <Border.Effect>
                         <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                     </Border.Effect>
 
-                    <ListBox x:Name="ListSearchInput" ItemsSource="{Binding FilteredComponents}"
+                    <ListBox ItemsSource="{Binding FilteredComponents}"
                         BorderThickness="0"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
@@ -118,24 +117,25 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-             Text="Артикул"  Foreground="White" FontSize="15"/>
+                Text="Артикул"  Foreground="White" FontSize="15"/>
+            
             <TextBox Grid.Column="1" Margin="5" IsReadOnly="True" 
-             Text="{Binding ItemToReceipt.Article}"/>
+                Text="{Binding ItemToReceipt.Article}"/>
 
             <TextBlock Grid.Column="2" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-             Text="Название" Foreground="White" FontSize="15"/>
+                Text="Название" Foreground="White" FontSize="15"/>
 
             <TextBox Grid.Column="3" Margin="5" IsReadOnly="True" 
-          Text="{Binding ItemToReceipt.ComponentName}"/>
+                Text="{Binding ItemToReceipt.ComponentName}"/>
 
             <TextBlock Grid.Column="4" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-             Text="Производитель" Foreground="White" FontSize="15"/>
+                Text="Производитель" Foreground="White" FontSize="15"/>
 
             <TextBox Grid.Column="5" Margin="5" IsReadOnly="True" 
-          Text="{Binding ItemToReceipt.Manufacturer}"/>
+                Text="{Binding ItemToReceipt.Manufacturer}"/>
 
             <TextBlock Grid.Column="6" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-            Text="Ячейка" Foreground="White" FontSize="15"/>
+                Text="Ячейка" Foreground="White" FontSize="15"/>
 
             <Grid Grid.Column="7" >
                 <TextBox x:Name="SearchCell" IsTabStop="False"
@@ -143,18 +143,17 @@
                    Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
-                        Placement="Bottom" 
-                        AllowsTransparency="True"
-                        StaysOpen="False"
-                        HorizontalOffset="0"
-                        VerticalOffset="2"
-                        Style="{StaticResource FilterCellPopupStyle}">
+                    Placement="Bottom" 
+                    AllowsTransparency="True"
+                    StaysOpen="False"
+                    HorizontalOffset="0"
+                    VerticalOffset="2"
+                    Style="{StaticResource FilterCellPopupStyle}">
 
-                    <!-- Border задает ширину, как у TextBox -->
                     <Border Background="White" 
-                           BorderBrush="#DDD" 
-                           BorderThickness="1" 
-                           Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
+                        BorderBrush="#DDD" 
+                        BorderThickness="1" 
+                        Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                         </Border.Effect>

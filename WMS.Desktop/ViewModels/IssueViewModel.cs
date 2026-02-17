@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using WMS.Application.Services;
 using WMS.Domain;
@@ -28,7 +29,18 @@ namespace WMS.Desktop.ViewModels
                 ApplyFilter();
             }
         }
+        public string ActiveRackCode
+        {
+            get => _activeRackCode;
+            set
+            {
+                _activeRackCode = value;
+                OnPropertyChanged();
+            }
+        }
 
+        private string _activeRackCode;
+        private IssueStockDto _selectedIssueItem;
         private Collection<IssueStockDto> Stocks = new();
         private bool _isLoading;
         private string _searchText;
@@ -53,17 +65,24 @@ namespace WMS.Desktop.ViewModels
         {
             Collection<OperationDTO> issueOperation = new();
 
-            foreach (var item in IssueItems)
+            try
             {
-                issueOperation.Add(new OperationDTO(
-                    item.ComponentId,
-                    item.CellId,
-                    item.IssueQuantity));
-            }
+                foreach (var item in IssueItems)
+                {
+                    issueOperation.Add(new OperationDTO(
+                        item.ComponentId,
+                        item.CellId,
+                        item.IssueQuantity));
+                }
 
-            await _issueService.IssueAsync(issueOperation);
-            await RefreshAsync();
-            IssueItems.Clear();
+                await _issueService.IssueAsync(issueOperation);
+                await RefreshAsync();
+                IssueItems.Clear();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public async Task RefreshAsync()
@@ -116,6 +135,18 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Add(item);
+
+            ActiveRackCode = ExtractRackCode(item.CellCode);
+        }
+
+        private string ExtractRackCode(string cellCode)
+        {
+            if (string.IsNullOrWhiteSpace(cellCode))
+                return null;
+
+            var parts = cellCode.Split('-');
+
+            return parts.Length >= 2 ? $"{parts[0]}-{parts[1]}" : null;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
