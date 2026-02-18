@@ -29,24 +29,15 @@ namespace WMS.Desktop.ViewModels
                 ApplyFilter();
             }
         }
-        public string ActiveRackCode
-        {
-            get => _activeRackCode;
-            set
-            {
-                _activeRackCode = value;
-                OnPropertyChanged();
-            }
-        }
 
-        private string _activeRackCode;
         private IssueStockDto _selectedIssueItem;
         private Collection<IssueStockDto> Stocks = new();
         private bool _isLoading;
         private string _searchText;
 
         public ICommand IssueCommand { get; }
-        public ICommand AddSelectedStockCommand { get; }
+        public ICommand AddIssueItemCommand { get; }
+        public ICommand RemoveIssueItemCommand { get; }
 
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
@@ -58,7 +49,14 @@ namespace WMS.Desktop.ViewModels
             _issueService = issueService;
             _stockService = stockService;
             IssueCommand = new RelayCommand(IssueAsync);
-            AddSelectedStockCommand = new RelayCommand(AddSelectedStock);
+            AddIssueItemCommand = new RelayCommand(AddIssueItem);
+            RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
+
+            // Привязка для срабатывания конвертора RackHighlightConverter
+            IssueItems.CollectionChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(IssueItems));
+            };
         }
 
         public async Task IssueAsync()
@@ -126,7 +124,7 @@ namespace WMS.Desktop.ViewModels
                 FilteredStocks.Add(item);
         }
 
-        private void AddSelectedStock(object obj)
+        private void AddIssueItem(object obj)
         {
             if (obj is not IssueStockDto item)
                 return;
@@ -135,18 +133,14 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Add(item);
-
-            ActiveRackCode = ExtractRackCode(item.CellCode);
         }
 
-        private string ExtractRackCode(string cellCode)
+        private void RemoveIssueItem (object obj)
         {
-            if (string.IsNullOrWhiteSpace(cellCode))
-                return null;
+            if (obj is not IssueStockDto item)
+                return;
 
-            var parts = cellCode.Split('-');
-
-            return parts.Length >= 2 ? $"{parts[0]}-{parts[1]}" : null;
+            IssueItems.Remove(item);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

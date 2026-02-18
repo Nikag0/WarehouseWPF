@@ -13,15 +13,32 @@ namespace WMS.Desktop.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var activeRack = value as string;
+            var items = value as IEnumerable<IssueStockDto>;
             var rackCode = parameter as string;
 
-            return activeRack == rackCode ? Brushes.OrangeRed : Brushes.DimGray;
+            if (items == null || rackCode == null)
+                return Brushes.DimGray;
+
+            foreach (var item in items)
+            {
+                var rack = ExtractRackCode(item.CellCode); 
+                if (rack == rackCode)
+                    return Brushes.OrangeRed;
+            }
+
+            return Brushes.DimGray;
+        }
+
+        private string ExtractRackCode(string cellCode)
+        {
+            if (string.IsNullOrWhiteSpace(cellCode))
+                return null;
+
+            var parts = cellCode.Split('-');
+            return parts.Length >= 2 ? $"{parts[0]}-{parts[1]}" : null;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
     }
 }

@@ -99,21 +99,20 @@
         <Style.Triggers>
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
+                    
+                    <Condition Binding="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True"/>
 
-                    <Condition Binding="{Binding ElementName=SearchReceipt, Path=IsKeyboardFocused}"
-                        Value="True"/>
-
-                    <Condition Binding="{Binding ElementName=SearchReceipt, Path=Text.Length,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
-
-                    <Condition Binding="{Binding FilteredComponents.Count,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
-
+                    <Condition Binding="{Binding FilteredComponents.Count, 
+                        Converter={StaticResource GreaterThanZero}}" Value="True"/>
+                    
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
             </MultiDataTrigger>
+
+            <DataTrigger Binding="{Binding ElementName=SearchReceipt, Path=IsKeyboardFocused}" Value="True">
+                <Setter Property="IsOpen" Value="True"/>
+            </DataTrigger>
+            
         </Style.Triggers>
     </Style>
 
@@ -123,20 +122,19 @@
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
 
-                    <Condition Binding="{Binding ElementName=SearchCell, Path=IsKeyboardFocused}"
-                               Value="True"/>
-
-                    <Condition Binding="{Binding ElementName=SearchCell, Path=Text.Length,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
+                    <Condition Binding="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="True"/>
 
                     <Condition Binding="{Binding FilteredFreeCells.Count,
-                            Converter={StaticResource GreaterThanZero}}"
-                        Value="True"/>
+                        Converter={StaticResource GreaterThanZero}}" Value="True"/>
 
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
             </MultiDataTrigger>
+
+            <DataTrigger Binding="{Binding ElementName=SearchCell, Path=IsKeyboardFocused}" Value="True">
+                <Setter Property="IsOpen" Value="True"/>
+            </DataTrigger>
+            
         </Style.Triggers>
     </Style>
 

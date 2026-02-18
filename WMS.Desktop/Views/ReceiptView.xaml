@@ -38,14 +38,15 @@
                 Style="{StaticResource WatermarkTextBox}"
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <Popup x:Name="Pop" 
+            <Popup 
                 PlacementTarget="{Binding ElementName=SearchReceipt}" 
+                Tag="{Binding ElementName=SearchReceipt}"
+                Style="{StaticResource FilterReceiptPopupStyle}"
                 Placement="Bottom" 
                 AllowsTransparency="True"
-                StaysOpen="False"
+                StaysOpen="True"
                 HorizontalOffset="0"
-                VerticalOffset="2"
-                Style="{StaticResource FilterReceiptPopupStyle}">
+                VerticalOffset="2">
 
                 <Border Background="White" 
                     BorderBrush="#DDD" 
@@ -143,12 +144,13 @@
                    Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
+                    Tag="{Binding ElementName=SearchCell}"
+                    Style="{StaticResource FilterCellPopupStyle}"
                     Placement="Bottom" 
                     AllowsTransparency="True"
-                    StaysOpen="False"
+                    StaysOpen="True"
                     HorizontalOffset="0"
-                    VerticalOffset="2"
-                    Style="{StaticResource FilterCellPopupStyle}">
+                    VerticalOffset="2">
 
                     <Border Background="White" 
                         BorderBrush="#DDD" 
@@ -159,8 +161,8 @@
                         </Border.Effect>
 
                         <ListBox ItemsSource="{Binding FilteredFreeCells}"
-                               BorderThickness="0"
-                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                           BorderThickness="0"
+                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -168,8 +170,8 @@
                                         <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                         <Button Content="Выбрать ячейку"
-                                               Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                               CommandParameter="{Binding}">
+                                           Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                           CommandParameter="{Binding}">
                                             <Button.Style>
                                                 <Style TargetType="Button">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -192,10 +194,10 @@
             </Grid>
 
             <TextBlock Grid.Column="8" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-            Text="Количество" Foreground="White" FontSize="15"/>
+                Text="Количество" Foreground="White" FontSize="15"/>
 
             <TextBox Grid.Column="9" Margin="5"
-         Text="{Binding ItemToReceipt.Quantity}"/>
+                Text="{Binding ItemToReceipt.Quantity}"/>
 
             <Button Grid.Column="10" Margin="2" Content="Приёмка" Command="{Binding ReceiveCommand}"/>
             <Button Grid.Column="11" Margin="2" Content="Обновить" Command="{Binding RefreshCommand}"/>

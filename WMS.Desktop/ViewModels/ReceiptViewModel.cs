@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
@@ -17,9 +18,9 @@ namespace WMS.Desktop.ViewModels
 {
     public class ReceiptViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<StockDto> Stocks { get; } = new ();
-        public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new ();
-        public ObservableCollection<Cell> FilteredFreeCells { get; } = new ();
+        public ObservableCollection<StockDto> Stocks { get; } = new();
+        public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new();
+        public ObservableCollection<Cell> FilteredFreeCells { get; } = new();
         public ReceiptStockDto ItemToReceipt
         {
             get => _itemToReceipt;
@@ -59,12 +60,12 @@ namespace WMS.Desktop.ViewModels
             {
                 _searchFreeCell = value;
                 OnPropertyChanged();
-                ApplyFilter();
+                ApplyCellFilter();
             }
         }
 
-        private Collection<ReceiptStockDto> Components = new();
-        private Collection<Cell> FreeCells = new();
+        private Collection<ReceiptStockDto> components = new();
+        private Collection<Cell> freeCells = new();
         private Guid _cellId;
         private ReceiptStockDto _itemToReceipt;
         private bool _isLoading;
@@ -75,13 +76,13 @@ namespace WMS.Desktop.ViewModels
         private readonly ReceiptService _receiptService;
         private readonly CellService _cellService;
 
-        public ICommand RefreshCommand { get; } 
+        public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
         public ICommand AddSelectedComponentCommand { get; }
         public ICommand AddSelectedCellCommand { get; }
 
         public ReceiptViewModel(
-            StockService stockService, 
+            StockService stockService,
             ReceiptService receiptService,
             CellService cellService)
         {
@@ -97,34 +98,42 @@ namespace WMS.Desktop.ViewModels
 
         public async Task ReceiveAsync()
         {
-            var receiptDto = new OperationDTO(
-                ItemToReceipt.ComponentId,
-                CellId,
-                ItemToReceipt.Quantity);
-            await _receiptService.ReceiveAsync(receiptDto);
-            await RefreshAsync();
+            try
+            {
+                var receiptDto = new OperationDTO(
+                    ItemToReceipt.ComponentId,
+                    CellId,
+                    ItemToReceipt.Quantity);
+                await _receiptService.ReceiveAsync(receiptDto);
+                await RefreshAsync();
+            }
+            catch
+            (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public async Task RefreshAsync()
         {
             if (_isLoading) return;
-            
+
             try
             {
-                Components.Clear();
+                components.Clear();
                 var itemCpmponent = await _receiptService.GetAllComponentsAsync();
                 foreach (var item in itemCpmponent)
-                    Components.Add(item);
+                    components.Add(item);
 
                 Stocks.Clear();
                 var itemStock = await _stockService.GetAllAsync();
                 foreach (var item in itemStock)
                     Stocks.Add(item);
 
-                FreeCells.Clear();
+                freeCells.Clear();
                 var query = await _cellService.GetFreeCellsAsync(ItemToReceipt?.ComponentId);
                 foreach (var item in query)
-                    FreeCells.Add(item);
+                    freeCells.Add(item);
 
                 ApplyFilter();
                 ApplyCellFilter();
@@ -139,7 +148,7 @@ namespace WMS.Desktop.ViewModels
         {
             FilteredComponents.Clear();
 
-            var query = Components.AsEnumerable();
+            var query = components.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
@@ -147,7 +156,7 @@ namespace WMS.Desktop.ViewModels
 
                 query = query.Where(c =>
                         c.Article != null && c.Article.ToLower().Contains(text) ||
-                        c.ComponentName!= null && c.ComponentName.ToLower().Contains(text) ||
+                        c.ComponentName != null && c.ComponentName.ToLower().Contains(text) ||
                         c.Manufacturer != null && c.Manufacturer.ToLower().Contains(text));
             }
 
@@ -159,14 +168,15 @@ namespace WMS.Desktop.ViewModels
         {
             FilteredFreeCells.Clear();
 
-            var query = FreeCells.AsEnumerable();
+            var query = freeCells.AsEnumerable();
 
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            if (!string.IsNullOrWhiteSpace(SearchFreeCell))
             {
                 var text = SearchFreeCell.ToLower();
 
                 query = query.Where(c =>
-                        c.Code != null && c.Code.ToLower().Contains(text));
+                        c.Code != null
+                        && c.Code.ToLower().Contains(text));
             }
 
             foreach (var item in query)
@@ -189,13 +199,13 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             CellId = item.Id;
-            SearchFreeCell = item.Code; 
+            SearchFreeCell = item.Code;
 
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string ?propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
