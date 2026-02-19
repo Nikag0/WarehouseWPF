@@ -44,7 +44,8 @@ namespace WMS.Application.Services
                     sc.c.Manufacturer,
                     cell.Code,
                     sc.s.Quantity,
-                    0)).ToList();
+                    0))
+                .ToList();
         }
 
         public async Task IssueAsync(
@@ -70,6 +71,9 @@ namespace WMS.Application.Services
                 stock.Issue(item.Quantity);
 
                 await _stockRepo.UpdateAsync(stock);
+
+                if (stock.Quantity == 0)
+                    await _stockRepo.RemoveAsync(stock);
 
                 //operation.AddItem(
                 //    item.ComponentId,

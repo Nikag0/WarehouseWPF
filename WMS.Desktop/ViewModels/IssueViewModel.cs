@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WMS.Application.Services;
@@ -31,7 +25,7 @@ namespace WMS.Desktop.ViewModels
         }
 
         private IssueStockDto _selectedIssueItem;
-        private Collection<IssueStockDto> Stocks = new();
+        private readonly List<IssueStockDto> Stocks = new();
         private bool _isLoading;
         private string _searchText;
 
@@ -61,17 +55,16 @@ namespace WMS.Desktop.ViewModels
 
         public async Task IssueAsync()
         {
-            Collection<OperationDTO> issueOperation = new();
+            if (!IssueItems.Any()) return;
 
             try
             {
-                foreach (var item in IssueItems)
-                {
-                    issueOperation.Add(new OperationDTO(
+                var issueOperation = IssueItems
+                    .Select(item => new OperationDTO(
                         item.ComponentId,
                         item.CellId,
-                        item.IssueQuantity));
-                }
+                        item.IssueQuantity))
+                    .ToList();
 
                 await _issueService.IssueAsync(issueOperation);
                 await RefreshAsync();
@@ -114,10 +107,11 @@ namespace WMS.Desktop.ViewModels
                 var text = SearchText.ToLower();
 
                 query = query.Where(c =>
-                        c.Quantity > 0 &&(
-                        c.Article != null && c.Article.ToLower().Contains(text) ||
-                        c.ComponentName != null && c.ComponentName.ToLower().Contains(text) ||
-                        c.CellCode != null && c.CellCode.ToLower().Contains(text)));
+                    c.Quantity > 0 && (
+                    (c.Article?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.ComponentName?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.CellCode?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false)
+                ));
             }
 
             foreach (var item in query)
@@ -129,7 +123,7 @@ namespace WMS.Desktop.ViewModels
             if (obj is not IssueStockDto item)
                 return;
 
-            if (IssueItems.Contains(item))
+            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
                 return;
 
             IssueItems.Add(item);

@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
-using WMS.Infrastructure.Migrations;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
@@ -64,10 +57,10 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private Collection<ReceiptStockDto> components = new();
-        private Collection<Cell> freeCells = new();
-        private Guid _cellId;
+        private readonly List<ReceiptStockDto> _allComponents = new();
+        private readonly List<Cell> _freeCells = new();
         private ReceiptStockDto _itemToReceipt;
+        private Guid _cellId;
         private bool _isLoading;
         private string _searchText;
         private string _searchFreeCell;
@@ -98,6 +91,8 @@ namespace WMS.Desktop.ViewModels
 
         public async Task ReceiveAsync()
         {
+            if (ItemToReceipt == null || CellId == Guid.Empty) return;
+
             try
             {
                 var receiptDto = new OperationDTO(
@@ -118,22 +113,17 @@ namespace WMS.Desktop.ViewModels
         {
             if (_isLoading) return;
 
+            _isLoading = true;
+
             try
             {
-                components.Clear();
-                var itemCpmponent = await _receiptService.GetAllComponentsAsync();
-                foreach (var item in itemCpmponent)
-                    components.Add(item);
+                _allComponents.Clear();
+                _allComponents.AddRange(await _receiptService.GetAllComponentsAsync());
 
-                Stocks.Clear();
-                var itemStock = await _stockService.GetAllAsync();
-                foreach (var item in itemStock)
-                    Stocks.Add(item);
+                _freeCells.Clear();
+                _freeCells.AddRange(await _cellService.GetFreeCellsAsync(ItemToReceipt?.ComponentId));
 
-                freeCells.Clear();
-                var query = await _cellService.GetFreeCellsAsync(ItemToReceipt?.ComponentId);
-                foreach (var item in query)
-                    freeCells.Add(item);
+                ReplaceCollection(Stocks, await _stockService.GetAllAsync());
 
                 ApplyFilter();
                 ApplyCellFilter();
@@ -146,29 +136,24 @@ namespace WMS.Desktop.ViewModels
 
         private void ApplyFilter()
         {
-            FilteredComponents.Clear();
-
-            var query = components.AsEnumerable();
+            var query = _allComponents.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var text = SearchText.ToLower();
 
                 query = query.Where(c =>
-                        c.Article != null && c.Article.ToLower().Contains(text) ||
-                        c.ComponentName != null && c.ComponentName.ToLower().Contains(text) ||
-                        c.Manufacturer != null && c.Manufacturer.ToLower().Contains(text));
+                        (c.Article?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (c.ComponentName?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (c.Manufacturer?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false));
             }
 
-            foreach (var item in query)
-                FilteredComponents.Add(item);
+            ReplaceCollection(FilteredComponents, query);
         }
 
         private void ApplyCellFilter()
         {
-            FilteredFreeCells.Clear();
-
-            var query = freeCells.AsEnumerable();
+            var query = _freeCells.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchFreeCell))
             {
@@ -179,8 +164,7 @@ namespace WMS.Desktop.ViewModels
                         && c.Code.ToLower().Contains(text));
             }
 
-            foreach (var item in query)
-                FilteredFreeCells.Add(item);
+            ReplaceCollection(FilteredFreeCells, query);
         }
 
         private async Task AddSelectedStock(object obj)
@@ -200,7 +184,15 @@ namespace WMS.Desktop.ViewModels
 
             CellId = item.Id;
             SearchFreeCell = item.Code;
+        }
 
+        private void ReplaceCollection<T>(
+            ObservableCollection<T> target,
+            IEnumerable<T> source)
+        {
+            target.Clear();
+            foreach (var item in source)
+                target.Add(item);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

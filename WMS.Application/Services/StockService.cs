@@ -40,6 +40,11 @@ namespace WMS.Application.Services
                     sc.s.Quantity)).ToList();
         }
 
+        public async Task RemoveStock(Stock stock)
+        {
+            await _stockRepo.RemoveAsync(stock);
+        }
+
         public async Task<Stock?> GetAsync(Guid componentId, Guid cellId)
         {
             return await _stockRepo.GetAsync(componentId, cellId);

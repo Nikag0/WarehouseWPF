@@ -13,5 +13,6 @@ namespace WMS.Application.Abstractions
         Task<Stock?> GetAsync(Guid componentId, Guid cellId);
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
+        Task RemoveAsync(Stock stock);
     }
 }

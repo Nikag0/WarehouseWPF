@@ -32,7 +32,7 @@ namespace WMS.Infrastructure
             using var db = _factory.CreateDbContext();
 
             return await db.Stocks
-                .AsNoTracking() // Разрывает связь с контекстом сразу
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.ComponentId == componentId &&
                     x.CellId == cellId);
@@ -51,6 +51,14 @@ namespace WMS.Infrastructure
             using var db = _factory.CreateDbContext();
 
             db.Stocks.Update(stock);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task RemoveAsync(Stock stock)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Stocks.Remove(stock);
             await db.SaveChangesAsync();
         }
     }

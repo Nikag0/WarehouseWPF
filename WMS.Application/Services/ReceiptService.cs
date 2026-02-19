@@ -27,13 +27,13 @@ namespace WMS.Application.Services
             var components = await _componentRepo.GetAllAsync();
 
             return components.Select(c => new ReceiptStockDto(
-                    c.Id,
-                    Guid.Empty,
-                    c.Article,
-                    c.Name,
-                    c.Manufacturer,
-                    "",
-                    0)).ToList();
+                c.Id,
+                Guid.Empty,
+                c.Article,
+                c.Name,
+                c.Manufacturer,
+                "",
+                0)).ToList();
         }
 
         public async Task ReceiveAsync(OperationDTO item)
@@ -62,6 +62,8 @@ namespace WMS.Application.Services
             }
         }
 
+    }
+}
         // Расширенный метод с фиксированием истории операций и добавление списка приёмки.
         //public async Task ReceiveAsync(
         //    IReadOnlyCollection<ReceiptItemDto> items,
@@ -120,5 +122,3 @@ namespace WMS.Application.Services
         //    // 5. Сохраняем историю
         //    await _operationRepo.AddAsync(operation);
         //}
-    }
-}
