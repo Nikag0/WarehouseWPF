@@ -3,8 +3,10 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
@@ -68,6 +70,7 @@ namespace WMS.Desktop.ViewModels
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
         private readonly CellService _cellService;
+        private readonly DialogService _dialogService;
 
         public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
@@ -77,11 +80,13 @@ namespace WMS.Desktop.ViewModels
         public ReceiptViewModel(
             StockService stockService,
             ReceiptService receiptService,
-            CellService cellService)
+            CellService cellService,
+            DialogService dialogService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
             _cellService = cellService;
+            _dialogService = dialogService;
 
             RefreshCommand = new RelayCommand(RefreshAsync);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
@@ -102,10 +107,17 @@ namespace WMS.Desktop.ViewModels
                 await _receiptService.ReceiveAsync(receiptDto);
                 await RefreshAsync();
             }
-            catch
-            (Exception ex)
+            catch (WrongValueExeption ex)
             {
-                MessageBox.Show(ex.Message);
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
             }
         }
 
@@ -127,6 +139,14 @@ namespace WMS.Desktop.ViewModels
 
                 ApplyFilter();
                 ApplyCellFilter();
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
             }
             finally
             {

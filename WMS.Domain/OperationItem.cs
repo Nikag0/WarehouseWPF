@@ -1,4 +1,6 @@
-﻿namespace WMS.Domain;
+﻿using WMS.Domain.ExceptionControl;
+
+namespace WMS.Domain;
 
 public class OperationItem
 {
@@ -20,13 +22,13 @@ public class OperationItem
         int quantityAfter)
     {
         if (componentId == Guid.Empty)
-            throw new Exception("ComponentId не задан");
+            throw new OverallDomainException("ComponentId не задан");
 
         if (cellId == Guid.Empty)
-            throw new Exception("CellId не задан");
+            throw new OverallDomainException("CellId не задан");
 
         if (quantityBefore < 0 || quantityAfter < 0)
-            throw new Exception("Количество не может быть отрицательным");
+            throw new OverallDomainException("Количество не может быть отрицательным");
 
         Id = Guid.NewGuid();
         ComponentId = componentId;

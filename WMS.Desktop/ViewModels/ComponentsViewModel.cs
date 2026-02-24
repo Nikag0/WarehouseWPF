@@ -8,8 +8,10 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
@@ -34,15 +36,20 @@ namespace WMS.Desktop.ViewModels
 
         private ObservableCollection<ComponentDTO> components = new();
         private readonly ComponentService _componentService;
+        private readonly DialogService _dialogService;
         private bool _isLoading;
         private string _searchText;
 
         public ICommand LoadCommand { get; set; }
         public ICommand AddCommand { get; set; }
 
-        public ComponentsViewModel(ComponentService componentService)
+        public ComponentsViewModel(
+            ComponentService componentService, 
+            DialogService dialogService)
         {
             _componentService = componentService;
+            _dialogService = dialogService;
+
             LoadCommand = new RelayCommand(LoadAsync);
             AddCommand = new RelayCommand(AddAsync);
         }
@@ -61,6 +68,14 @@ namespace WMS.Desktop.ViewModels
 
                 ApplyFilter();
             }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
             finally
             {
                 _isLoading = false;
@@ -69,8 +84,24 @@ namespace WMS.Desktop.ViewModels
 
         public async Task AddAsync()
         {
-            await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
-            await LoadAsync();
+            try 
+            {
+                await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
+                await LoadAsync();
+            }
+            catch (WrongValueExeption ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+
         }
 
         private void ApplyFilter()

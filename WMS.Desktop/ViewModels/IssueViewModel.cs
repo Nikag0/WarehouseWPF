@@ -2,9 +2,10 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Input;
 using WMS.Application.Services;
-using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
@@ -26,8 +27,8 @@ namespace WMS.Desktop.ViewModels
 
         private IssueStockDto _selectedIssueItem;
         private readonly List<IssueStockDto> Stocks = new();
-        private bool _isLoading;
         private string _searchText;
+        private bool _isLoading;
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
@@ -35,18 +36,21 @@ namespace WMS.Desktop.ViewModels
 
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
+        private readonly DialogService _dialogService;
 
         public IssueViewModel(
             StockService stockService, 
-            IssueService issueService)
+            IssueService issueService,
+            DialogService dialogService)
         {
             _issueService = issueService;
             _stockService = stockService;
+            _dialogService = dialogService;
             IssueCommand = new RelayCommand(IssueAsync);
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
 
-            // Привязка для срабатывания конвертора RackHighlightConverter
+            // Привязка для срабатывания конвертора RackHighlightConverter.
             IssueItems.CollectionChanged += (s, e) =>
             {
                 OnPropertyChanged(nameof(IssueItems));
@@ -69,10 +73,20 @@ namespace WMS.Desktop.ViewModels
                 await _issueService.IssueAsync(issueOperation);
                 await RefreshAsync();
                 IssueItems.Clear();
+
+                _dialogService.ShowInfo("Выдача успешно выполнена.");
+            }
+            catch (WrongValueExeption ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                _dialogService.ShowWarning(ex.Message);
             }
         }
 
@@ -89,6 +103,14 @@ namespace WMS.Desktop.ViewModels
                     Stocks.Add(item);
 
                 ApplyFilter();
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
             }
             finally
             {

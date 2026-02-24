@@ -70,10 +70,6 @@
                                     <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="  Производитель: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Ячейка: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Остаток: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding Quantity}" FontSize="14" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                     <Button Content="Добавить к приёмке"
                                         Command="{Binding DataContext.AddSelectedComponentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"

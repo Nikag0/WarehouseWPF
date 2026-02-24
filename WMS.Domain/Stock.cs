@@ -1,4 +1,6 @@
-﻿namespace WMS.Domain;
+﻿using WMS.Domain.ExceptionControl;
+
+namespace WMS.Domain;
 public class Stock
 {
     public Guid Id { get; private set; }
@@ -26,10 +28,10 @@ public class Stock
         int initialQuantity)
     {
         if (componentId == Guid.Empty)
-            throw new Exception("ComponentId не задан");
+            throw new OverallDomainException("ComponentId не задан");
 
         if (cellId == Guid.Empty)
-            throw new Exception("CellId не задан");
+            throw new OverallDomainException("CellId не задан");
 
         return new Stock(
             Guid.NewGuid(),
@@ -51,7 +53,7 @@ public class Stock
         ValidatePositiveQuantity(quantity);
 
         if (quantity > Quantity)
-            throw new Exception("Недостаточно товара в ячейке");
+            throw new WrongValueExeption("Недостаточно товара в ячейке");
 
         Quantity -= quantity;
     }
@@ -59,7 +61,7 @@ public class Stock
     public void Inventory(int actualQuantity)
     {
         if (actualQuantity < 0)
-            throw new Exception("Фактическое количество не может быть отрицательным");
+            throw new WrongValueExeption("Фактическое количество не может быть отрицательным");
 
         Quantity = actualQuantity;
     }
@@ -69,7 +71,7 @@ public class Stock
     private void SetInitialQuantity(int quantity)
     {
         if (quantity < 0)
-            throw new Exception("Начальное количество не может быть отрицательным");
+            throw new WrongValueExeption("Начальное количество не может быть отрицательным");
 
         Quantity = quantity;
     }
@@ -77,6 +79,6 @@ public class Stock
     private static void ValidatePositiveQuantity(int quantity)
     {
         if (quantity <= 0)
-            throw new Exception("Количество должно быть больше нуля");
+            throw new WrongValueExeption("Количество должно быть больше нуля");
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain;
 
@@ -52,7 +53,7 @@ public class Component
     public void SetArticle(string article)
     {
         if (string.IsNullOrWhiteSpace(article))
-            throw new Exception("Артикул не может быть пустым");
+            throw new OverallDomainException("Артикул не может быть пустым");
 
         Article = article.Trim();
     }
@@ -60,7 +61,7 @@ public class Component
     public void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new Exception("Название не может быть пустым");
+            throw new OverallDomainException("Название не может быть пустым");
 
         Name = name.Trim();
     }
@@ -68,7 +69,7 @@ public class Component
     public void SetManufacturer(string manufacturer)
     {
         if (string.IsNullOrWhiteSpace(manufacturer))
-            throw new Exception("Производитель не может быть пустым");
+            throw new OverallDomainException("Производитель не может быть пустым");
 
         Manufacturer = manufacturer.Trim();
     }
@@ -78,7 +79,7 @@ public class Component
         if (expirationDate.HasValue &&
             expirationDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
         {
-            throw new Exception("Срок годности не может быть в прошлом");
+            throw new OverallDomainException("Срок годности не может быть в прошлом");
         }
 
         ExpirationDate = expirationDate;
@@ -87,7 +88,7 @@ public class Component
     public void SetMinQuantity(int minQuantity)
     {
         if (minQuantity < 0)
-            throw new Exception("Минимальный остаток не может быть отрицательным");
+            throw new OverallDomainException("Минимальный остаток не может быть отрицательным");
 
         MinQuantity = minQuantity;
     }

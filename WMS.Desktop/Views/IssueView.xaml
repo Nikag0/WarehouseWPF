@@ -235,7 +235,6 @@
                         <Rectangle Grid.Row="2" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
                             Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-2}"/>
                     </Grid>
-
                     
                 </Grid>
             </Grid>

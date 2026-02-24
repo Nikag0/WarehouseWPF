@@ -1,4 +1,6 @@
-﻿namespace WMS.Domain;
+﻿using WMS.Domain.ExceptionControl;
+
+namespace WMS.Domain;
 public class Operation
 {
     private readonly List<OperationItem> _items = new();
@@ -39,7 +41,7 @@ public class Operation
                 i.ComponentId == componentId &&
                 i.CellId == cellId))
         {
-            throw new ("Операция уже содержит позицию для этого товара и ячейки");
+            throw new OverallDomainException("Операция уже содержит позицию для этого товара и ячейки");
         }
 
         _items.Add(new OperationItem(
@@ -52,6 +54,6 @@ public class Operation
     public void Validate()
     {
         if (_items.Count == 0)
-            throw new Exception("Операция не может быть пустой");
+            throw new OverallDomainException("Операция не может быть пустой");
     }
 }
