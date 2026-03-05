@@ -40,15 +40,18 @@
 
             <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="Артикул"  Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="1" Margin="2" Text="{Binding NewArticle}"/>
+            <TextBox Grid.Column="1" Margin="2" Text="{Binding NewArticle}" 
+                     VerticalContentAlignment="Center" FontSize="15"/>
             
             <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Text="Название" Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="3" Margin="2" Text="{Binding NewName}"/>
+            <TextBox Grid.Column="3" Margin="2" Text="{Binding NewName}" 
+                     VerticalContentAlignment="Center" FontSize="15"/>
             
             <TextBlock Grid.Column="4" Text="Компания" HorizontalAlignment="Center" VerticalAlignment="Center"
                        Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="5" Margin="2" Text="{Binding NewManufacturer}"/>
+            <TextBox Grid.Column="5" Margin="2" Text="{Binding NewManufacturer}" 
+                     VerticalContentAlignment="Center" FontSize="15"/>
 
             <Button Content="Добавить" Grid.Column="6" Margin="2" Command="{Binding AddCommand}" />
             <Button Content="Обновить" Grid.Column="7" Margin="2" Command="{Binding LoadCommand}" />
