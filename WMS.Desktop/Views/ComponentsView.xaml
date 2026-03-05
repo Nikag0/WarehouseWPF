@@ -20,12 +20,12 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" Margin="10,0">
             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
                 Text="Список товаров" FontSize="30" Foreground="White"/>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" Margin="10,0,0,0">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
@@ -35,31 +35,58 @@
                 <ColumnDefinition Width="73"/>
                 <ColumnDefinition Width="250*"/>
                 <ColumnDefinition Width="150*"/>
-                <ColumnDefinition Width="150*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Text="Артикул"  Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="1" Margin="2" Text="{Binding NewArticle}" 
-                     VerticalContentAlignment="Center" FontSize="15"/>
+            <TextBlock Grid.Column="0"
+                       Text="Артикул"
+                       Foreground="White" 
+                       FontSize="15"
+                       HorizontalAlignment="Left" 
+                       VerticalAlignment="Center"/>
             
-            <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Text="Название" Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="3" Margin="2" Text="{Binding NewName}" 
-                     VerticalContentAlignment="Center" FontSize="15"/>
-            
-            <TextBlock Grid.Column="4" Text="Компания" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Foreground="White" FontSize="15"/>
-            <TextBox Grid.Column="5" Margin="2" Text="{Binding NewManufacturer}" 
-                     VerticalContentAlignment="Center" FontSize="15"/>
+            <TextBox Grid.Column="1" 
+                     Text="{Binding NewArticle}"
+                     Margin="5,5,20,5"
+                     VerticalContentAlignment="Center" 
+                     FontSize="15"/>
 
-            <Button Content="Добавить" Grid.Column="6" Margin="2" Command="{Binding AddCommand}" />
-            <Button Content="Обновить" Grid.Column="7" Margin="2" Command="{Binding LoadCommand}" />
+            <TextBlock Grid.Column="2" 
+                       Text="Название"
+                       Foreground="White" 
+                       FontSize="15"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       />
+
+            <TextBox Grid.Column="3" 
+                     Text="{Binding NewName}"
+                     Margin="5,5,20,5"
+                     FontSize="15"
+                     VerticalContentAlignment="Center"/>
+            
+            <TextBlock Grid.Column="4" 
+                       Text="Компания" 
+                       Foreground="White" 
+                        FontSize="15"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       />
+            
+            <TextBox Grid.Column="5" 
+                     Text="{Binding NewManufacturer}"
+                     Margin="5,5,20,5"
+                     FontSize="15"
+                     VerticalContentAlignment="Center"/>
+
+            <Button Grid.Column="6"
+                    Command="{Binding AddCommand}"
+                    Content="Добавить" 
+                    Margin="5" />
         </Grid>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1"  Margin="10">
 
-            <TextBox Grid.Column="0" Margin="10"
+            <TextBox Grid.Column="0"
                     Style="{StaticResource WatermarkTextBox}"
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -69,10 +96,16 @@
             
             <DataGrid ItemsSource="{Binding FilteredComponents}" AutoGenerateColumns="False" FontSize="15">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}"/>
-                    <DataGridTextColumn Header="Название" Binding="{Binding Name}"/>
-                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}"/>
-                    <DataGridTextColumn Header="Мин. количество" Binding="{Binding MinQuantity}"/>
+                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
+                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>
+                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*"/>
+                    <DataGridTextColumn Header="Мин. количество" Binding="{Binding MinQuantity}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
