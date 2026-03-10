@@ -11,6 +11,7 @@ public class Component
     public string Manufacturer { get; private set; } = null!;
     public DateOnly? ExpirationDate { get; private set; }
     public int MinQuantity { get; private set; }
+    public bool IsDelet { get; set; }
 
     // Для EF Core
     private Component() { }
@@ -21,7 +22,8 @@ public class Component
         string name,
         string manufacturer,
         DateOnly? expirationDate,
-        int minQuantity)
+        int minQuantity,
+        bool isDelet)
     {
         Id = id;
         SetArticle(article);
@@ -29,6 +31,7 @@ public class Component
         SetManufacturer(manufacturer);
         SetExpirationDate(expirationDate);
         SetMinQuantity(minQuantity);
+        this.IsDelet = isDelet;
     }
 
     // Factory method
@@ -45,7 +48,8 @@ public class Component
             name,
             manufacturer,
             expirationDate,
-            minQuantity);
+            minQuantity,
+            false);
     }
 
     // -------- Business rules --------

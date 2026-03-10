@@ -21,7 +21,9 @@ namespace WMS.Application.Services
         {
             var components =  await _componentRepo.GetAllAsync();
 
-            return components.Select(c => new ComponentDTO(
+            return components
+                .Where(c => !c.IsDelet)
+                .Select(c => new ComponentDTO(
                 c.Article,
                 c.Name,
                 c.Manufacturer,
@@ -43,6 +45,16 @@ namespace WMS.Application.Services
             );
 
             await _componentRepo.AddAsync(component);
+        }
+
+        public async Task DeletAsync(string article)
+        {
+            var compoment = await _componentRepo.GetByArticledAsync(article);
+
+            if (compoment is null)
+                throw new Exception("Компонент с таким артиклом не найден");
+
+            compoment.IsDelet = true;
         }
     }
 }

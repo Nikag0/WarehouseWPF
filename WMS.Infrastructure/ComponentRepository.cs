@@ -33,11 +33,26 @@ namespace WMS.Infrastructure
             await db.SaveChangesAsync();
         }
 
+        public async Task DeletAsync(Component component)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Components.Add(component);
+            await db.SaveChangesAsync();
+        }
+
         public async Task<Component?> GetByIdAsync(Guid id)
         {
             using var db = _factory.CreateDbContext();
 
             return await db.Components.FindAsync(id);
+        }
+
+        public async Task<Component?> GetByArticledAsync(string article)
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Components.FindAsync(article);
         }
 
         public async Task<bool> ExistsByArticle(string article)

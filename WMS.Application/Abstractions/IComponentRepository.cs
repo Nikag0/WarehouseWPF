@@ -12,6 +12,7 @@ namespace WMS.Application.Abstractions
         Task<List<Component>> GetAllAsync();
         Task AddAsync(Component component);
         Task<Component?> GetByIdAsync(Guid id);
+        Task<Component?> GetByArticledAsync(string article);
         Task<bool> ExistsByArticle(string article);
     }
 }

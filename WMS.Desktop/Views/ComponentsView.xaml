@@ -25,6 +25,29 @@
                 Text="Список товаров" FontSize="30" Foreground="White"/>
         </Grid>
 
+        <Grid Grid.Row="2"
+              Width="300"
+              Margin="10,0,0,0"
+              HorizontalAlignment="Left">
+            
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Button Grid.Column="6"
+                    Command="{Binding AddModeOnCommand}"
+                    Content="Добавить"
+                    FontSize="15"/>
+        
+        </Grid>
+
         <Grid Grid.Row="2" Margin="10,0,0,0">
 
             <Grid.ColumnDefinitions>
@@ -35,7 +58,19 @@
                 <ColumnDefinition Width="73"/>
                 <ColumnDefinition Width="250*"/>
                 <ColumnDefinition Width="150*"/>
+                <ColumnDefinition Width="150*"/>
             </Grid.ColumnDefinitions>
+
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAdding}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
 
             <TextBlock Grid.Column="0"
                        Text="Артикул"
@@ -43,7 +78,7 @@
                        FontSize="15"
                        HorizontalAlignment="Left" 
                        VerticalAlignment="Center"/>
-            
+
             <TextBox Grid.Column="1" 
                      Text="{Binding NewArticle}"
                      Margin="5,5,20,5"
@@ -63,15 +98,14 @@
                      Margin="5,5,20,5"
                      FontSize="15"
                      VerticalContentAlignment="Center"/>
-            
+
             <TextBlock Grid.Column="4" 
                        Text="Компания" 
                        Foreground="White" 
                         FontSize="15"
                        HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"
-                       />
-            
+                       VerticalAlignment="Center"/>
+
             <TextBox Grid.Column="5" 
                      Text="{Binding NewManufacturer}"
                      Margin="5,5,20,5"
@@ -80,11 +114,18 @@
 
             <Button Grid.Column="6"
                     Command="{Binding AddCommand}"
-                    Content="Добавить" 
-                    Margin="5" />
+                    Margin="5,5,10,5"
+                    Content="Применить"/>
+
+            <Button Grid.Column="7"
+                    Command="{Binding AddModeOffCommand}"
+                    Margin="5,5,10,5"
+                    Content="Отменить"/>
+
         </Grid>
 
-        <Grid Grid.Row="1"  Margin="10">
+        <Grid Grid.Row="1"
+              Margin="10">
 
             <TextBox Grid.Column="0"
                     Style="{StaticResource WatermarkTextBox}"
@@ -92,9 +133,13 @@
 
         </Grid>
 
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3"
+              Margin="10">
             
-            <DataGrid ItemsSource="{Binding FilteredComponents}" AutoGenerateColumns="False" FontSize="15">
+            <DataGrid ItemsSource="{Binding FilteredComponents}" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True"
+                      FontSize="15">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>

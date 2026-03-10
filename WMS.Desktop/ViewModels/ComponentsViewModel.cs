@@ -33,15 +33,28 @@ namespace WMS.Desktop.ViewModels
                 ApplyFilter();
             }
         }
+        public bool IsAdding
+        {
+            get => _isAdding;
+            set
+            {
+                _isAdding = value;
+                OnPropertyChanged();
+            }
+        }
 
         private ObservableCollection<ComponentDTO> components = new();
         private readonly ComponentService _componentService;
         private readonly DialogService _dialogService;
         private bool _isLoading;
         private string _searchText;
+        private bool _isAdding;
 
         public ICommand LoadCommand { get; set; }
         public ICommand AddCommand { get; set; }
+        public ICommand DeletCommand { get; set; }
+        public ICommand AddModeOnCommand { get; set; }
+        public ICommand AddModeOffCommand { get; set; }
 
         public ComponentsViewModel(
             ComponentService componentService, 
@@ -52,6 +65,9 @@ namespace WMS.Desktop.ViewModels
 
             LoadCommand = new RelayCommand(LoadAsync);
             AddCommand = new RelayCommand(AddAsync);
+            DeletCommand = new RelayCommand(DeletAsync);
+            AddModeOnCommand = new RelayCommand(_ =>{IsAdding = true;});
+            AddModeOffCommand = new RelayCommand(_ =>{IsAdding = false;});
         }
 
         public async Task LoadAsync()
@@ -88,6 +104,30 @@ namespace WMS.Desktop.ViewModels
             {
                 await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
                 await LoadAsync();
+                IsAdding = false;
+            }
+            catch (WrongValueExeption ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+
+        }
+
+        public async Task DeletAsync()
+        {
+            try
+            {
+                await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
+                await LoadAsync();
+                IsAdding = false;
             }
             catch (WrongValueExeption ex)
             {

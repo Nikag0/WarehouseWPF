@@ -10,7 +10,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
 
-
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
         <converters:RackHighlightConverter x:Key="RackHighlightConverter"/>
@@ -18,227 +17,246 @@
     
     <Grid>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="0">
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"
-                Text="Поиск для выдачи" FontSize="30" Foreground="White"/>
-        </Grid>
+        <Grid Grid.Column="0"
+              Margin="10,0">
 
-        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="160"/>
+            </Grid.RowDefinitions>
 
-            <TextBox x:Name="SearchIssue" Grid.Column="0" Margin="10" IsTabStop="False"
-                    Style="{StaticResource WatermarkTextBox}"
-                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+            <Grid Grid.Row="0">
 
-            <Popup PlacementTarget="{Binding ElementName=SearchIssue}" 
-                       Placement="Bottom" 
-                       AllowsTransparency="True"
-                       StaysOpen="False"
-                       HorizontalOffset="0"
-                       VerticalOffset="2"
-                       Style="{StaticResource FilterIssuePopupStyle}">
+                <TextBlock 
+                Text="Поиск для выдачи"
+                FontSize="30"
+                Foreground="White"
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Center"/>
+                
+            </Grid>
 
-                <Border Background="White" 
-                BorderBrush="#DDD" 
-                BorderThickness="1" 
-                Width="{Binding ElementName=SearchIssue, Path=ActualWidth}">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
-                    </Border.Effect>
+            <Grid Grid.Row="1"
+                  Margin="0,10">
 
-                    <ListBox ItemsSource="{Binding FilteredStocks}"
+                <TextBox Grid.Column="0"
+                         x:Name="SearchIssue" 
+                         IsTabStop="False"
+                         Style="{StaticResource WatermarkTextBox}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Popup PlacementTarget="{Binding ElementName=SearchIssue}" 
+                   Placement="Bottom" 
+                   AllowsTransparency="True"
+                   StaysOpen="False"
+                   HorizontalOffset="0"
+                   VerticalOffset="2"
+                   Style="{StaticResource FilterIssuePopupStyle}">
+
+                    <Border Background="White" 
+                        BorderBrush="#DDD" 
+                        BorderThickness="1" 
+                        Width="{Binding ElementName=SearchIssue, Path=ActualWidth}">
+
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
+                        </Border.Effect>
+
+                        <ListBox ItemsSource="{Binding FilteredStocks}"
                         BorderThickness="0"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="5">
-                                    <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Производительт: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Ячейка: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                    <Button Content="Добавить к выдаче"
-                                        Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                        CommandParameter="{Binding}">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="5">
+                                        <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="  Производительт: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="  Ячейка: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
+                                        <Button Content="Добавить к выдаче"
+                                            Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding}">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
                                                         Path=IsMouseOver}" 
                                                         Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
+                </Popup>
+                
+            </Grid>
+
+            <Grid Grid.Row="2">
+
+                <DataGrid x:Name="IssueGrid" 
+                          ItemsSource="{Binding IssueItems}" 
+                          AutoGenerateColumns="False" 
+                          FontSize="15">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Артикул" Width="100*" Binding="{Binding Article}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Название" Width="250*" Binding="{Binding ComponentName}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Производитель" Width="250*" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" IsReadOnly="False"/>
+                        <DataGridTemplateColumn Width="75">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Удалить"
+                                            Command="{Binding DataContext.RemoveIssueItemCommand,
+                                            RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Height="20"
+                                            FontSize="12">
                                     </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </Popup>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </Grid>
+
+            <Grid Grid.Row="3">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0"
+                      Margin="0,10">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0"
+                               Text="Комментарий&#x0a;к выдаче"
+                               Foreground="White"
+                               FontSize="15"
+                               HorizontalAlignment="Left" 
+                               VerticalAlignment="Center"/>
+
+                    <TextBox Grid.Column="1"/>
+
+                </Grid>
+
+                <Grid Grid.Row="1"
+                      Margin="0,10">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="ФИО оператора" 
+                               Foreground="White"
+                               FontSize="15" 
+                               HorizontalAlignment="Left" 
+                               VerticalAlignment="Center"/>
+
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding }"/>
+
+                    <Button Grid.Column="2"
+                            Content="Выдать" 
+                            Command="{Binding IssueCommand}"
+                            FontSize="20"
+                            Margin="10,0,0,0"/>
+
+                </Grid>
+
+
+
+            </Grid>
+
         </Grid>
 
-        <Grid Grid.Row="2">
-
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="520"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="170"/>
-                    <ColumnDefinition Width="110"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="250*"/>
-                    <ColumnDefinition Width="250*"/>
-                </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="ФИО оператора" FontSize="15" Foreground="White"/>
+                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="20,0,0,0">
+                    <TextBlock Text="A" Foreground="White" FontWeight="Bold" Margin="70,0"/>
+                    <TextBlock Text="B" Foreground="White" FontWeight="Bold" Margin="62,0"/>
+                    <TextBlock Text="С" Foreground="White" FontWeight="Bold" Margin="70,0"/>
+                </StackPanel>
 
-                <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="Криворуков П.О." FontSize="18" Foreground="White" Background="DimGray"/>
-                
-                <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="Дата выдачи" FontSize="15" Foreground="White"/>
+                <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,20,0,0">
+                    <TextBlock Text="1" Foreground="White" FontWeight="Bold" Margin="5,100"/>
+                    <TextBlock Text="2" Foreground="White" FontWeight="Bold" Margin="5,150"/>
+                </StackPanel>
 
-                <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Text="22.22.2022" FontSize="18" Foreground="White" Background="DimGray"/>
+                <Grid Margin="50,30,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="200"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Text="Комментарйи к выдаче" FontSize="15" Foreground="White"/>
+                    <Rectangle Grid.Row="0" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-1}"/>
 
-                <TextBox Grid.Column="5" Margin="5"/>
-                
-                <Button Grid.Column="6" 
-                    Content="Выдать" FontSize="20" Margin="30,5"
-                    Command="{Binding IssueCommand}"/>
-            </Grid>
+                    <Rectangle Grid.Row="0" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-1}"/>
 
-        </Grid>
+                    <Rectangle Grid.Row="0" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-1}"/>
 
-        <Grid Grid.Row="3">
+                    <Rectangle Grid.Row="2" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-2}"/>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="800"/>
-                <ColumnDefinition Width="500*"/>
-            </Grid.ColumnDefinitions>
+                    <Rectangle Grid.Row="2" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-2}"/>
 
-            <DataGrid x:Name="IssueGrid" 
-                      ItemsSource="{Binding IssueItems}" 
-                      AutoGenerateColumns="False" 
-                      FontSize="15">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Название" Width="80*" Binding="{Binding ComponentName}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" IsReadOnly="True"/>
-                    <DataGridTextColumn Width="50" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" IsReadOnly="False"/>
-                    <DataGridTextColumn Width="212"/>
-                    <DataGridTemplateColumn Header="Удалить" Width="80">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Удалить"
-                                        Padding="6,2"
-                                        Command="{Binding DataContext.RemoveIssueItemCommand,
-                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                        CommandParameter="{Binding}">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger
-                                                Binding="{Binding IsMouseOver,
-                                                    RelativeSource={RelativeSource Mode=FindAncestor,
-                                                    AncestorType=DataGridRow}}"
-                                                    Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="520"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0">
-
-                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="20,0,0,0">
-                        <TextBlock Text="A" Foreground="White" FontWeight="Bold" Margin="70,0"/>
-                        <TextBlock Text="B" Foreground="White" FontWeight="Bold" Margin="62,0"/>
-                        <TextBlock Text="С" Foreground="White" FontWeight="Bold" Margin="70,0"/>
-                    </StackPanel>
-                    
-                    <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,20,0,0">
-                        <TextBlock Text="1" Foreground="White" FontWeight="Bold" Margin="5,100"/>
-                        <TextBlock Text="2" Foreground="White" FontWeight="Bold" Margin="5,150"/>
-                    </StackPanel>
-
-                    <Grid Margin="50,30,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="200"/>
-                            <RowDefinition Height="50"/>
-                            <RowDefinition Height="200"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="50"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Rectangle Grid.Row="0" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-1}"/>
-                        
-                        <Rectangle Grid.Row="0" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-1}"/>
-                        
-                        <Rectangle Grid.Row="0" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-1}"/>
-
-                        <Rectangle Grid.Row="2" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-2}"/>
-                        
-                        <Rectangle Grid.Row="2" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-2}"/>
-                        
-                        <Rectangle Grid.Row="2" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
-                            Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-2}"/>
-                    </Grid>
-                    
+                    <Rectangle Grid.Row="2" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
+                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-2}"/>
                 </Grid>
+
             </Grid>
         </Grid>
 
     </Grid>
+    
 </UserControl>
