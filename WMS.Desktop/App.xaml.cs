@@ -6,6 +6,7 @@ using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Desktop.ViewModels;
 using WMS.Infrastructure;
+using WMS.Infrastructure.Migrations;
 
 namespace WMS.Desktop
 {
@@ -31,6 +32,7 @@ namespace WMS.Desktop
             services.AddScoped<IComponentRepository, ComponentRepository>();
             services.AddScoped<IOperationRepository, OperationRepository>();
             services.AddScoped<ICellRepository, CellRepository>();
+            services.AddScoped<IUserRepository, UsersRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
@@ -40,6 +42,7 @@ namespace WMS.Desktop
             services.AddScoped<StockService>();
             services.AddScoped<CellService>();
             services.AddScoped<DialogService>();
+            services.AddScoped<UserService>();
 
             // view models
             services.AddTransient<MainViewModel>();

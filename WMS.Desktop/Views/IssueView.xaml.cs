@@ -28,11 +28,17 @@ namespace WMS.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += StockItemDtoViewLoaded;
+            this.Loaded += UsersViewLoaded;
         }
         private async void StockItemDtoViewLoaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is IssueViewModel viewModel)
                 await viewModel.RefreshAsync();
+        } 
+        private async void UsersViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is IssueViewModel viewModel)
+                await viewModel.LoadUsers();
         }
     }
 }

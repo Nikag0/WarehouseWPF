@@ -4,7 +4,9 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Input;
+using WMS.Application.Abstractions;
 using WMS.Application.Services;
+using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 
@@ -14,6 +16,7 @@ namespace WMS.Desktop.ViewModels
     {
         public ObservableCollection<IssueStockDto> IssueItems { get; } = new();
         public ObservableCollection<IssueStockDto> FilteredStocks { get; } = new();
+        public ObservableCollection<User> Users { get; } = new();
         public string SearchText
         {
             get => _searchText;
@@ -37,15 +40,20 @@ namespace WMS.Desktop.ViewModels
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
         private readonly DialogService _dialogService;
+        private readonly UserService _userService;
+
 
         public IssueViewModel(
             StockService stockService, 
             IssueService issueService,
-            DialogService dialogService)
+            DialogService dialogService,
+            UserService userService)
         {
             _issueService = issueService;
             _stockService = stockService;
             _dialogService = dialogService;
+            _userService = userService;
+
             IssueCommand = new RelayCommand(IssueAsync);
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
@@ -103,6 +111,29 @@ namespace WMS.Desktop.ViewModels
                     Stocks.Add(item);
 
                 ApplyFilter();
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async Task LoadUsers()
+        {
+            try
+            {
+                Users.Clear();
+                var items = await _userService.GetAllAsync();
+                foreach (var item in items)
+                    Users.Add(item);
             }
             catch (OverallDomainException ex)
             {

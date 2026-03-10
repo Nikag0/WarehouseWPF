@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:WMS.Desktop.Views" 
              xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{d:DesignInstance Type=viewmodels:IssueViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
@@ -18,8 +19,8 @@
     <Grid>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1100"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1000"/>
+            <ColumnDefinition Width="920"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0"
@@ -70,8 +71,9 @@
                         </Border.Effect>
 
                         <ListBox ItemsSource="{Binding FilteredStocks}"
-                        BorderThickness="0"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            BorderThickness="0"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            Background="#CCC">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -88,18 +90,6 @@
                                         <Button Content="Добавить к выдаче"
                                             Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                        Path=IsMouseOver}" 
-                                                        Value="True">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
@@ -122,7 +112,15 @@
                         <DataGridTextColumn Header="Производитель" Width="250*" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="К выдаче" Binding="{Binding IssueQuantity}" IsReadOnly="False"/>
+
+                        <DataGridTemplateColumn Header="К выдаче">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <xctk:IntegerUpDown Value="{Binding IssueQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
                         <DataGridTemplateColumn Width="75">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -163,7 +161,10 @@
                                HorizontalAlignment="Left" 
                                VerticalAlignment="Center"/>
 
-                    <TextBox Grid.Column="1"/>
+                    <TextBox Grid.Column="1"
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"/>
 
                 </Grid>
 
@@ -184,7 +185,11 @@
                                VerticalAlignment="Center"/>
 
                     <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding }"/>
+                              ItemsSource="{Binding Users}"
+                              DisplayMemberPath="FullName"
+                              FontSize="20"
+                              HorizontalContentAlignment="Center" 
+                              VerticalContentAlignment="Center"/>
 
                     <Button Grid.Column="2"
                             Content="Выдать" 
@@ -194,64 +199,186 @@
 
                 </Grid>
 
-
-
             </Grid>
 
         </Grid>
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="520"/>
-                <RowDefinition/>
+                <RowDefinition Height="600"/>
+                <RowDefinition Height="480"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
 
-                <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="20,0,0,0">
-                    <TextBlock Text="A" Foreground="White" FontWeight="Bold" Margin="70,0"/>
-                    <TextBlock Text="B" Foreground="White" FontWeight="Bold" Margin="62,0"/>
-                    <TextBlock Text="С" Foreground="White" FontWeight="Bold" Margin="70,0"/>
-                </StackPanel>
+                <Grid HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <Image Source="/Images/Warehouse.png" 
+                        Width="640" 
+                        Height="600"/>
+                </Grid>
 
-                <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,20,0,0">
-                    <TextBlock Text="1" Foreground="White" FontWeight="Bold" Margin="5,100"/>
-                    <TextBlock Text="2" Foreground="White" FontWeight="Bold" Margin="5,150"/>
-                </StackPanel>
-
-                <Grid Margin="50,30,0,0">
+                <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="20"/>
                         <RowDefinition Height="50"/>
-                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="110"/>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="20"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="90"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="90"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="180"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Rectangle Grid.Row="0" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-1}"/>
+                    <Rectangle Grid.Row="1" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-1}"/>
 
-                    <Rectangle Grid.Row="0" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-1}"/>
+                    <Rectangle Grid.Row="1" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-2}"/>
 
-                    <Rectangle Grid.Row="0" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-1}"/>
+                    <Rectangle Grid.Row="1" 
+                               Grid.Column="3" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-3}"/>
+                    
+                    <Rectangle Grid.Row="3" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=B-1}"/>
+                    
+                    <Rectangle Grid.Row="3" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=B-2}"/>
+                    
+                    <Rectangle Grid.Row="3" 
+                               Grid.Column="3" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=B-3}"/>
+                    
+                    <Rectangle Grid.Row="5" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=C-1}"/>
+                    
+                    <Rectangle Grid.Row="5" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=C-2}"/>
+                    
+                    <Rectangle Grid.Row="5" 
+                               Grid.Column="3" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=C-3}"/>
+                    
+                    <Rectangle Grid.Row="6" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=D-1}"/>
+                    
+                    <Rectangle Grid.Row="6" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=D-2}"/>
+                    
+                    <Rectangle Grid.Row="6" 
+                               Grid.Column="3" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=D-3}"/>
+                    
+                    <Rectangle Grid.Row="8" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=E-1}"/>
+                    
+                    <Rectangle Grid.Row="8" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=E-2}"/>
+                    
+                    <Rectangle Grid.Row="8" 
+                               Grid.Column="3" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=E-3}"/>
+                    
+                    <Rectangle Grid.Row="8" 
+                               Grid.Column="4" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=E-4}"/>
 
-                    <Rectangle Grid.Row="2" Grid.Column="0" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=A-2}"/>
+                </Grid>
 
-                    <Rectangle Grid.Row="2" Grid.Column="2" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=B-2}"/>
+            </Grid>
 
-                    <Rectangle Grid.Row="2" Grid.Column="4" Stroke="Gray" StrokeThickness="1"
-                Fill="{Binding IssueItems, Converter={StaticResource RackHighlightConverter}, ConverterParameter=C-2}"/>
+            <Grid Grid.Row="1">
+
+                <Grid HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <Image Source="/Images/Row1.jpg" 
+                           Width="220" 
+                           Height="480"/>
                 </Grid>
 
             </Grid>

@@ -17,7 +17,7 @@ namespace WMS.Desktop.Converters
             var rackCode = parameter as string;
 
             if (items == null || rackCode == null)
-                return Brushes.DimGray;
+                return Brushes.Transparent;
 
             foreach (var item in items)
             {
@@ -26,7 +26,7 @@ namespace WMS.Desktop.Converters
                     return Brushes.OrangeRed;
             }
 
-            return Brushes.DimGray;
+            return Brushes.Transparent;
         }
 
         private string ExtractRackCode(string cellCode)
