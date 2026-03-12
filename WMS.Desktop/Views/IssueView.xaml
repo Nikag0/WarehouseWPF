@@ -377,8 +377,58 @@
                 <Grid HorizontalAlignment="Center"
                       VerticalAlignment="Center">
                     <Image Source="/Images/Row1.jpg" 
-                           Width="220" 
-                           Height="480"/>
+                           Width="210" 
+                           Height="350"/>
+                </Grid>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="47"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="360"/>
+                        <ColumnDefinition Width="51"/>
+                        <ColumnDefinition Width="51"/>
+                        <ColumnDefinition Width="51"/>
+                        <ColumnDefinition Width="51"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Rectangle Grid.Row="1" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-1-1-1}"/>
+                    
+                    <Rectangle Grid.Row="2" 
+                               Grid.Column="1" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-1-2-1}"/>
+                    
+                    <Rectangle Grid.Row="2" 
+                               Grid.Column="2" 
+                               Stroke="Gray" 
+                               StrokeThickness="1"
+                               Fill="{Binding IssueItems, 
+                               Converter={StaticResource RackHighlightConverter}, 
+                               ConverterParameter=A-1-2-2}"/>
+
+                   
+                   
                 </Grid>
 
             </Grid>
