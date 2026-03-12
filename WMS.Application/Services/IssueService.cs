@@ -55,7 +55,7 @@ namespace WMS.Application.Services
             if (items.Count == 0)
                 throw new Exception("Список выдачи пуст");
 
-            //var operation = Operation.Create(OperationType.Issue, comment);
+            var operation = Operation.Create(OperationType.Issue, comment);
 
             foreach (var item in items)
             {
@@ -75,15 +75,15 @@ namespace WMS.Application.Services
                 if (stock.Quantity == 0)
                     await _stockRepo.RemoveAsync(stock);
 
-                //operation.AddItem(
-                //    item.ComponentId,
-                //    item.CellId,
-                //    before,
-                //    stock.Quantity);
+                operation.AddItem(
+                    item.ComponentId,
+                    item.CellId,
+                    before,
+                    stock.Quantity);
             }
 
-            //operation.Validate();
-            //await _operationRepo.AddAsync(operation);
+            operation.Validate();
+            await _operationRepo.AddAsync(operation);
         }
     }
 }

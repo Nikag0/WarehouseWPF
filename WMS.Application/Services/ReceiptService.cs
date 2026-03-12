@@ -36,10 +36,12 @@ namespace WMS.Application.Services
                 0)).ToList();
         }
 
-        public async Task ReceiveAsync(OperationDTO item)
+        public async Task ReceiveAsync(OperationDTO item, string? comment = null)
         {
             if (item == null)
                 return;
+
+            var operation = Operation.Create(OperationType.Receipt, comment);
 
             Component? component = await _componentRepo.GetByIdAsync(item.ComponentId);
 
@@ -48,20 +50,32 @@ namespace WMS.Application.Services
 
             Stock? stock = await _stockRepo.GetAsync(item.ComponentId, item.CellId);
 
+            int before;
+
             if (stock is null)
             {
                 stock = Stock.Create(item.ComponentId, item.CellId, 0);
-
+                before = 0;
                 stock.Receive(item.Quantity);
                 await _stockRepo.AddAsync(stock);
             }
             else
             {
+                before = stock.Quantity;
                 stock.Receive(item.Quantity);
                 await _stockRepo.UpdateAsync(stock);
             }
-        }
 
+            operation.AddItem(
+                    item.ComponentId,
+                    item.CellId,
+                    before,
+                    stock.Quantity);
+
+            operation.Validate();
+
+            await _operationRepo.AddAsync(operation);
+        }
     }
 }
         // Расширенный метод с фиксированием истории операций и добавление списка приёмки.

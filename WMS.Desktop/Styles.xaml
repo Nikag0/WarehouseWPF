@@ -61,7 +61,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="SideMenuTabItemStyle" TargetType="TabItem">
+    <Style x:Key="MenuTabItemStyle" TargetType="TabItem">
         <Setter Property="Foreground" Value="#333333"/>
 
         <Style.Triggers>

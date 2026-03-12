@@ -7,85 +7,76 @@
         xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
         d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
-        d:DesignHeight="1080" d:DesignWidth="1920">
+        d:DesignHeight="1080" d:DesignWidth="1920"
+        WindowState="Maximized">
 
+    <TabControl Grid.Column="0"
+                ItemContainerStyle="{StaticResource MenuTabItemStyle}"
+                TabStripPlacement="Left"
+                Background="#36495b">
 
-    <Grid>
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                    <TextBlock Text="Сообщения" FontSize="11" HorizontalAlignment="Center"
+                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                </StackPanel>
+            </TabItem.Header>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="73*"/>
-            <ColumnDefinition Width="727*"/>
-        </Grid.ColumnDefinitions>
+        </TabItem>
 
-        <TabControl Grid.ColumnSpan="2"
-            TabStripPlacement="Left"
-            Background="#36495b"
-            BorderThickness="0"
-            ItemContainerStyle="{StaticResource SideMenuTabItemStyle}">
-            
-            <TabItem >
-                <TabItem.Header>
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                        <TextBlock Text="Сообщения" FontSize="11" HorizontalAlignment="Center"
-                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                    </StackPanel>
-                </TabItem.Header>
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                    <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
+                </StackPanel>
+            </TabItem.Header>
 
-            </TabItem>
+            <views:ComponentsView DataContext="{Binding Components}"/>
 
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"
-                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                        <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"
-                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                    </StackPanel>
-                </TabItem.Header>
+        </TabItem>
 
-                <views:ComponentsView DataContext="{Binding Components}"/>
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Выдача" FontSize="11"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+            </TabItem.Header>
 
-            </TabItem>
+            <views:IssueView DataContext="{Binding Issue}"/>
+        </TabItem>
 
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Выдача" FontSize="11"
-                               HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </TabItem.Header>
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Приёмка" FontSize="11"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+            </TabItem.Header>
 
-                <views:IssueView DataContext="{Binding Issue}"/>
-            </TabItem>
+            <views:ReceiptView DataContext="{Binding Receipt}"/>
 
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Приёмка" FontSize="11"
-                             HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </TabItem.Header>
+        </TabItem>
 
-                <views:ReceiptView DataContext="{Binding Receipt}"/>
+        <TabItem >
+            <TabItem.Header>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="⚙️" FontSize="22" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Настройки" FontSize="11"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+            </TabItem.Header>
 
-            </TabItem>
+        </TabItem>
 
-            <TabItem >
-                <TabItem.Header>
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="⚙️" FontSize="22" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Настройки" FontSize="11"
-                             HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </TabItem.Header>
-
-            </TabItem>
-
-        </TabControl>
-
-    </Grid>
+    </TabControl>
+    
 </Window>

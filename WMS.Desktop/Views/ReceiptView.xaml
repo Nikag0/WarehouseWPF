@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:WMS.Desktop.Views" 
              xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
@@ -16,12 +17,12 @@
     </UserControl.Resources>
 
 
-    <Grid Background="Transparent" MouseDown="RootGrid_MouseDown">
+    <Grid Margin="10,0">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
             <RowDefinition Height="60"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="45"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
@@ -30,11 +31,9 @@
                 Text="Приём заказов" FontSize="30" Foreground="White"/>
         </Grid>
 
-        
-
         <Grid Grid.Row="1">
 
-            <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="10" IsTabStop="False"
+            <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="0,10" IsTabStop="False"
                 Style="{StaticResource WatermarkTextBox}"
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -100,41 +99,62 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="150*"/>
+                <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="150*"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="110"/>
-                <ColumnDefinition Width="150*"/>
+                <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="90"/>
                 <ColumnDefinition Width="90"/>
                 <ColumnDefinition Width="90*"/>
-                <ColumnDefinition Width="90*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Артикул"  Foreground="White" FontSize="15"/>
+            <TextBlock Grid.Column="0"
+                       Text="Артикул" 
+                       FontSize="15"
+                       Foreground="White" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
             
-            <TextBox x:Name="ArticleTextBox" Grid.Column="1" Margin="5" IsReadOnly="True" 
-                Text="{Binding ItemToReceipt.Article}" VerticalContentAlignment="Center" FontSize="15"/>
+            <TextBox Grid.Column="1" 
+                     Text="{Binding ItemToReceipt.Article}" 
+                     Margin="5,5,20,5"
+                     FontSize="15"
+                     IsReadOnly="True" 
+                     VerticalContentAlignment="Center"/>
 
-            <TextBlock Grid.Column="2" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Название" Foreground="White" FontSize="15"/>
+            <TextBlock Grid.Column="2" 
+                       Text="Название" 
+                       FontSize="15"
+                       Foreground="White" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
 
-            <TextBox x:Name="NameTextBox" Grid.Column="3" Margin="5" IsReadOnly="True" 
-                Text="{Binding ItemToReceipt.ComponentName}" VerticalContentAlignment="Center" FontSize="15"/>
+            <TextBox Grid.Column="3" 
+                     Text="{Binding ItemToReceipt.ComponentName}"  
+                     Margin="5,5,20,5" 
+                     IsReadOnly="True" 
+                     VerticalContentAlignment="Center" 
+                     FontSize="15"/>
 
-            <TextBlock Grid.Column="4" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
                 Text="Производитель" Foreground="White" FontSize="15"/>
 
-            <TextBox x:Name="ManufacturerTextBox" Grid.Column="5" Margin="5" IsReadOnly="True" 
-                Text="{Binding ItemToReceipt.Manufacturer}" VerticalContentAlignment="Center" FontSize="15"/>
+            <TextBox Grid.Column="5" 
+                     Text="{Binding ItemToReceipt.Manufacturer}" 
+                     Margin="5,5,20,5"  
+                     IsReadOnly="True" 
+                     VerticalContentAlignment="Center" 
+                     FontSize="15"/>
 
-            <TextBlock Grid.Column="6" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+            <TextBlock Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"
                 Text="Ячейка" Foreground="White" FontSize="15"/>
 
-            <Grid Grid.Column="7" >
+            <Grid Grid.Column="7"
+                  Margin="5,5,20,5">
+                
                 <TextBox x:Name="SearchCell" IsTabStop="False"
                    Style="{StaticResource WatermarkTextBox}"
                    Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"/>
@@ -192,25 +212,39 @@
             <TextBlock Grid.Column="8" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
                 Text="Количество" Foreground="White" FontSize="15"/>
 
-            <TextBox x:Name="QuantityTextBox" Grid.Column="9" Margin="5"
-                Text="{Binding ItemToReceipt.Quantity}" VerticalContentAlignment="Center" FontSize="15"/>
+            <xctk:IntegerUpDown Grid.Column="9"
+                                Value="{Binding ItemToReceipt.Quantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                Margin="5,5,20,5" >
+                <xctk:IntegerUpDown.Style>
+                    <Style TargetType="xctk:IntegerUpDown">
+                        <Setter Property="IsEnabled" Value="True"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </xctk:IntegerUpDown.Style>
+            </xctk:IntegerUpDown>
 
             <Button Grid.Column="10" Margin="2" Content="Приёмка" Command="{Binding ReceiveCommand}"/>
-            <Button Grid.Column="11" Margin="2" Content="Обновить" Command="{Binding RefreshCommand}"/>
         </Grid>
 
         <Grid Grid.Row="3">
             
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450"/>
+                <ColumnDefinition Width="550"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <DataGrid ItemsSource="{Binding Stocks}" AutoGenerateColumns="False" FontSize="15" IsReadOnly="True">
+            <DataGrid ItemsSource="{Binding Stocks}" 
+                      AutoGenerateColumns="False" 
+                      FontSize="15" 
+                      IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Binding="{Binding Article}"/>
-                    <DataGridTextColumn Header="Название" Binding="{Binding ComponentName}"/>
-                    <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCode}"/>
+                    <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
+                    <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
+                    <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
                     <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
                 </DataGrid.Columns>
             </DataGrid>

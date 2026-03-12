@@ -27,15 +27,36 @@ namespace WMS.Desktop.ViewModels
                 ApplyFilter();
             }
         }
+        public string CommentText
+        {
+            get => _commentText;
+            set
+            {
+                _commentText = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool IsIssue
+        {
+            get => _isIssue;
+            set
+            {
+                _isIssue = value;
+                OnPropertyChanged();
+            }
+        }
 
         private IssueStockDto _selectedIssueItem;
         private readonly List<IssueStockDto> Stocks = new();
         private string _searchText;
+        private string _commentText;
         private bool _isLoading;
+        private bool _isIssue;
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
         public ICommand RemoveIssueItemCommand { get; }
+        public ICommand ClearIssueItemsCommand { get; }
 
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
@@ -57,6 +78,7 @@ namespace WMS.Desktop.ViewModels
             IssueCommand = new RelayCommand(IssueAsync);
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
+            ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
 
             // Привязка для срабатывания конвертора RackHighlightConverter.
             IssueItems.CollectionChanged += (s, e) =>
@@ -78,10 +100,10 @@ namespace WMS.Desktop.ViewModels
                         item.IssueQuantity))
                     .ToList();
 
-                await _issueService.IssueAsync(issueOperation);
+                await _issueService.IssueAsync(issueOperation, CommentText);
                 await RefreshAsync();
-                IssueItems.Clear();
-
+                CommentText = string.Empty;
+                IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
             }
             catch (WrongValueExeption ex)
@@ -188,6 +210,12 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Remove(item);
+        }
+
+        private void ClearIssueItems()
+        {
+            IssueItems.Clear();
+            IsIssue = false; 
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
