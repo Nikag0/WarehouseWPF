@@ -25,6 +25,7 @@ namespace WMS.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += ReceiptViewLoaded;
+            this.Loaded += UsersViewLoaded;
         }
 
         private async void ReceiptViewLoaded(object sender, RoutedEventArgs e)
@@ -39,6 +40,12 @@ namespace WMS.Desktop.Views
         {
             // Убираем фокус с любого TextBox
             Keyboard.ClearFocus();
+        }
+
+        private async void UsersViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is IssueViewModel viewModel)
+                await viewModel.LoadUsers();
         }
     }
 }

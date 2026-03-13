@@ -19,182 +19,76 @@
 
     <Grid Margin="10,0">
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="45"/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="0">
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
-                Text="Приём заказов" FontSize="30" Foreground="White"/>
-        </Grid>
-
-        <Grid Grid.Row="1">
-
-            <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="0,10" IsTabStop="False"
-                Style="{StaticResource WatermarkTextBox}"
-                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-
-            <Popup 
-                PlacementTarget="{Binding ElementName=SearchReceipt}" 
-                Tag="{Binding ElementName=SearchReceipt}"
-                Style="{StaticResource FilterReceiptPopupStyle}"
-                Placement="Bottom" 
-                AllowsTransparency="True"
-                StaysOpen="True"
-                HorizontalOffset="0"
-                VerticalOffset="2">
-
-                <Border Background="White" 
-                    BorderBrush="#DDD" 
-                    BorderThickness="1" 
-                    Width="{Binding ElementName=SearchReceipt, Path=ActualWidth}">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
-                    </Border.Effect>
-
-                    <ListBox ItemsSource="{Binding FilteredComponents}"
-                        BorderThickness="0"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="5">
-
-                                    <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="  Производитель: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
-                                    <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                    <Button Content="Добавить к приёмке"
-                                        Command="{Binding DataContext.AddSelectedComponentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                        CommandParameter="{Binding}">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                        Path=IsMouseOver}" 
-                                                        Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </Popup>
+        <Grid Grid.Column="0">
             
-        </Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition/>
+                <RowDefinition Height="300"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="2">
+            <TextBlock Grid.Row="0"
+                       Text="Приём заказов" 
+                       FontSize="30" 
+                       HorizontalAlignment="Left" 
+                       VerticalAlignment="Center"
+                       Foreground="White"/>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition Width="110"/>
-                <ColumnDefinition Width="300"/>
-                <ColumnDefinition Width="80"/>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="90"/>
-                <ColumnDefinition Width="90"/>
-                <ColumnDefinition Width="90*"/>
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1">
 
-            <TextBlock Grid.Column="0"
-                       Text="Артикул" 
-                       FontSize="15"
-                       Foreground="White" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
-            
-            <TextBox Grid.Column="1" 
-                     Text="{Binding ItemToReceipt.Article}" 
-                     Margin="5,5,20,5"
-                     FontSize="15"
-                     IsReadOnly="True" 
-                     VerticalContentAlignment="Center"/>
+                <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="0,10" IsTabStop="False"
+                     Style="{StaticResource WatermarkTextBox}"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
-            <TextBlock Grid.Column="2" 
-                       Text="Название" 
-                       FontSize="15"
-                       Foreground="White" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
-
-            <TextBox Grid.Column="3" 
-                     Text="{Binding ItemToReceipt.ComponentName}"  
-                     Margin="5,5,20,5" 
-                     IsReadOnly="True" 
-                     VerticalContentAlignment="Center" 
-                     FontSize="15"/>
-
-            <TextBlock Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Производитель" Foreground="White" FontSize="15"/>
-
-            <TextBox Grid.Column="5" 
-                     Text="{Binding ItemToReceipt.Manufacturer}" 
-                     Margin="5,5,20,5"  
-                     IsReadOnly="True" 
-                     VerticalContentAlignment="Center" 
-                     FontSize="15"/>
-
-            <TextBlock Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Ячейка" Foreground="White" FontSize="15"/>
-
-            <Grid Grid.Column="7"
-                  Margin="5,5,20,5">
-                
-                <TextBox x:Name="SearchCell" IsTabStop="False"
-                   Style="{StaticResource WatermarkTextBox}"
-                   Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
-                    Tag="{Binding ElementName=SearchCell}"
-                    Style="{StaticResource FilterCellPopupStyle}"
-                    Placement="Bottom" 
-                    AllowsTransparency="True"
-                    StaysOpen="True"
-                    HorizontalOffset="0"
-                    VerticalOffset="2">
+                <Popup 
+                         PlacementTarget="{Binding ElementName=SearchReceipt}" 
+                         Tag="{Binding ElementName=SearchReceipt}"
+                         Style="{StaticResource FilterReceiptPopupStyle}"
+                         Placement="Bottom" 
+                         AllowsTransparency="True"
+                         StaysOpen="True"
+                         HorizontalOffset="0"
+                         VerticalOffset="2">
 
                     <Border Background="White" 
-                        BorderBrush="#DDD" 
-                        BorderThickness="1" 
-                        Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
+                         BorderBrush="#DDD" 
+                         BorderThickness="1" 
+                         Width="{Binding ElementName=SearchReceipt, Path=ActualWidth}">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                         </Border.Effect>
 
-                        <ListBox ItemsSource="{Binding FilteredFreeCells}"
-                           BorderThickness="0"
-                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox ItemsSource="{Binding FilteredComponents}"
+                            BorderThickness="0"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Margin="5">
-                                        <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
+
+                                        <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="  Производитель: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                        <Button Content="Выбрать ячейку"
-                                           Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                           CommandParameter="{Binding}">
+                                        <Button Content="Добавить к приёмке"
+                                            Command="{Binding DataContext.AddSelectedComponentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding}">
                                             <Button.Style>
                                                 <Style TargetType="Button">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                           Path=IsMouseOver}" 
-                                                           Value="True">
+                                                 Path=IsMouseOver}" 
+                                                 Value="True">
                                                             <Setter Property="Visibility" Value="Visible"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -207,47 +101,227 @@
                         </ListBox>
                     </Border>
                 </Popup>
+
             </Grid>
-
-            <TextBlock Grid.Column="8" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
-                Text="Количество" Foreground="White" FontSize="15"/>
-
-            <xctk:IntegerUpDown Grid.Column="9"
-                                Value="{Binding ItemToReceipt.Quantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                Margin="5,5,20,5" >
-                <xctk:IntegerUpDown.Style>
-                    <Style TargetType="xctk:IntegerUpDown">
-                        <Setter Property="IsEnabled" Value="True"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </xctk:IntegerUpDown.Style>
-            </xctk:IntegerUpDown>
-
-            <Button Grid.Column="10" Margin="2" Content="Приёмка" Command="{Binding ReceiveCommand}"/>
-        </Grid>
-
-        <Grid Grid.Row="3">
             
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="550"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2">
 
-            <DataGrid ItemsSource="{Binding Stocks}" 
+                <DataGrid ItemsSource="{Binding Stocks}" 
                       AutoGenerateColumns="False" 
                       FontSize="15" 
                       IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
-                    <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
-                    <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
-                    <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
+                        <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
+                        <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+            <Grid Grid.Row="3">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Артикул" 
+                            FontSize="15"
+                            Foreground="White" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"/>
+
+                <TextBox Grid.Row="0"
+                            Grid.Column="1" 
+                            Text="{Binding ItemToReceipt.Article}" 
+                            Margin="5"
+                            FontSize="15"
+                            IsReadOnly="True" 
+                            VerticalContentAlignment="Center"
+                            TextAlignment="Center"/>
+
+                <TextBlock Grid.Row="1"
+                            Grid.Column="0" 
+                            Text="Название" 
+                            FontSize="15"
+                            Foreground="White" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"/>
+
+                <TextBox Grid.Row="1"
+                         Grid.Column="1" 
+                         Text="{Binding ItemToReceipt.ComponentName}"  
+                         Margin="5" 
+                         IsReadOnly="True" 
+                         VerticalContentAlignment="Center" 
+                         FontSize="15"
+                         TextAlignment="Center"/>
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           Text="Производитель" 
+                           Foreground="White" 
+                           FontSize="15"/>
+
+                <TextBox Grid.Row="2"
+                         Grid.Column="1" 
+                         Text="{Binding ItemToReceipt.Manufacturer}" 
+                         Margin="5"  
+                         IsReadOnly="True" 
+                         VerticalContentAlignment="Center" 
+                         FontSize="15"
+                         TextAlignment="Center"/>
+
+                <Grid Grid.Row="3"
+                      Grid.Column="0">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               Text="Ячейка" 
+                               Foreground="White" 
+                               FontSize="15"/>
+
+                    <Grid Grid.Column="1"
+                          Margin="5">
+
+                        <TextBox x:Name="SearchCell" 
+                                 IsTabStop="False"
+                                 Style="{StaticResource WatermarkTextBox}"
+                                 Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"
+                                 TextAlignment="Center"/>
+
+                        <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
+                            Tag="{Binding ElementName=SearchCell}"
+                            Style="{StaticResource FilterCellPopupStyle}"
+                            Placement="Bottom" 
+                            AllowsTransparency="True"
+                            StaysOpen="True"
+                            HorizontalOffset="0"
+                            VerticalOffset="2">
+
+                            <Border Background="White" 
+                            BorderBrush="#DDD" 
+                            BorderThickness="1" 
+                            Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
+                                </Border.Effect>
+
+                                <ListBox ItemsSource="{Binding FilteredFreeCells}"
+                               BorderThickness="0"
+                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5">
+                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
+                                                <Button Content="Выбрать ячейку"
+                                               Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                               CommandParameter="{Binding}">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                                                               Path=IsMouseOver}" 
+                                                               Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </Popup>    
+                    </Grid>
+
+                </Grid>
+
+                <Grid Grid.Row="3"
+                      Grid.Column="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" 
+                               Margin="2" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               Text="Количество" 
+                               Foreground="White" 
+                               FontSize="15"/>      
+
+                    <xctk:IntegerUpDown Grid.Column="1"
+                                        Value="{Binding ItemToReceipt.Quantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        Margin="5"
+                                        FontSize="15"
+                                        TextAlignment="Center">
+                    </xctk:IntegerUpDown>
+                    
+                </Grid>
+
+                <Grid Grid.Row="4"
+                      Grid.Column="0">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="ФИО оператора" 
+                               Foreground="White"
+                               FontSize="15" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding Users}"
+                              DisplayMemberPath="FullName"
+                              FontSize="20"
+                              HorizontalContentAlignment="Center" 
+                              VerticalContentAlignment="Center"
+                              Margin="5"/>
+
+                </Grid>
+                
+                
+
+                <Button Grid.Row="4" 
+                        Grid.Column="1"
+                        Command="{Binding ReceiveCommand}"
+                        Content="Приёмка" 
+                        Margin="5"/>
+                
+            </Grid>
+            
         </Grid>
+
     </Grid>
 </UserControl>

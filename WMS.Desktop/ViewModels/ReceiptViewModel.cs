@@ -16,6 +16,7 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<StockDto> Stocks { get; } = new();
         public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new();
         public ObservableCollection<Cell> FilteredFreeCells { get; } = new();
+        public ObservableCollection<User> Users { get; } = new();
         public ReceiptStockDto ItemToReceipt
         {
             get => _itemToReceipt;
@@ -71,6 +72,7 @@ namespace WMS.Desktop.ViewModels
         private readonly ReceiptService _receiptService;
         private readonly CellService _cellService;
         private readonly DialogService _dialogService;
+        private readonly UserService _userService;
 
         public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
@@ -81,12 +83,14 @@ namespace WMS.Desktop.ViewModels
             StockService stockService,
             ReceiptService receiptService,
             CellService cellService,
-            DialogService dialogService)
+            DialogService dialogService,
+            UserService userService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
             _cellService = cellService;
             _dialogService = dialogService;
+            _userService = userService;
 
             RefreshCommand = new RelayCommand(RefreshAsync);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
@@ -139,6 +143,29 @@ namespace WMS.Desktop.ViewModels
 
                 ApplyFilter();
                 ApplyCellFilter();
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async Task LoadUsers()
+        {
+            try
+            {
+                Users.Clear();
+                var items = await _userService.GetAllAsync();
+                foreach (var item in items)
+                    Users.Add(item);
             }
             catch (OverallDomainException ex)
             {
@@ -214,6 +241,8 @@ namespace WMS.Desktop.ViewModels
             foreach (var item in source)
                 target.Add(item);
         }
+
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

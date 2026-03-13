@@ -43,7 +43,7 @@
 
             <Button Grid.Column="6"
                     Command="{Binding AddModeOnCommand}"
-                    Content="Добавить"
+                    Content="Добавить новый товар"
                     FontSize="15"/>
         
         </Grid>

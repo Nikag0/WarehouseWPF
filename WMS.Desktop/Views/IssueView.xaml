@@ -207,7 +207,8 @@
                              Text="{Binding CommentText}"
                              AcceptsReturn="True" 
                              TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"/>
+                             VerticalScrollBarVisibility="Auto"
+                             Style="{StaticResource TextBoxStyle}"/>
 
                 </Grid>
 
