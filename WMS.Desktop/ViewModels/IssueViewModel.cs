@@ -16,7 +16,7 @@ namespace WMS.Desktop.ViewModels
     {
         public ObservableCollection<IssueStockDto> IssueItems { get; } = new();
         public ObservableCollection<IssueStockDto> FilteredStocks { get; } = new();
-        public ObservableCollection<User> Users { get; } = new();
+        public ObservableCollection<Operator> Operators { get; } = new();
         public string SearchText
         {
             get => _searchText;
@@ -36,6 +36,15 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
+        public string OperatorName
+        {
+            get => _operatorName;
+            set
+            {
+                _operatorName = value;
+                OnPropertyChanged();
+            }
+        }
         public bool IsIssue
         {
             get => _isIssue;
@@ -46,10 +55,12 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+
         private IssueStockDto _selectedIssueItem;
         private readonly List<IssueStockDto> Stocks = new();
         private string _searchText;
         private string _commentText;
+        private string _operatorName;
         private bool _isLoading;
         private bool _isIssue;
 
@@ -61,14 +72,14 @@ namespace WMS.Desktop.ViewModels
         private readonly StockService _stockService;
         private readonly IssueService _issueService;
         private readonly DialogService _dialogService;
-        private readonly UserService _userService;
+        private readonly OperatorService _userService;
 
 
         public IssueViewModel(
             StockService stockService, 
             IssueService issueService,
             DialogService dialogService,
-            UserService userService)
+            OperatorService userService)
         {
             _issueService = issueService;
             _stockService = stockService;
@@ -97,7 +108,8 @@ namespace WMS.Desktop.ViewModels
                     .Select(item => new OperationDTO(
                         item.ComponentId,
                         item.CellId,
-                        item.IssueQuantity))
+                        item.IssueQuantity,
+                        OperatorName))
                     .ToList();
 
                 await _issueService.IssueAsync(issueOperation, CommentText);
@@ -152,10 +164,10 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                Users.Clear();
+                Operators.Clear();
                 var items = await _userService.GetAllAsync();
                 foreach (var item in items)
-                    Users.Add(item);
+                    Operators.Add(item);
             }
             catch (OverallDomainException ex)
             {

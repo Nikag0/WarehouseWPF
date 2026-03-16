@@ -7,7 +7,10 @@
         xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
         d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
-        d:DesignHeight="1080" d:DesignWidth="1920"
+        d:DesignHeight="1080" 
+        d:DesignWidth="1920"
+        MinHeight="540"
+        MinWidth="960"
         WindowState="Maximized">
 
     <TabControl Grid.Column="0"

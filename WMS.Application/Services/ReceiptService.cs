@@ -41,7 +41,7 @@ namespace WMS.Application.Services
             if (item == null)
                 return;
 
-            var operation = Operation.Create(OperationType.Receipt, comment);
+            var operation = Operation.Create(OperationType.Receipt, item.OperatorName, comment);
 
             Component? component = await _componentRepo.GetByIdAsync(item.ComponentId);
 

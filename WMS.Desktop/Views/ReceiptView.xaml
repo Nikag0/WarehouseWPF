@@ -302,7 +302,8 @@
                                VerticalAlignment="Center"/>
 
                     <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding Users}"
+                              ItemsSource="{Binding Operators}"
+                              SelectedItem="{Binding OperatorName}"
                               DisplayMemberPath="FullName"
                               FontSize="20"
                               HorizontalContentAlignment="Center" 

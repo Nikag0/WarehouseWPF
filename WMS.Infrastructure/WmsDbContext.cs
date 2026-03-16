@@ -16,7 +16,7 @@ namespace WMS.Infrastructure
         public DbSet<Operation> Operations => Set<Operation>();
         public DbSet<OperationItem> OperationItems => Set<OperationItem>();
         public DbSet<Cell> Cells => Set<Cell>();
-        public DbSet<User> Users => Set<User>();
+        public DbSet<Operator> Users => Set<Operator>();
 
         public WmsDbContext(DbContextOptions<WmsDbContext> options)
             : base(options) { }

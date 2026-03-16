@@ -16,7 +16,7 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<StockDto> Stocks { get; } = new();
         public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new();
         public ObservableCollection<Cell> FilteredFreeCells { get; } = new();
-        public ObservableCollection<User> Users { get; } = new();
+        public ObservableCollection<Operator> Operators { get; } = new();
         public ReceiptStockDto ItemToReceipt
         {
             get => _itemToReceipt;
@@ -59,6 +59,15 @@ namespace WMS.Desktop.ViewModels
                 ApplyCellFilter();
             }
         }
+        public string OperatorName
+        {
+            get => _operatorName;
+            set
+            {
+                _operatorName = value;
+                OnPropertyChanged();
+            }
+        }
 
         private readonly List<ReceiptStockDto> _allComponents = new();
         private readonly List<Cell> _freeCells = new();
@@ -67,12 +76,13 @@ namespace WMS.Desktop.ViewModels
         private bool _isLoading;
         private string _searchText;
         private string _searchFreeCell;
+        private string _operatorName;
 
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
         private readonly CellService _cellService;
         private readonly DialogService _dialogService;
-        private readonly UserService _userService;
+        private readonly OperatorService _userService;
 
         public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
@@ -84,7 +94,7 @@ namespace WMS.Desktop.ViewModels
             ReceiptService receiptService,
             CellService cellService,
             DialogService dialogService,
-            UserService userService)
+            OperatorService userService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
@@ -107,7 +117,8 @@ namespace WMS.Desktop.ViewModels
                 var receiptDto = new OperationDTO(
                     ItemToReceipt.ComponentId,
                     CellId,
-                    ItemToReceipt.Quantity);
+                    ItemToReceipt.Quantity,
+                    OperatorName);
                 await _receiptService.ReceiveAsync(receiptDto);
                 await RefreshAsync();
             }
@@ -158,14 +169,14 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task LoadUsers()
+        public async Task LoadOperators()
         {
             try
             {
-                Users.Clear();
+                Operators.Clear();
                 var items = await _userService.GetAllAsync();
                 foreach (var item in items)
-                    Users.Add(item);
+                    Operators.Add(item);
             }
             catch (OverallDomainException ex)
             {

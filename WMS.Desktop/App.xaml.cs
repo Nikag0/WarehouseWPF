@@ -32,7 +32,7 @@ namespace WMS.Desktop
             services.AddScoped<IComponentRepository, ComponentRepository>();
             services.AddScoped<IOperationRepository, OperationRepository>();
             services.AddScoped<ICellRepository, CellRepository>();
-            services.AddScoped<IUserRepository, UsersRepository>();
+            services.AddScoped<IOperatorRepository, UsersRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
@@ -42,7 +42,7 @@ namespace WMS.Desktop
             services.AddScoped<StockService>();
             services.AddScoped<CellService>();
             services.AddScoped<DialogService>();
-            services.AddScoped<UserService>();
+            services.AddScoped<OperatorService>();
 
             // view models
             services.AddTransient<MainViewModel>();

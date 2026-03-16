@@ -9,11 +9,11 @@ using WMS.Domain;
 
 namespace WMS.Infrastructure.Configurations
 {
-    public class UserConfiguraton : IEntityTypeConfiguration<User>
+    public class OperatorConfiguraton : IEntityTypeConfiguration<Operator>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public void Configure(EntityTypeBuilder<Operator> builder)
         {
-            builder.ToTable("users");
+            builder.ToTable("operators");
 
             builder.HasKey(x => x.Id);
 

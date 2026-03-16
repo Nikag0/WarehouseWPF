@@ -9,7 +9,7 @@ using WMS.Domain;
 
 namespace WMS.Infrastructure.Migrations
 {
-    public class UsersRepository : IUserRepository
+    public class UsersRepository : IOperatorRepository
     {
         private readonly IDbContextFactory<WmsDbContext> _factory;
 
@@ -18,7 +18,7 @@ namespace WMS.Infrastructure.Migrations
             _factory = factory;
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<List<Operator>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
 

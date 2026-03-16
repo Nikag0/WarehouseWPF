@@ -12,8 +12,8 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    [Migration("20260306085317_AddIsDeletToComponent")]
-    partial class AddIsDeletToComponent
+    [Migration("20260316153726_addColumnToCell")]
+    partial class addColumnToCell
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,19 +31,21 @@ namespace WMS.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Position")
+                    b.Property<int>("Column")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Line")
                         .HasColumnType("integer");
 
                     b.Property<int>("Rack")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Row")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Row")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Row", "Rack", "Position")
+                    b.HasIndex("Row", "Rack", "Line", "Column")
                         .IsUnique();
 
                     b.ToTable("cells", (string)null);
@@ -99,6 +101,10 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<DateTime>("OccurredAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -159,6 +165,32 @@ namespace WMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("stocks", (string)null);
+                });
+
+            modelBuilder.Entity("WMS.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Patronymic")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Surname", "Name", "Patronymic")
+                        .IsUnique();
+
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.OperationItem", b =>

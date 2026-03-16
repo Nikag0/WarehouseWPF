@@ -7,8 +7,8 @@ using WMS.Domain;
 
 namespace WMS.Application.Abstractions
 {
-    public interface IUserRepository
+    public interface IOperatorRepository
     {
-        Task<List<User>> GetAllAsync();
+        Task<List<Operator>> GetAllAsync();
     }
 }

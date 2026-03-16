@@ -6,23 +6,24 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WMS.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class NewDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "cell_stocks",
+                name: "cells",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                    Row = table.Column<int>(type: "integer", nullable: false),
+                    Rack = table.Column<int>(type: "integer", nullable: false),
+                    Line = table.Column<int>(type: "integer", nullable: false),
+                    Column = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_cell_stocks", x => x.Id);
+                    table.PrimaryKey("PK_cells", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -34,7 +35,8 @@ namespace WMS.Infrastructure.Migrations
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Manufacturer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     ExpirationDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    MinQuantity = table.Column<int>(type: "integer", nullable: false)
+                    MinQuantity = table.Column<int>(type: "integer", nullable: false),
+                    IsDelet = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,11 +50,52 @@ namespace WMS.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     OccurredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Operator = table.Column<string>(type: "text", nullable: false),
                     Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_operations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Surname = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Patronymic = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "stocks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_stocks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_stocks_cells_CellId",
+                        column: x => x.CellId,
+                        principalTable: "cells",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_stocks_components_ComponentId",
+                        column: x => x.ComponentId,
+                        principalTable: "components",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,9 +121,9 @@ namespace WMS.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_cell_stocks_ComponentId_CellId",
-                table: "cell_stocks",
-                columns: new[] { "ComponentId", "CellId" },
+                name: "IX_cells_Row_Rack_Line",
+                table: "cells",
+                columns: new[] { "Row", "Rack", "Line" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -93,22 +136,45 @@ namespace WMS.Infrastructure.Migrations
                 name: "IX_operation_items_OperationId",
                 table: "operation_items",
                 column: "OperationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_stocks_CellId",
+                table: "stocks",
+                column: "CellId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_stocks_ComponentId_CellId",
+                table: "stocks",
+                columns: new[] { "ComponentId", "CellId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_users_Surname_Name_Patronymic",
+                table: "users",
+                columns: new[] { "Surname", "Name", "Patronymic" },
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "cell_stocks");
-
-            migrationBuilder.DropTable(
-                name: "components");
-
-            migrationBuilder.DropTable(
                 name: "operation_items");
 
             migrationBuilder.DropTable(
+                name: "stocks");
+
+            migrationBuilder.DropTable(
+                name: "users");
+
+            migrationBuilder.DropTable(
                 name: "operations");
+
+            migrationBuilder.DropTable(
+                name: "cells");
+
+            migrationBuilder.DropTable(
+                name: "components");
         }
     }
 }

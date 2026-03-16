@@ -9,20 +9,22 @@ namespace WMS.Domain
     public class Cell
     {
         public Guid Id { get; private set; }
-        public string Row { get; private set; }
+        public int Row { get; private set; }
         public int Rack { get; private set; }
-        public int Position { get; private set; }
+        public int Line { get; private set; }
+        public int Column { get; private set; }
 
         private Cell() { } // для EF
 
-        public Cell(string row, int rack, int position)
+        public Cell( int row, int rack, int position, int column)
         {
             Id = Guid.NewGuid();
             Row = row;
             Rack = rack;
-            Position = position;
+            Line = position;
+            Column = column;
         }
 
-        public string Code => $"{Row}-{Rack}-{Position}";
+        public string Code => $"{Row}-{Rack}-{Line}-{Column}";
     }
 }

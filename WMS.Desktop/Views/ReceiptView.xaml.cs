@@ -25,7 +25,6 @@ namespace WMS.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += ReceiptViewLoaded;
-            this.Loaded += UsersViewLoaded;
         }
 
         private async void ReceiptViewLoaded(object sender, RoutedEventArgs e)
@@ -33,19 +32,13 @@ namespace WMS.Desktop.Views
             if (DataContext is ReceiptViewModel viewModel)
             {
                 await viewModel.RefreshAsync();
+                await viewModel.LoadOperators();
             }
         }
-
         private void RootGrid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             // Убираем фокус с любого TextBox
             Keyboard.ClearFocus();
-        }
-
-        private async void UsersViewLoaded(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is IssueViewModel viewModel)
-                await viewModel.LoadUsers();
         }
     }
 }

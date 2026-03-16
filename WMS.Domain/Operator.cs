@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace WMS.Domain
 {
-    public class User
+    public class Operator
     {
         public Guid Id { get; private set; }
         public string Surname { get; private set; }
         public string Name { get; private set; }
         public string Patronymic { get; private set; }
 
-        private User() { } // для EF
+        private Operator() { } // для EF
 
-        public User(string surname, string name, string patronymic)
+        public Operator(string surname, string name, string patronymic)
         {
             Id = Guid.NewGuid();
             Surname = surname;

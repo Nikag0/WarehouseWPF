@@ -19,9 +19,10 @@ namespace WMS.Infrastructure.Configurations
 
             builder.Property(x => x.Row).IsRequired();
             builder.Property(x => x.Rack).IsRequired();
-            builder.Property(x => x.Position).IsRequired();
+            builder.Property(x => x.Line).IsRequired();
+            builder.Property(x => x.Column).IsRequired();
 
-            builder.HasIndex(x => new { x.Row, x.Rack, x.Position })
+            builder.HasIndex(x => new { x.Row, x.Rack, x.Line, x.Column })
                 .IsUnique();
         }
     }

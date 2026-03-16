@@ -1,4 +1,5 @@
-﻿using WMS.Domain.ExceptionControl;
+﻿using System.ComponentModel;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain;
 public class Operation
@@ -8,6 +9,7 @@ public class Operation
     public Guid Id { get; private set; }
     public OperationType Type { get; private set; }
     public DateTime OccurredAt { get; private set; }
+    public string Operator { get; private set; }
     public string? Comment { get; private set; }
 
     public IReadOnlyCollection<OperationItem> Items => _items.AsReadOnly();
@@ -15,18 +17,24 @@ public class Operation
     // Для EF Core
     private Operation() { }
 
-    private Operation(OperationType type, string? comment)
+    private Operation(OperationType type, string operatorName, string? comment)
     {
         Id = Guid.NewGuid();
         Type = type;
         OccurredAt = DateTime.UtcNow;
+        Operator = operatorName;
         Comment = comment;
+
+        
     }
 
     // Factory method
-    public static Operation Create(OperationType type, string? comment = null)
+    public static Operation Create(OperationType type, string operatorName, string? comment = null)
     {
-        return new Operation(type, comment);
+        if (operatorName == string.Empty || operatorName == null)
+            throw new OverallDomainException("Имя оператора не указано");
+
+        return new Operation(type, operatorName, comment);
     }
 
     // -------- Aggregate behavior --------
@@ -56,4 +64,5 @@ public class Operation
         if (_items.Count == 0)
             throw new OverallDomainException("Операция не может быть пустой");
     }
+
 }
