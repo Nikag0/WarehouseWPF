@@ -3,6 +3,7 @@
                     xmlns:converters="clr-namespace:WMS.Desktop.Converters">
 
     <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
+    <converters:RackHighlightConverter x:Key="RackHighlightConverter"/>
 
     <Style x:Key="WatermarkTextBox" TargetType="TextBox">
         <!-- базовые свойства -->
@@ -160,5 +161,20 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!--<Style x:Key="RackRectangleStyle" TargetType="Rectangle">
+        <Setter Property="Stroke" Value="Gray"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="Fill">
+            <Setter.Value>
+                <Binding Path="IssueItems"
+                     RelativeSource="{RelativeSource AncestorType=Grid}"
+                     Converter="{StaticResource RackHighlightConverter}"
+                     ConverterParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
+            </Setter.Value>
+        </Setter>
+    </Style>-->
 
 </ResourceDictionary>

@@ -59,7 +59,16 @@ namespace WMS.Desktop.ViewModels
                 ApplyCellFilter();
             }
         }
-        public string OperatorName
+        public string CommentText
+        {
+            get => _commentText;
+            set
+            {
+                _commentText = value;
+                OnPropertyChanged();
+            }
+        }
+        public Operator OperatorName
         {
             get => _operatorName;
             set
@@ -76,7 +85,8 @@ namespace WMS.Desktop.ViewModels
         private bool _isLoading;
         private string _searchText;
         private string _searchFreeCell;
-        private string _operatorName;
+        private string _commentText;
+        private Operator _operatorName;
 
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
@@ -112,14 +122,19 @@ namespace WMS.Desktop.ViewModels
         {
             if (ItemToReceipt == null || CellId == Guid.Empty) return;
 
+            if (OperatorName == null)
+            {
+                _dialogService.ShowWarning("Оператор не указан");
+                return;
+            }
+
             try
             {
                 var receiptDto = new OperationDTO(
                     ItemToReceipt.ComponentId,
                     CellId,
-                    ItemToReceipt.Quantity,
-                    OperatorName);
-                await _receiptService.ReceiveAsync(receiptDto);
+                    ItemToReceipt.Quantity);
+                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
                 await RefreshAsync();
             }
             catch (WrongValueExeption ex)
@@ -252,8 +267,6 @@ namespace WMS.Desktop.ViewModels
             foreach (var item in source)
                 target.Add(item);
         }
-
-
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

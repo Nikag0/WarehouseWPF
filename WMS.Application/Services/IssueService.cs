@@ -50,12 +50,13 @@ namespace WMS.Application.Services
 
         public async Task IssueAsync(
             IReadOnlyCollection<OperationDTO> items,
+            string operatorName,
             string? comment = null)
         {
             if (items.Count == 0)
                 throw new Exception("Список выдачи пуст");
 
-            var operation = Operation.Create(OperationType.Issue, comment);
+            var operation = Operation.Create(OperationType.Issue, operatorName, comment);
 
             foreach (var item in items)
             {

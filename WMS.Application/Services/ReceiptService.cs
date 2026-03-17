@@ -36,12 +36,12 @@ namespace WMS.Application.Services
                 0)).ToList();
         }
 
-        public async Task ReceiveAsync(OperationDTO item, string? comment = null)
+        public async Task ReceiveAsync(OperationDTO item, string operatorName, string? comment = null)
         {
             if (item == null)
                 return;
 
-            var operation = Operation.Create(OperationType.Receipt, item.OperatorName, comment);
+            var operation = Operation.Create(OperationType.Receipt, operatorName, comment);
 
             Component? component = await _componentRepo.GetByIdAsync(item.ComponentId);
 

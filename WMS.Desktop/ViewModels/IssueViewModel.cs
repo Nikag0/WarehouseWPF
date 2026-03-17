@@ -36,7 +36,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        public string OperatorName
+        public Operator OperatorName
         {
             get => _operatorName;
             set
@@ -60,7 +60,7 @@ namespace WMS.Desktop.ViewModels
         private readonly List<IssueStockDto> Stocks = new();
         private string _searchText;
         private string _commentText;
-        private string _operatorName;
+        private Operator _operatorName;
         private bool _isLoading;
         private bool _isIssue;
 
@@ -102,17 +102,22 @@ namespace WMS.Desktop.ViewModels
         {
             if (!IssueItems.Any()) return;
 
+            if (OperatorName == null)
+            {
+                _dialogService.ShowWarning("Оператор не указан");
+                return;
+            }
+
             try
             {
                 var issueOperation = IssueItems
                     .Select(item => new OperationDTO(
                         item.ComponentId,
                         item.CellId,
-                        item.IssueQuantity,
-                        OperatorName))
+                        item.IssueQuantity))
                     .ToList();
 
-                await _issueService.IssueAsync(issueOperation, CommentText);
+                await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
                 await RefreshAsync();
                 CommentText = string.Empty;
                 IsIssue = true;

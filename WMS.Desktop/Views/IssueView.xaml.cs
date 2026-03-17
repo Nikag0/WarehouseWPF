@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace WMS.Desktop.Views
             InitializeComponent();
             this.Loaded += StockItemDtoViewLoaded;
             this.Loaded += UsersViewLoaded;
+            
         }
         private async void StockItemDtoViewLoaded(object sender, RoutedEventArgs e)
         {
@@ -39,6 +41,27 @@ namespace WMS.Desktop.Views
         {
             if (DataContext is IssueViewModel viewModel)
                 await viewModel.LoadUsers();
+        }
+
+        private void VisibleRow2(object sender, RoutedEventArgs e)
+        {
+            Row1Grid.Visibility = Visibility.Collapsed;
+            Row2Grid.Visibility = Visibility.Visible;
+            Row3Grid.Visibility = Visibility.Collapsed;
+        }
+
+        private void VisibleRow3(object sender, RoutedEventArgs e)
+        {
+            Row1Grid.Visibility = Visibility.Collapsed;
+            Row2Grid.Visibility = Visibility.Collapsed;
+            Row3Grid.Visibility = Visibility.Visible;
+        }
+
+        private void VisibleRow1(object sender, MouseButtonEventArgs e)
+        {
+            Row1Grid.Visibility = Visibility.Visible;
+            Row2Grid.Visibility = Visibility.Collapsed;
+            Row3Grid.Visibility = Visibility.Collapsed;
         }
     }
 }

@@ -9,7 +9,8 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
              mc:Ignorable="d" 
-             d:DesignHeight="1080" d:DesignWidth="1920">
+             d:DesignHeight="1008"
+             d:DesignWidth="1920">
 
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>

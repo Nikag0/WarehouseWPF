@@ -24,8 +24,6 @@ public class Operation
         OccurredAt = DateTime.UtcNow;
         Operator = operatorName;
         Comment = comment;
-
-        
     }
 
     // Factory method
