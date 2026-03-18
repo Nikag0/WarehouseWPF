@@ -8,17 +8,20 @@ namespace WMS.Application.Services
         private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepo;
         private readonly ICellRepository _cellRepo;
+        private readonly IRackRepository _rackRepo;
         private readonly IOperationRepository _operationRepo;
 
         public ReceiptService(
             IComponentRepository componentRepo,
             IStockRepository stockRepo, 
             ICellRepository cellRepo,
+            IRackRepository rackRepo,
             IOperationRepository operationRepo)
         {
             _componentRepo = componentRepo;
             _stockRepo = stockRepo;
             _cellRepo = cellRepo;
+            _rackRepo = rackRepo;
             _operationRepo = operationRepo;
         }
 

@@ -12,8 +12,8 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    [Migration("20260316153726_addColumnToCell")]
-    partial class addColumnToCell
+    [Migration("20260318170715_NewDb")]
+    partial class NewDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,15 +37,12 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("Line")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Rack")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Row")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RackId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Row", "Rack", "Line", "Column")
+                    b.HasIndex("RackId", "Line", "Column")
                         .IsUnique();
 
                     b.ToTable("cells", (string)null);
@@ -142,6 +139,52 @@ namespace WMS.Infrastructure.Migrations
                     b.ToTable("operation_items", (string)null);
                 });
 
+            modelBuilder.Entity("WMS.Domain.Operator", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Patronymic")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Surname", "Name", "Patronymic")
+                        .IsUnique();
+
+                    b.ToTable("operators", (string)null);
+                });
+
+            modelBuilder.Entity("WMS.Domain.Rack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RackNum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Row")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Row", "RackNum")
+                        .IsUnique();
+
+                    b.ToTable("racks", (string)null);
+                });
+
             modelBuilder.Entity("WMS.Domain.Stock", b =>
                 {
                     b.Property<Guid>("Id")
@@ -167,30 +210,15 @@ namespace WMS.Infrastructure.Migrations
                     b.ToTable("stocks", (string)null);
                 });
 
-            modelBuilder.Entity("WMS.Domain.User", b =>
+            modelBuilder.Entity("WMS.Domain.Cell", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.HasOne("WMS.Domain.Rack", "Rack")
+                        .WithMany("Cells")
+                        .HasForeignKey("RackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Patronymic")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Surname", "Name", "Patronymic")
-                        .IsUnique();
-
-                    b.ToTable("users", (string)null);
+                    b.Navigation("Rack");
                 });
 
             modelBuilder.Entity("WMS.Domain.OperationItem", b =>
@@ -219,6 +247,11 @@ namespace WMS.Infrastructure.Migrations
             modelBuilder.Entity("WMS.Domain.Operation", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("WMS.Domain.Rack", b =>
+                {
+                    b.Navigation("Cells");
                 });
 #pragma warning restore 612, 618
         }

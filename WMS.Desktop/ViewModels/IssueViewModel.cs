@@ -17,6 +17,8 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<IssueStockDto> IssueItems { get; } = new();
         public ObservableCollection<IssueStockDto> FilteredStocks { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
+        public ObservableCollection<CellViewModel> Cells { get; } = new();
+        public ObservableCollection<RackViewModel> Racks { get; set; } = new();
         public string SearchText
         {
             get => _searchText;
@@ -54,37 +56,58 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
+        public int SelectedRow
+        {
+            get => _selectedRow;
+            set
+            {
+                _selectedRow = value;
+                OnPropertyChanged();
+            }
+        }
+        public int SelectedRack
+        {
+            get => _selectedRack;
+            set
+            {
+                _selectedRack = value;
+                OnPropertyChanged();
+            }
+        }
 
-
-        private IssueStockDto _selectedIssueItem;
         private readonly List<IssueStockDto> Stocks = new();
         private string _searchText;
         private string _commentText;
         private Operator _operatorName;
         private bool _isLoading;
         private bool _isIssue;
+        private int _selectedRow;
+        private int _selectedRack;
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
         public ICommand RemoveIssueItemCommand { get; }
         public ICommand ClearIssueItemsCommand { get; }
 
-        private readonly StockService _stockService;
         private readonly IssueService _issueService;
         private readonly DialogService _dialogService;
-        private readonly OperatorService _userService;
-
+        private readonly OperatorService _operatorService;
+        private readonly CellService _cellService;
+        private readonly RackService _rackService;
 
         public IssueViewModel(
-            StockService stockService, 
+            StockService stockService,
             IssueService issueService,
             DialogService dialogService,
-            OperatorService userService)
+            OperatorService operatorService,
+            CellService cellService,
+            RackService rackService)
         {
             _issueService = issueService;
-            _stockService = stockService;
             _dialogService = dialogService;
-            _userService = userService;
+            _operatorService = operatorService;
+            _cellService = cellService;
+            _rackService = rackService;
 
             IssueCommand = new RelayCommand(IssueAsync);
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
@@ -118,6 +141,7 @@ namespace WMS.Desktop.ViewModels
                     .ToList();
 
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
+
                 await RefreshAsync();
                 CommentText = string.Empty;
                 IsIssue = true;
@@ -165,14 +189,60 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task LoadUsers()
+        public async Task LoadOperators()
         {
             try
             {
                 Operators.Clear();
-                var items = await _userService.GetAllAsync();
+                var items = await _operatorService.GetAllAsync();
                 foreach (var item in items)
                     Operators.Add(item);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async Task LoadRacks()
+        {
+            try
+            {
+                Racks.Clear();
+                var items = await _rackService.GetAllAsync();
+                foreach (var item in items)
+                    Racks.Add(new RackViewModel(item));
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async Task LoadCells()
+        {
+            try
+            {
+                Cells.Clear();
+                var items = await _cellService.GetAllAsync();
+                foreach (var item in items)
+                    Cells.Add(new CellViewModel(item));
             }
             catch (OverallDomainException ex)
             {
@@ -219,6 +289,14 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Add(item);
+
+            var cell = Cells.First(c => c.Cell.Id == item.CellId);
+
+            var rackVm = Racks.First(r => r.Id == cell.Cell.RackId);
+
+            rackVm.IsHighlighted = true;
+
+            var a = Racks;
         }
 
         private void RemoveIssueItem (object obj)

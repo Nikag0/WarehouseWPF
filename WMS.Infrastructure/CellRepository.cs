@@ -23,7 +23,9 @@ namespace WMS.Infrastructure
         {
             using var db = _factory.CreateDbContext();
 
-            return await db.Cells.ToListAsync();
+            return await db.Cells
+                .Include(c => c.Rack)
+                .ToListAsync();
         }
     }
 }

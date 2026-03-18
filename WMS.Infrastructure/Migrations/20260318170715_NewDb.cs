@@ -12,21 +12,6 @@ namespace WMS.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "cells",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Row = table.Column<int>(type: "integer", nullable: false),
-                    Rack = table.Column<int>(type: "integer", nullable: false),
-                    Line = table.Column<int>(type: "integer", nullable: false),
-                    Column = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_cells", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "components",
                 columns: table => new
                 {
@@ -59,7 +44,7 @@ namespace WMS.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "users",
+                name: "operators",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -69,7 +54,62 @@ namespace WMS.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_users", x => x.Id);
+                    table.PrimaryKey("PK_operators", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "racks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Row = table.Column<int>(type: "integer", nullable: false),
+                    RackNum = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_racks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "operation_items",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuantityBefore = table.Column<int>(type: "integer", nullable: false),
+                    QuantityAfter = table.Column<int>(type: "integer", nullable: false),
+                    OperationId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_operation_items", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_operation_items_operations_OperationId",
+                        column: x => x.OperationId,
+                        principalTable: "operations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "cells",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RackId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Line = table.Column<int>(type: "integer", nullable: false),
+                    Column = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_cells", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_cells_racks_RackId",
+                        column: x => x.RackId,
+                        principalTable: "racks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -98,32 +138,10 @@ namespace WMS.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "operation_items",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuantityBefore = table.Column<int>(type: "integer", nullable: false),
-                    QuantityAfter = table.Column<int>(type: "integer", nullable: false),
-                    OperationId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_operation_items", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_operation_items_operations_OperationId",
-                        column: x => x.OperationId,
-                        principalTable: "operations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
-                name: "IX_cells_Row_Rack_Line",
+                name: "IX_cells_RackId_Line_Column",
                 table: "cells",
-                columns: new[] { "Row", "Rack", "Line" },
+                columns: new[] { "RackId", "Line", "Column" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -138,6 +156,18 @@ namespace WMS.Infrastructure.Migrations
                 column: "OperationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_operators_Surname_Name_Patronymic",
+                table: "operators",
+                columns: new[] { "Surname", "Name", "Patronymic" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_racks_Row_RackNum",
+                table: "racks",
+                columns: new[] { "Row", "RackNum" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_stocks_CellId",
                 table: "stocks",
                 column: "CellId");
@@ -146,12 +176,6 @@ namespace WMS.Infrastructure.Migrations
                 name: "IX_stocks_ComponentId_CellId",
                 table: "stocks",
                 columns: new[] { "ComponentId", "CellId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_users_Surname_Name_Patronymic",
-                table: "users",
-                columns: new[] { "Surname", "Name", "Patronymic" },
                 unique: true);
         }
 
@@ -162,10 +186,10 @@ namespace WMS.Infrastructure.Migrations
                 name: "operation_items");
 
             migrationBuilder.DropTable(
-                name: "stocks");
+                name: "operators");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "stocks");
 
             migrationBuilder.DropTable(
                 name: "operations");
@@ -175,6 +199,9 @@ namespace WMS.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "components");
+
+            migrationBuilder.DropTable(
+                name: "racks");
         }
     }
 }

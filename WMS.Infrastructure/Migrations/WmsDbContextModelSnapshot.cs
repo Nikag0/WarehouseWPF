@@ -34,15 +34,12 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("Line")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Rack")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Row")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RackId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Row", "Rack", "Line", "Column")
+                    b.HasIndex("RackId", "Line", "Column")
                         .IsUnique();
 
                     b.ToTable("cells", (string)null);
@@ -165,6 +162,26 @@ namespace WMS.Infrastructure.Migrations
                     b.ToTable("operators", (string)null);
                 });
 
+            modelBuilder.Entity("WMS.Domain.Rack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RackNum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Row")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Row", "RackNum")
+                        .IsUnique();
+
+                    b.ToTable("racks", (string)null);
+                });
+
             modelBuilder.Entity("WMS.Domain.Stock", b =>
                 {
                     b.Property<Guid>("Id")
@@ -188,6 +205,17 @@ namespace WMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("stocks", (string)null);
+                });
+
+            modelBuilder.Entity("WMS.Domain.Cell", b =>
+                {
+                    b.HasOne("WMS.Domain.Rack", "Rack")
+                        .WithMany("Cells")
+                        .HasForeignKey("RackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rack");
                 });
 
             modelBuilder.Entity("WMS.Domain.OperationItem", b =>
@@ -216,6 +244,11 @@ namespace WMS.Infrastructure.Migrations
             modelBuilder.Entity("WMS.Domain.Operation", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("WMS.Domain.Rack", b =>
+                {
+                    b.Navigation("Cells");
                 });
 #pragma warning restore 612, 618
         }

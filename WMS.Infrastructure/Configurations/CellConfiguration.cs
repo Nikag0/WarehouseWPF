@@ -17,12 +17,23 @@ namespace WMS.Infrastructure.Configurations
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Row).IsRequired();
-            builder.Property(x => x.Rack).IsRequired();
-            builder.Property(x => x.Line).IsRequired();
-            builder.Property(x => x.Column).IsRequired();
+            builder.Property(x => x.RackId)
+                .IsRequired();
 
-            builder.HasIndex(x => new { x.Row, x.Rack, x.Line, x.Column })
+            builder.Property(x => x.Line)
+                .IsRequired();
+
+            builder.Property(x => x.Column)
+                .IsRequired();
+
+            // Связь: один Rack -> много Cell
+            builder.HasOne(x => x.Rack)
+                .WithMany(r => r.Cells)
+                .HasForeignKey(x => x.RackId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Уникальность внутри одного Rack
+            builder.HasIndex(x => new { x.RackId, x.Line, x.Column })
                 .IsUnique();
         }
     }

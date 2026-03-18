@@ -7,22 +7,24 @@ using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 
-namespace WMS.Infrastructure.Migrations
+namespace WMS.Infrastructure
 {
-    public class UsersRepository : IOperatorRepository
+    public class RackRepository : IRackRepository
     {
         private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public UsersRepository(IDbContextFactory<WmsDbContext> factory)
+        public RackRepository(IDbContextFactory<WmsDbContext> factory)
         {
             _factory = factory;
         }
 
-        public async Task<List<Operator>> GetAllAsync()
+        public async Task<List<Rack>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
 
-            return await db.Operators.ToListAsync();
+            return await db.Racks
+                .Include(r => r.Cells)
+                .ToListAsync();
         }
     }
 }

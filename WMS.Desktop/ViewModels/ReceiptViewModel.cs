@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
@@ -16,6 +17,8 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<StockDto> Stocks { get; } = new();
         public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new();
         public ObservableCollection<Cell> FilteredFreeCells { get; } = new();
+        public ObservableCollection<Rack> Racks { get; } = new();
+        public ObservableCollection<RackViewModel> RacksView { get; set; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
         public ReceiptStockDto ItemToReceipt
         {
@@ -68,6 +71,15 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
+        public Rack SelectedRacks
+        {
+            get => _selectedRacks;
+            set
+            {
+                _selectedRacks = value;
+                OnPropertyChanged();
+            }
+        }
         public Operator OperatorName
         {
             get => _operatorName;
@@ -86,13 +98,15 @@ namespace WMS.Desktop.ViewModels
         private string _searchText;
         private string _searchFreeCell;
         private string _commentText;
+        private Rack _selectedRacks;
         private Operator _operatorName;
 
         private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
         private readonly CellService _cellService;
+        private readonly RackService _rackService;
         private readonly DialogService _dialogService;
-        private readonly OperatorService _userService;
+        private readonly OperatorService _operatorrService;
 
         public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
@@ -104,13 +118,15 @@ namespace WMS.Desktop.ViewModels
             ReceiptService receiptService,
             CellService cellService,
             DialogService dialogService,
-            OperatorService userService)
+            OperatorService operatorrService,
+            RackService rackService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
             _cellService = cellService;
+            _rackService = rackService;
             _dialogService = dialogService;
-            _userService = userService;
+            _operatorrService = operatorrService;
 
             RefreshCommand = new RelayCommand(RefreshAsync);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
@@ -189,9 +205,32 @@ namespace WMS.Desktop.ViewModels
             try
             {
                 Operators.Clear();
-                var items = await _userService.GetAllAsync();
+                var items = await _operatorrService.GetAllAsync();
                 foreach (var item in items)
                     Operators.Add(item);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public async Task LoadRacks()
+        {
+            try
+            {
+                Racks.Clear();
+                var items = await _rackService.GetAllAsync();
+                foreach (var item in items)
+                    Racks.Add(item);
             }
             catch (OverallDomainException ex)
             {
@@ -226,7 +265,9 @@ namespace WMS.Desktop.ViewModels
 
         private void ApplyCellFilter()
         {
-            var query = _freeCells.AsEnumerable();
+            if (SelectedRacks == null) return;
+
+            var query = SelectedRacks.Cells.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchFreeCell))
             {
@@ -234,6 +275,7 @@ namespace WMS.Desktop.ViewModels
 
                 query = query.Where(c =>
                         c.Code != null
+
                         && c.Code.ToLower().Contains(text));
             }
 

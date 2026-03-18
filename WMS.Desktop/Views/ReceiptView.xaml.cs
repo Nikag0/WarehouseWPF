@@ -33,6 +33,7 @@ namespace WMS.Desktop.Views
             {
                 await viewModel.RefreshAsync();
                 await viewModel.LoadOperators();
+                await viewModel.LoadRacks();
             }
         }
         private void RootGrid_MouseDown(object sender, MouseButtonEventArgs e)
