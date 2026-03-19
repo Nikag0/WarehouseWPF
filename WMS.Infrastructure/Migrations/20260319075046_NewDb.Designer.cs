@@ -12,7 +12,7 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    [Migration("20260318170715_NewDb")]
+    [Migration("20260319075046_NewDb")]
     partial class NewDb
     {
         /// <inheritdoc />

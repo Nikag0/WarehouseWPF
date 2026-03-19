@@ -11,6 +11,7 @@ namespace WMS.Desktop
     public class RackViewModel : INotifyPropertyChanged
     {
         public Guid Id { get; }
+
         private int _row;
         public int Row
         {

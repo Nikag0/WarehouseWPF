@@ -56,24 +56,19 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        public int SelectedRow
-        {
-            get => _selectedRow;
-            set
-            {
-                _selectedRow = value;
-                OnPropertyChanged();
-            }
-        }
-        public int SelectedRack
+        public RackViewModel SelectedRack
         {
             get => _selectedRack;
             set
             {
                 _selectedRack = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(VisibleCells));
             }
         }
+        public IEnumerable<CellViewModel> VisibleCells =>
+            Cells.Where(c => c.Cell.RackId == SelectedRack.Id);
+
 
         private readonly List<IssueStockDto> Stocks = new();
         private string _searchText;
@@ -81,8 +76,7 @@ namespace WMS.Desktop.ViewModels
         private Operator _operatorName;
         private bool _isLoading;
         private bool _isIssue;
-        private int _selectedRow;
-        private int _selectedRack;
+        private RackViewModel _selectedRack;
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
@@ -242,7 +236,7 @@ namespace WMS.Desktop.ViewModels
                 Cells.Clear();
                 var items = await _cellService.GetAllAsync();
                 foreach (var item in items)
-                    Cells.Add(new CellViewModel(item));
+                    Cells.Add(new CellViewModel(item, IssueItems));
             }
             catch (OverallDomainException ex)
             {
@@ -291,12 +285,10 @@ namespace WMS.Desktop.ViewModels
             IssueItems.Add(item);
 
             var cell = Cells.First(c => c.Cell.Id == item.CellId);
-
+            
             var rackVm = Racks.First(r => r.Id == cell.Cell.RackId);
 
             rackVm.IsHighlighted = true;
-
-            var a = Racks;
         }
 
         private void RemoveIssueItem (object obj)

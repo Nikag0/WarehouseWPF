@@ -48,9 +48,9 @@ namespace WMS.Desktop
 
             // view models
             services.AddTransient<MainViewModel>();
-            services.AddTransient<ReceiptViewModel>();
             services.AddTransient<ComponentsViewModel>();
-            services.AddTransient<IssueViewModel>();
+            services.AddSingleton<ReceiptViewModel>();
+            services.AddSingleton<IssueViewModel>();
 
             Services = services.BuildServiceProvider();
 

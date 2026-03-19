@@ -66,6 +66,8 @@ namespace WMS.Desktop.Views
         {
             if (sender is Border border && border.DataContext is RackViewModel rackVm)
             {
+                var vm = (IssueViewModel)DataContext;
+                vm.SelectedRack = rackVm;
                 int row = rackVm.Row;
                 int column = rackVm.RackNum;
 
