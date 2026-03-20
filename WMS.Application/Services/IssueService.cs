@@ -39,6 +39,7 @@ namespace WMS.Application.Services
                 .Join(cells, sc => sc.s.CellId, cell => cell.Id, (sc, cell) => new IssueStockDto(
                     sc.s.ComponentId,
                     sc.s.CellId,
+                    sc.s.RackId,
                     sc.c.Article,
                     sc.c.Name,
                     sc.c.Manufacturer,
@@ -61,7 +62,7 @@ namespace WMS.Application.Services
             foreach (var item in items)
             {
                 var stock = await _stockRepo
-                    .GetAsync(item.ComponentId, item.CellId);
+                    .GetAsync(item.RackId, item.ComponentId, item.CellId);
 
                 if (stock is null)
                     throw new Exception(
@@ -78,6 +79,7 @@ namespace WMS.Application.Services
 
                 operation.AddItem(
                     item.ComponentId,
+                    item.RackId,
                     item.CellId,
                     before,
                     stock.Quantity);

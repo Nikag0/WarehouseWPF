@@ -24,13 +24,6 @@ namespace WMS.Domain
             RackNum = rackNum;
         }
 
-        public Cell AddCell(int line, int column)
-        {
-            var cell = new Cell(Id, line, column);
-            _cells.Add(cell);
-            return cell;
-        }
-
-        public string Code => $"{Row}-{RackNum}";
+        public string RackCode => $"{Row}-{RackNum}";
     }
 }

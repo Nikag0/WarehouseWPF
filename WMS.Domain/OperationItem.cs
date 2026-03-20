@@ -8,6 +8,7 @@ public class OperationItem
 
     public Guid ComponentId { get; private set; }
     public Guid CellId { get; private set; }
+    public Guid RackId { get; private set; }
 
     public int QuantityBefore { get; private set; }
     public int QuantityAfter { get; private set; }
@@ -17,6 +18,7 @@ public class OperationItem
 
     internal OperationItem(
         Guid componentId,
+        Guid rackId,
         Guid cellId,
         int quantityBefore,
         int quantityAfter)
@@ -25,6 +27,9 @@ public class OperationItem
             throw new OverallDomainException("ComponentId не задан");
 
         if (cellId == Guid.Empty)
+            throw new OverallDomainException("RackId не задан");
+        
+        if (cellId == Guid.Empty)
             throw new OverallDomainException("CellId не задан");
 
         if (quantityBefore < 0 || quantityAfter < 0)
@@ -32,6 +37,7 @@ public class OperationItem
 
         Id = Guid.NewGuid();
         ComponentId = componentId;
+        RackId = rackId;
         CellId = cellId;
         QuantityBefore = quantityBefore;
         QuantityAfter = quantityAfter;

@@ -10,7 +10,7 @@ namespace WMS.Application.Abstractions
     public interface IStockRepository
     {
         Task<IReadOnlyList<Stock>> GetAllAsync();
-        Task<Stock?> GetAsync(Guid componentId, Guid cellId);
+        Task<Stock?> GetAsync(Guid rackId, Guid componentId, Guid cellId);
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
         Task RemoveAsync(Stock stock);

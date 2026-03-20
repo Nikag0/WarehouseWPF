@@ -21,6 +21,9 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.ComponentId)
                 .IsRequired();
 
+            builder.Property(x => x.RackId)
+                .IsRequired();
+
             builder.Property(x => x.CellId)
                 .IsRequired();
 

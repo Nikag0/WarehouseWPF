@@ -67,7 +67,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
         public IEnumerable<CellViewModel> VisibleCells =>
-            Cells.Where(c => c.Cell.RackId == SelectedRack.Id);
+            Cells.Where(c => c.RackId == SelectedRack.Id);
 
 
         private readonly List<IssueStockDto> Stocks = new();
@@ -107,12 +107,6 @@ namespace WMS.Desktop.ViewModels
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
             ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
-
-            // Привязка для срабатывания конвертора RackHighlightConverter.
-            IssueItems.CollectionChanged += (s, e) =>
-            {
-                OnPropertyChanged(nameof(IssueItems));
-            };
         }
 
         public async Task IssueAsync()
@@ -130,6 +124,7 @@ namespace WMS.Desktop.ViewModels
                 var issueOperation = IssueItems
                     .Select(item => new OperationDTO(
                         item.ComponentId,
+                        item.RackId,
                         item.CellId,
                         item.IssueQuantity))
                     .ToList();
@@ -213,7 +208,7 @@ namespace WMS.Desktop.ViewModels
                 Racks.Clear();
                 var items = await _rackService.GetAllAsync();
                 foreach (var item in items)
-                    Racks.Add(new RackViewModel(item));
+                    Racks.Add(new RackViewModel(item, IssueItems));
             }
             catch (OverallDomainException ex)
             {
@@ -284,11 +279,10 @@ namespace WMS.Desktop.ViewModels
 
             IssueItems.Add(item);
 
-            var cell = Cells.First(c => c.Cell.Id == item.CellId);
+            var cell = Cells.First(c => c.Id == item.CellId);
             
-            var rackVm = Racks.First(r => r.Id == cell.Cell.RackId);
+            var rackVm = Racks.First(r => r.Id == cell.RackId);
 
-            rackVm.IsHighlighted = true;
         }
 
         private void RemoveIssueItem (object obj)

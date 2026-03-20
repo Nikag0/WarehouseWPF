@@ -33,7 +33,7 @@ namespace WMS.Application.Services
             foreach (var item in items)
             {
                 var stock = await _stockRepo
-                    .GetAsync(item.ComponentId, item.CellId);
+                    .GetAsync(item.RackId, item.ComponentId, item.CellId);
 
                 int before;
 
@@ -42,6 +42,7 @@ namespace WMS.Application.Services
                     stock = Stock.Create(
                         item.ComponentId,
                         item.CellId,
+                        item.RackId,
                         item.Quantity);
 
                     before = 0;
@@ -56,6 +57,7 @@ namespace WMS.Application.Services
 
                 operation.AddItem(
                     item.ComponentId,
+                    item.RackId,
                     item.CellId,
                     before,
                     stock.Quantity);

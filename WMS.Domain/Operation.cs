@@ -39,6 +39,7 @@ public class Operation
 
     public void AddItem(
         Guid componentId,
+        Guid rackId,
         Guid cellId,
         int quantityBefore,
         int quantityAfter)
@@ -52,6 +53,7 @@ public class Operation
 
         _items.Add(new OperationItem(
             componentId,
+            rackId,
             cellId,
             quantityBefore,
             quantityAfter));

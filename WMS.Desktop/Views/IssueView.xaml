@@ -15,7 +15,6 @@
 
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-        <converters:RackHighlightConverter x:Key="RackHighlightConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -422,8 +421,8 @@
 
                             <ItemsControl.ItemContainerStyle>
                                 <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Cell.Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Cell.Column}"/>
+                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
+                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 
@@ -510,8 +509,8 @@
 
                             <ItemsControl.ItemContainerStyle>
                                 <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Cell.Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Cell.Column}"/>
+                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
+                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 
@@ -595,8 +594,8 @@
 
                             <ItemsControl.ItemContainerStyle>
                                 <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Cell.Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Cell.Column}"/>
+                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
+                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 

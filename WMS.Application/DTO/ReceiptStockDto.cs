@@ -1,5 +1,6 @@
 ﻿public record ReceiptStockDto(
         Guid ComponentId,
+        Guid RackId,
         Guid CellId,
 
         string Article,

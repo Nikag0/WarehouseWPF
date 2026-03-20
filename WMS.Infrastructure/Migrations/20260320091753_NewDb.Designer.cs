@@ -12,7 +12,7 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    [Migration("20260319075046_NewDb")]
+    [Migration("20260320091753_NewDb")]
     partial class NewDb
     {
         /// <inheritdoc />
@@ -132,6 +132,9 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("QuantityBefore")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("RackId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OperationId");
@@ -200,11 +203,16 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("RackId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CellId");
 
-                    b.HasIndex("ComponentId", "CellId")
+                    b.HasIndex("RackId");
+
+                    b.HasIndex("ComponentId", "RackId", "CellId")
                         .IsUnique();
 
                     b.ToTable("stocks", (string)null);
@@ -240,6 +248,12 @@ namespace WMS.Infrastructure.Migrations
                     b.HasOne("WMS.Domain.Component", null)
                         .WithMany()
                         .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WMS.Domain.Rack", null)
+                        .WithMany()
+                        .HasForeignKey("RackId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

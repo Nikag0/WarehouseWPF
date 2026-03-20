@@ -12,7 +12,8 @@ namespace WMS.Desktop
 {
     public class CellViewModel : INotifyPropertyChanged
     {
-        private int _row;
+        public Guid Id { get; }
+        public Guid RackId { get; }
         public int Row
         {
             get
@@ -32,8 +33,6 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(Row));
             }
         }
-
-        private int _rackNum;
         public int RackNum
         {
             get => _rackNum;
@@ -43,8 +42,6 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(RackNum));
             }
         }
-
-        private int _line;
         public int Line
         {
             get
@@ -57,8 +54,6 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(Line));
             }
         }
-
-        private int _column;
         public int Column
         {
             get => _column;
@@ -68,27 +63,29 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(Column));
             }
         }
-
-        public Cell Cell { get; }
-
-        private readonly ObservableCollection<IssueStockDto> _issueItems;
         public bool IsHighlighted =>
-            _issueItems.Any(i => i.CellId == Cell.Id);
+            _issueItems.Any(i => i.CellId == Id);
+
+        private int _row;
+        private int _rackNum;
+        private int _line;
+        private int _column;
+        private readonly ObservableCollection<IssueStockDto> _issueItems;
 
         public CellViewModel(Cell cell, ObservableCollection<IssueStockDto> issueItems)
         {
-            Cell = cell;
-            _issueItems = issueItems;
-
-            _issueItems.CollectionChanged += (_, __) =>
-            {
-                OnPropertyChanged(nameof(IsHighlighted));
-            };
-
+            Id = cell.Id;
+            RackId = cell.Rack.Id;
             Row = cell.Rack.Row;
             RackNum = cell.Rack.RackNum;
             Line = cell.Line;
             Column = cell.Column;
+
+            _issueItems = issueItems;
+            _issueItems.CollectionChanged += (_, __) =>
+            {
+                OnPropertyChanged(nameof(IsHighlighted));
+            };
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

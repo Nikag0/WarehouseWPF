@@ -77,6 +77,7 @@ namespace WMS.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
                     CellId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RackId = table.Column<Guid>(type: "uuid", nullable: false),
                     QuantityBefore = table.Column<int>(type: "integer", nullable: false),
                     QuantityAfter = table.Column<int>(type: "integer", nullable: false),
                     OperationId = table.Column<Guid>(type: "uuid", nullable: true)
@@ -119,6 +120,7 @@ namespace WMS.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
                     CellId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RackId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -134,6 +136,12 @@ namespace WMS.Infrastructure.Migrations
                         name: "FK_stocks_components_ComponentId",
                         column: x => x.ComponentId,
                         principalTable: "components",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_stocks_racks_RackId",
+                        column: x => x.RackId,
+                        principalTable: "racks",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -173,10 +181,15 @@ namespace WMS.Infrastructure.Migrations
                 column: "CellId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_stocks_ComponentId_CellId",
+                name: "IX_stocks_ComponentId_RackId_CellId",
                 table: "stocks",
-                columns: new[] { "ComponentId", "CellId" },
+                columns: new[] { "ComponentId", "RackId", "CellId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_stocks_RackId",
+                table: "stocks",
+                column: "RackId");
         }
 
         /// <inheritdoc />

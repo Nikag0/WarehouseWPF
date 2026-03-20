@@ -45,9 +45,9 @@ namespace WMS.Application.Services
             await _stockRepo.RemoveAsync(stock);
         }
 
-        public async Task<Stock?> GetAsync(Guid componentId, Guid cellId)
+        public async Task<Stock?> GetAsync(Guid  rackId, Guid componentId, Guid cellId)
         {
-            return await _stockRepo.GetAsync(componentId, cellId);
+            return await _stockRepo.GetAsync(rackId, componentId, cellId);
         }
 
         public async Task AddAsync(Stock stock)

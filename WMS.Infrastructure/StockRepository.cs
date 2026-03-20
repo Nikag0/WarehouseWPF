@@ -27,7 +27,7 @@ namespace WMS.Infrastructure
             return await db.Stocks.ToListAsync();
         }
 
-        public async Task<Stock?> GetAsync(Guid componentId, Guid cellId)
+        public async Task<Stock?> GetAsync(Guid rackId ,Guid componentId, Guid cellId)
         {
             using var db = _factory.CreateDbContext();
 
@@ -35,6 +35,7 @@ namespace WMS.Infrastructure
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x =>
                     x.ComponentId == componentId &&
+                    x.RackId == rackId &&
                     x.CellId == cellId);
         }
 

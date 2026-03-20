@@ -148,6 +148,7 @@ namespace WMS.Desktop.ViewModels
             {
                 var receiptDto = new OperationDTO(
                     ItemToReceipt.ComponentId,
+                    SelectedRacks.Id,
                     CellId,
                     ItemToReceipt.Quantity);
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);

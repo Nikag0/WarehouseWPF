@@ -16,13 +16,15 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.ComponentId)
                 .IsRequired();
 
+            builder.Property(x => x.RackId)
+                .IsRequired(); 
             builder.Property(x => x.CellId)
                 .IsRequired();
 
             builder.Property(x => x.Quantity)
                 .IsRequired();
 
-            builder.HasIndex(x => new { x.ComponentId, x.CellId })
+            builder.HasIndex(x => new { x.ComponentId, x.RackId, x.CellId })
                 .IsUnique();
 
             builder
@@ -32,10 +34,17 @@ namespace WMS.Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder
+               .HasOne<Rack>()
+               .WithMany()
+               .HasForeignKey(x => x.RackId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            builder
                 .HasOne<Cell>()
                 .WithMany()
                 .HasForeignKey(x => x.CellId)
                 .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

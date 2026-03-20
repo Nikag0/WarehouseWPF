@@ -32,6 +32,7 @@ namespace WMS.Application.Services
             return components.Select(c => new ReceiptStockDto(
                 c.Id,
                 Guid.Empty,
+                Guid.Empty,
                 c.Article,
                 c.Name,
                 c.Manufacturer,
@@ -51,13 +52,13 @@ namespace WMS.Application.Services
             if (component is null)
                     throw new Exception($"Компонент {item.ComponentId} не найден");
 
-            Stock? stock = await _stockRepo.GetAsync(item.ComponentId, item.CellId);
+            Stock? stock = await _stockRepo.GetAsync(item.RackId, item.ComponentId, item.CellId);
 
             int before;
 
             if (stock is null)
             {
-                stock = Stock.Create(item.ComponentId, item.CellId, 0);
+                stock = Stock.Create(item.ComponentId, item.RackId ,item.CellId, 0);
                 before = 0;
                 stock.Receive(item.Quantity);
                 await _stockRepo.AddAsync(stock);
@@ -71,6 +72,7 @@ namespace WMS.Application.Services
 
             operation.AddItem(
                     item.ComponentId,
+                    item.RackId,
                     item.CellId,
                     before,
                     stock.Quantity);

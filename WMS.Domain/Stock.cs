@@ -6,6 +6,7 @@ public class Stock
     public Guid Id { get; private set; }
 
     public Guid ComponentId { get; private set; }
+    public Guid RackId { get; private set; }
     public Guid CellId { get; private set; }
 
     public int Quantity { get; private set; }
@@ -13,10 +14,11 @@ public class Stock
     // Для EF Core
     private Stock() { }
 
-    private Stock(Guid id, Guid componentId, Guid cellId, int quantity)
+    private Stock(Guid id, Guid componentId, Guid rackId, Guid cellId, int quantity)
     {
         Id = id;
         ComponentId = componentId;
+        RackId = rackId;
         CellId = cellId;
         SetInitialQuantity(quantity);
     }
@@ -24,18 +26,24 @@ public class Stock
     // Factory method
     public static Stock Create(
         Guid componentId,
+        Guid rackId,
         Guid cellId,
         int initialQuantity)
     {
         if (componentId == Guid.Empty)
             throw new OverallDomainException("ComponentId не задан");
 
+        if (rackId == Guid.Empty)
+            throw new OverallDomainException("RackId не задан");
+
         if (cellId == Guid.Empty)
             throw new OverallDomainException("CellId не задан");
+        
 
         return new Stock(
             Guid.NewGuid(),
             componentId,
+            rackId,
             cellId,
             initialQuantity);
     }

@@ -18,10 +18,11 @@ namespace WMS.Domain
 
         private Cell() { }
 
-        internal Cell(Guid rackId, int line, int column)
+        internal Cell(Rack rack, Guid rackId, int line, int column)
         {
             Id = Guid.NewGuid();
             RackId = rackId;
+            Rack = rack;
             Line = line;
             Column = column;
         }

@@ -206,7 +206,7 @@
 
                     <ComboBox Grid.Column="1" 
                               ItemsSource="{Binding Racks}"
-                              DisplayMemberPath="Code"
+                              DisplayMemberPath="RackCode"
                               SelectedItem="{Binding SelectedRacks}"
                               Foreground="Black" 
                               Margin="10"
@@ -255,15 +255,15 @@
                                                 <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
                                                 <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать ячейку"
-                                               Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                               CommandParameter="{Binding}">
+                                                    Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                    CommandParameter="{Binding}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                               Path=IsMouseOver}" 
-                                                               Value="True">
+                                                                    Path=IsMouseOver}" 
+                                                                    Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
