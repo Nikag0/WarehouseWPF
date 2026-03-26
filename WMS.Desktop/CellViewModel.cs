@@ -63,6 +63,7 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(Column));
             }
         }
+        public int ColumnSpan => Line == 1 ? 4 : 1;
         public bool IsHighlighted =>
             _issueItems.Any(i => i.CellId == Id);
 
@@ -71,6 +72,7 @@ namespace WMS.Desktop
         private int _line;
         private int _column;
         private readonly ObservableCollection<IssueStockDto> _issueItems;
+        private readonly ObservableCollection<StockDto> _receiptItems;
 
         public CellViewModel(Cell cell, ObservableCollection<IssueStockDto> issueItems)
         {
@@ -83,6 +85,22 @@ namespace WMS.Desktop
 
             _issueItems = issueItems;
             _issueItems.CollectionChanged += (_, __) =>
+            {
+                OnPropertyChanged(nameof(IsHighlighted));
+            };
+        }
+
+        public CellViewModel(Cell cell, ObservableCollection<StockDto> receiptItems)
+        {
+            Id = cell.Id;
+            RackId = cell.Rack.Id;
+            Row = cell.Rack.Row;
+            RackNum = cell.Rack.RackNum;
+            Line = cell.Line;
+            Column = cell.Column;
+
+            _receiptItems = receiptItems;
+            _receiptItems.CollectionChanged += (_, __) =>
             {
                 OnPropertyChanged(nameof(IsHighlighted));
             };

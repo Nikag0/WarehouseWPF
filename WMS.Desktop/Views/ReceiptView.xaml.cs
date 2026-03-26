@@ -41,5 +41,35 @@ namespace WMS.Desktop.Views
             // Убираем фокус с любого TextBox
             Keyboard.ClearFocus();
         }
+
+        private void RackBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is RackViewModel rackVm)
+            {
+                var vm = (ReceiptViewModel)DataContext;
+                vm.SelectedRackView = rackVm;
+                int row = rackVm.Row;
+                int column = rackVm.RackNum;
+
+                if (row != 5 && column == 2)
+                {
+                    Row1Grid.Visibility = Visibility.Visible;
+                    Row2Grid.Visibility = Visibility.Collapsed;
+                    Row3Grid.Visibility = Visibility.Collapsed;
+                }
+                else if (row != 5 && (column == 1 || column == 3 || column == 4))
+                {
+                    Row1Grid.Visibility = Visibility.Collapsed;
+                    Row2Grid.Visibility = Visibility.Visible;
+                    Row3Grid.Visibility = Visibility.Collapsed;
+                }
+                else if (row == 5)
+                {
+                    Row1Grid.Visibility = Visibility.Collapsed;
+                    Row2Grid.Visibility = Visibility.Collapsed;
+                    Row3Grid.Visibility = Visibility.Visible;
+                }
+            }
+        }
     }
 }

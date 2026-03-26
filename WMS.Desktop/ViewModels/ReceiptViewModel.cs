@@ -17,8 +17,6 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<StockDto> Stocks { get; } = new();
         public ObservableCollection<ReceiptStockDto> FilteredComponents { get; } = new();
         public ObservableCollection<Cell> FilteredFreeCells { get; } = new();
-        public ObservableCollection<Rack> Racks { get; } = new();
-        public ObservableCollection<RackViewModel> RacksView { get; set; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
         public ReceiptStockDto ItemToReceipt
         {
@@ -71,12 +69,21 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        public Rack SelectedRacks
+        public Rack SelectedRack
         {
             get => _selectedRacks;
             set
             {
                 _selectedRacks = value;
+                OnPropertyChanged();
+            }
+        }
+        public RackViewModel SelectedRackView
+        {
+            get => _selectedRackView;
+            set
+            {
+                _selectedRackView = value;
                 OnPropertyChanged();
             }
         }
@@ -89,6 +96,16 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
+        public ObservableCollection<CellViewModel> Cells { get; } = new();
+        public ObservableCollection<Rack> Racks { get; } = new();
+        public ObservableCollection<RackViewModel> RacksView { get; set; } = new();
+
+        public IEnumerable<CellViewModel> VisibleCells =>
+                Cells.Where(c => c.RackId == SelectedRack.Id);
+        public IEnumerable<RackViewModel> NormalRacks =>
+                RacksView.Where(r => r.Row != 5);
+        public IEnumerable<RackViewModel> SpecialRacks =>
+                RacksView.Where(r => r.Row == 5);
 
         private readonly List<ReceiptStockDto> _allComponents = new();
         private readonly List<Cell> _freeCells = new();
@@ -99,6 +116,7 @@ namespace WMS.Desktop.ViewModels
         private string _searchFreeCell;
         private string _commentText;
         private Rack _selectedRacks;
+        private RackViewModel _selectedRackView;
         private Operator _operatorName;
 
         private readonly StockService _stockService;
@@ -112,6 +130,7 @@ namespace WMS.Desktop.ViewModels
         public ICommand ReceiveCommand { get; }
         public ICommand AddSelectedComponentCommand { get; }
         public ICommand AddSelectedCellCommand { get; }
+        public ICommand AddToReceiptCommand { get; }
 
         public ReceiptViewModel(
             StockService stockService,
@@ -132,6 +151,13 @@ namespace WMS.Desktop.ViewModels
             ReceiveCommand = new RelayCommand(ReceiveAsync);
             AddSelectedComponentCommand = new RelayCommand(AddSelectedStock);
             AddSelectedCellCommand = new RelayCommand(AddSelectedCell);
+            AddToReceiptCommand = new RelayCommand(AddToReceipt);
+
+            RacksView.CollectionChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(NormalRacks));
+                OnPropertyChanged(nameof(SpecialRacks));
+            };
         }
 
         public async Task ReceiveAsync()
@@ -148,11 +174,12 @@ namespace WMS.Desktop.ViewModels
             {
                 var receiptDto = new OperationDTO(
                     ItemToReceipt.ComponentId,
-                    SelectedRacks.Id,
+                    SelectedRack.Id,
                     CellId,
                     ItemToReceipt.Quantity);
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
                 await RefreshAsync();
+                SearchFreeCell = string.Empty;
             }
             catch (WrongValueExeption ex)
             {
@@ -228,10 +255,13 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                Racks.Clear();
+                RacksView.Clear();
                 var items = await _rackService.GetAllAsync();
                 foreach (var item in items)
+                {
+                    RacksView.Add(new RackViewModel(item, Stocks));
                     Racks.Add(item);
+                }
             }
             catch (OverallDomainException ex)
             {
@@ -245,6 +275,43 @@ namespace WMS.Desktop.ViewModels
             {
                 _isLoading = false;
             }
+        }
+
+        public async Task LoadCells()
+        {
+            try
+            {
+                Cells.Clear();
+                var items = await _cellService.GetAllAsync();
+                foreach (var item in items)
+                    Cells.Add(new CellViewModel(item, Stocks));
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        public void AddToReceipt(/*ReceiptStockDto selectedStock*/)
+        {
+            //if (selectedStock == null) return;
+
+            //ItemToReceipt.ComponentId = selectedStock.ComponentId; 
+            //ItemToReceipt.RackId = selectedStock.RackId; 
+            //ItemToReceipt.CellId = selectedStock.CellId; 
+            //ItemToReceipt.Article = selectedStock.Article; 
+            //ItemToReceipt.ComponentName = selectedStock.ComponentName; 
+            //ItemToReceipt.Manufacturer = selectedStock.Manufacturer; 
+            //ItemToReceipt.CellCode = selectedStock.CellCode;
+            //ItemToReceipt.Quantity = selectedStock.Quantit; 
         }
 
         private void ApplyFilter()
@@ -266,9 +333,9 @@ namespace WMS.Desktop.ViewModels
 
         private void ApplyCellFilter()
         {
-            if (SelectedRacks == null) return;
+            if (SelectedRack == null) return;
 
-            var query = SelectedRacks.Cells.AsEnumerable();
+            var query = SelectedRack.Cells.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchFreeCell))
             {

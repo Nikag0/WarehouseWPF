@@ -42,26 +42,6 @@ namespace WMS.Desktop.Views
             }
         }
 
-        private void VisibleRow1(object sender, MouseButtonEventArgs e)
-        {
-            Row1Grid.Visibility = Visibility.Visible;
-            Row2Grid.Visibility = Visibility.Collapsed;
-            Row3Grid.Visibility = Visibility.Collapsed;
-        }
-        private void VisibleRow2(object sender, MouseButtonEventArgs e)
-        {
-            Row1Grid.Visibility = Visibility.Collapsed;
-            Row2Grid.Visibility = Visibility.Visible;
-            Row3Grid.Visibility = Visibility.Collapsed;
-        }
-
-        private void VisibleRow3(object sender, MouseButtonEventArgs e)
-        {
-            Row1Grid.Visibility = Visibility.Collapsed;
-            Row2Grid.Visibility = Visibility.Collapsed;
-            Row3Grid.Visibility = Visibility.Visible;
-        }
-
         private void RackBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Border border && border.DataContext is RackViewModel rackVm)

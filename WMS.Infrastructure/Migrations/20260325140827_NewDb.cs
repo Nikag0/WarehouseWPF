@@ -119,8 +119,8 @@ namespace WMS.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
                     RackId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

@@ -33,6 +33,9 @@ namespace WMS.Application.Services
             return stocks
                 .Join(components, s => s.ComponentId, c => c.Id, (s, c) => new { s, c })
                 .Join(cells, sc => sc.s.CellId, cell => cell.Id, (sc, cell) => new StockDto(
+                    sc.s.ComponentId,
+                    sc.s.CellId,
+                    sc.s.RackId,
                     sc.c.Article,
                     sc.c.Name,
                     sc.c.Manufacturer,

@@ -19,6 +19,7 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<Operator> Operators { get; } = new();
         public ObservableCollection<CellViewModel> Cells { get; } = new();
         public ObservableCollection<RackViewModel> Racks { get; set; } = new();
+    
         public string SearchText
         {
             get => _searchText;
@@ -68,6 +69,10 @@ namespace WMS.Desktop.ViewModels
         }
         public IEnumerable<CellViewModel> VisibleCells =>
             Cells.Where(c => c.RackId == SelectedRack.Id);
+        public IEnumerable<RackViewModel> NormalRacks =>
+            Racks.Where(r => r.Row != 5);
+        public IEnumerable<RackViewModel> SpecialRacks =>
+            Racks.Where(r => r.Row == 5);
 
 
         private readonly List<IssueStockDto> Stocks = new();
@@ -107,6 +112,12 @@ namespace WMS.Desktop.ViewModels
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
             ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
+
+            Racks.CollectionChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(NormalRacks));
+                OnPropertyChanged(nameof(SpecialRacks));
+            };
         }
 
         public async Task IssueAsync()

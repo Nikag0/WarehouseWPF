@@ -172,6 +172,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -280,10 +281,18 @@
                     Height="auto"
                     Stretch="Fill"/>
 
-                <Grid Width="auto" 
-                      Height="auto">
+                <Grid>
 
-                    <ItemsControl ItemsSource="{Binding Racks}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="55*"/>
+                        <RowDefinition Height="5*"/>
+                        <RowDefinition Height="38*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0"
+                          Grid.RowSpan="3">
+                        
+                        <ItemsControl ItemsSource="{Binding NormalRacks}">
 
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -331,7 +340,7 @@
                                             <Setter Property="Background" Value="Transparent"/>
 
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
                                                     <Setter Property="Background" Value="Red"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -342,6 +351,57 @@
                         </ItemsControl.ItemTemplate>
 
                     </ItemsControl>
+                        
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+
+                        <ItemsControl ItemsSource="{Binding SpecialRacks}">
+
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="8.6*"/>
+                                            <ColumnDefinition Width="16.6*"/>
+                                            <ColumnDefinition Width="16.6*"/>
+                                            <ColumnDefinition Width="16.6*"/>
+                                            <ColumnDefinition Width="16.6*"/>
+                                            <ColumnDefinition Width="28*"/>
+                                        </Grid.ColumnDefinitions>
+                                    </Grid>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="Gray"
+                                BorderThickness="1"
+                                MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="Transparent"/>
+
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
+                                                        <Setter Property="Background" Value="Red"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+
+                        </ItemsControl>
+                    </Grid>
 
                     <!--<Grid Grid.Row="2" 
                           Grid.Column="5"
@@ -423,6 +483,7 @@
                                 <Style>
                                     <Setter Property="Grid.Row" Value="{Binding Line}"/>
                                     <Setter Property="Grid.Column" Value="{Binding Column}"/>
+                                    <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 
@@ -437,7 +498,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
                                                         <Setter Property="Background" Value="Red"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -511,6 +572,7 @@
                                 <Style>
                                     <Setter Property="Grid.Row" Value="{Binding Line}"/>
                                     <Setter Property="Grid.Column" Value="{Binding Column}"/>
+                                    <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
                                 </Style>
                             </ItemsControl.ItemContainerStyle>
 
@@ -525,7 +587,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
                                                         <Setter Property="Background" Value="Red"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -610,7 +672,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
                                                         <Setter Property="Background" Value="Red"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

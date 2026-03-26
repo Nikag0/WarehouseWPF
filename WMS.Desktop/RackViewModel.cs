@@ -40,12 +40,15 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(RackNum));
             }
         }
-        public bool IsHighlighted =>
+        public bool IsHighlightedIssue =>
            _issueItems.Any(i => i.RackId == Id);
+        public bool IsHighlightedReceipt =>
+         _receiptItems.Any(i => i.RackId == Id);
 
         private int _row;
         private int _rackNum;
         private readonly ObservableCollection<IssueStockDto> _issueItems;
+        private readonly ObservableCollection<StockDto> _receiptItems;
 
         public RackViewModel(Rack rack, ObservableCollection<IssueStockDto> issueItems)
         {
@@ -56,7 +59,20 @@ namespace WMS.Desktop
             _issueItems = issueItems;
             _issueItems.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlighted));
+                OnPropertyChanged(nameof(IsHighlightedIssue));
+            };
+        }
+
+        public RackViewModel(Rack rack, ObservableCollection<StockDto> receiptItems)
+        {
+            Id = rack.Id;
+            Row = rack.Row;
+            RackNum = rack.RackNum;
+
+            _receiptItems = receiptItems;
+            _receiptItems.CollectionChanged += (_, __) =>
+            {
+                OnPropertyChanged(nameof(IsHighlightedReceipt));
             };
         }
 
