@@ -420,12 +420,12 @@
 
                     <TextBox Grid.Row="2"
                              Grid.Column="1" 
-                             Text="{Binding CommentText}" 
-                             Margin="5"
-                             FontSize="15"
-                             IsReadOnly="True" 
-                             VerticalContentAlignment="Center"
-                             TextAlignment="Center"/>
+                             Text="{Binding CommentText}"
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Style="{StaticResource TextBoxStyle}"
+                             Margin="5"/>
 
                 </Grid>
 
