@@ -12,8 +12,8 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    [Migration("20260325140827_NewDb")]
-    partial class NewDb
+    [Migration("20260413070240_Refresh1")]
+    partial class Refresh1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

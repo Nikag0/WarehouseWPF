@@ -180,13 +180,6 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            if (ReceiptItem.RackCode != SearchRacks || ReceiptItem.CellCode != SearchFreeCell)
-            {
-                _dialogService.ShowWarning("Название стеллажа или ячейки в поиске не совпадает с выбранным значением. \n" +
-                    "Выберите стеллаж или ячейку из выпадающего списка.");
-                return;
-            }
-
             if (OperatorName == null)
             {
                 _dialogService.ShowWarning("Оператор не указан.");
@@ -345,11 +338,13 @@ namespace WMS.Desktop.ViewModels
 
             if (rack != null)
             {
-                ReceiptItem.RackCode = rack.RackCode;
                 ReceiptItem.RackId = rack.Id;
             }
+            else
+            {
+                ReceiptItem.RackId = Guid.Empty;
+            }
         }
-
 
         private void FilterFreeCells()
         {
@@ -380,8 +375,11 @@ namespace WMS.Desktop.ViewModels
 
             if (cell != null && ReceiptItem.RackId == cell.RackId)
             {
-                ReceiptItem.CellCode = cell.CellCode;
                 ReceiptItem.CellId = cell.Id;
+            }
+            else
+            {
+                ReceiptItem.CellId = Guid.Empty;
             }
         }
 
@@ -391,17 +389,12 @@ namespace WMS.Desktop.ViewModels
             {
                 if (obj is ComponentDTO component)
                 {
-
                     ReceiptItem.ComponentId = component.Id;
                     ReceiptItem.Article = component.Article;
                     ReceiptItem.ComponentName = component.Name;
                     ReceiptItem.Manufacturer = component.Manufacturer;
                     ReceiptItem.RackId = Guid.Empty;
-                    ReceiptItem.RackCode = string.Empty;
                     ReceiptItem.CellId = Guid.Empty;
-                    ReceiptItem.CellCode = string.Empty;
-
-
                 }
 
                 if (obj is StockViewDto stock)
@@ -411,10 +404,8 @@ namespace WMS.Desktop.ViewModels
                     ReceiptItem.ComponentName = stock.ComponentName;
                     ReceiptItem.Manufacturer = stock.Manufacturer;
                     ReceiptItem.RackId = stock.RackId;
-                    ReceiptItem.RackCode = stock.RackCode;
                     SearchRacks = stock.RackCode;
                     ReceiptItem.CellId = stock.CellId;
-                    ReceiptItem.CellCode = stock.CellCode;
                     SearchFreeCell = stock.CellCode;
                 }
 
@@ -437,7 +428,6 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             ReceiptItem.RackId = rack.Id;
-            ReceiptItem.RackCode = rack.RackCode;
             SearchRacks = rack.RackCode;
         }
 
@@ -447,7 +437,6 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             ReceiptItem.CellId = cell.Id;
-            ReceiptItem.CellCode = cell.CellCode;
             SearchFreeCell = cell.CellCode;
         }
 

@@ -41,9 +41,9 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(RackNum));
             }
         }
-        public bool IsHighlightedIssue =>
+        public bool IsSelectToIssue =>
            _selectedItemsToIssue.Any(x => x.RackId == Id);
-        public bool IsHighlightedReceipt =>
+        public bool IsSelectToReceipt =>
            _selectedItemToReceipt.RackId == Id;
 
         private int _row;
@@ -60,7 +60,7 @@ namespace WMS.Desktop
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlightedIssue));
+                OnPropertyChanged(nameof(IsSelectToIssue));
             };
         }
         public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
@@ -72,7 +72,7 @@ namespace WMS.Desktop
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlightedReceipt));
+                OnPropertyChanged(nameof(IsSelectToReceipt));
             };
         }
 

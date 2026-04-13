@@ -37,9 +37,9 @@ namespace WMS.Desktop
             }
         }
         public int ColumnSpan => Line == 1 ? 4 : 1;
-        public bool IsHighlightedIssue =>
+        public bool IsSelectToIssue =>
             _selectedItemsToIssue.Any(x=> x.CellId == Id);
-        public bool IsHighlightedReceipt =>
+        public bool IsSelectToReceipt =>
            _selectedItemToReceipt.CellId == Id;
 
         private int _line;
@@ -57,7 +57,7 @@ namespace WMS.Desktop
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlightedIssue));
+                OnPropertyChanged(nameof(IsSelectToIssue));
             };
         }
 
@@ -71,7 +71,7 @@ namespace WMS.Desktop
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlightedReceipt));
+                OnPropertyChanged(nameof(IsSelectToReceipt));
             };
         }
 

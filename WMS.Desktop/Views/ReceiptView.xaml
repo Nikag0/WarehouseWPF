@@ -653,15 +653,15 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="Gray"
-                                            BorderThickness="1"
-                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                                                BorderThickness="1"
+                                                MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
 
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="Transparent"/>
 
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                        <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
                                                             <Setter Property="Background" Value="Yellow"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -674,6 +674,10 @@
                             </ItemsControl>
 
                         </Grid>
+                                                        <!--<DataTrigger Binding="{Binding IsSelect}" Value="True">
+                                                            <Setter Property="BorderBrush" Value="Red"/>
+                                                            <Setter Property="BorderThickness" Value="4"/>
+                                                        </DataTrigger>-->
 
                         <Grid Grid.Row="2">
 
@@ -712,7 +716,7 @@
                                                     <Setter Property="Background" Value="Transparent"/>
 
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                        <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
                                                             <Setter Property="Background" Value="Yellow"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -933,10 +937,12 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
+                                                
+                                                
                                             </Style>
                                         </Border.Style>
                                     </Border>
@@ -1023,7 +1029,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -1109,10 +1115,11 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
+
                                             </Style>
                                         </Border.Style>
                                     </Border>

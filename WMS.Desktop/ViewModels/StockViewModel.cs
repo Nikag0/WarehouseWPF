@@ -29,7 +29,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        private string _article;
+        private string? _article;
         public string ComponentName
         {
             get => _componentName;
@@ -49,7 +49,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        private string _manufacturer;
+        private string? _manufacturer;
 
         public Guid RackId
         {
@@ -70,7 +70,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        private string _rackCode;
+        private string? _rackCode;
 
         public Guid CellId
         {
@@ -91,7 +91,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        private string _cellCode;
+        private string? _cellCode;
 
         public int Quantity
         {

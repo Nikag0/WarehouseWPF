@@ -342,7 +342,7 @@
                                             <Setter Property="Background" Value="Transparent"/>
 
                                             <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToIssue}" Value="True">
                                                     <Setter Property="Background" Value="Yellow"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -502,7 +502,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToIssue}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -592,7 +592,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToIssue}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -678,7 +678,7 @@
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedIssue}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsSelectToIssue}" Value="True">
                                                         <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

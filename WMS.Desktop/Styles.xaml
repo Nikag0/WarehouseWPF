@@ -68,7 +68,6 @@
 
         <Style.Triggers>
 
-            <!-- Выбран -->
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Foreground" Value="#1f91dc"/>
             </Trigger>
@@ -83,12 +82,14 @@
                 <MultiDataTrigger.Conditions>
 
                     <Condition Binding="{Binding ElementName=SearchIssue, Path=Text.Length,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
-
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
                     <Condition Binding="{Binding FilteredStocks.Count,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
+
+                    <Condition Binding="{Binding ElementName=SearchIssue, Path=IsKeyboardFocused}"
+                               Value="True"/>
 
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
@@ -103,12 +104,14 @@
                 <MultiDataTrigger.Conditions>
 
                     <Condition Binding="{Binding ElementName=SearchComponentsToReceipt, Path=Text.Length,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
-
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
                     <Condition Binding="{Binding FilteredComponents.Count,
-                        Converter={StaticResource GreaterThanZero}}"
-                    Value="True"/>
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
+
+                    <Condition Binding="{Binding ElementName=SearchComponentsToReceipt, Path=IsKeyboardFocused}"
+                               Value="True"/>
 
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
@@ -121,15 +124,18 @@
         <Style.Triggers>
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
-
+                    
                     <Condition Binding="{Binding ElementName=SearchRack, Path=Text.Length,
-                                Converter={StaticResource GreaterThanZero}}"
-                            Value="True"/>
-
+                             Converter={StaticResource GreaterThanZero}}"
+                           Value="True"/>
+                    
                     <Condition Binding="{Binding FilteredRacks.Count,
-                                Converter={StaticResource GreaterThanZero}}"
-                            Value="True"/>
-
+                             Converter={StaticResource GreaterThanZero}}"
+                           Value="True"/>
+                    
+                    <Condition Binding="{Binding ElementName=SearchRack, Path=IsKeyboardFocused}"
+                           Value="True"/>
+                    
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
             </MultiDataTrigger>
@@ -143,12 +149,14 @@
                 <MultiDataTrigger.Conditions>
 
                     <Condition Binding="{Binding ElementName=SearchCell, Path=Text.Length,
-                                Converter={StaticResource GreaterThanZero}}"
-                            Value="True"/>
-
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
                     <Condition Binding="{Binding FilteredFreeCells.Count,
-                                Converter={StaticResource GreaterThanZero}}"
-                            Value="True"/>
+                                                 Converter={StaticResource GreaterThanZero}}"
+                               Value="True"/>
+                    
+                    <Condition Binding="{Binding ElementName=SearchCell, Path=IsKeyboardFocused}"
+                               Value="True"/>
 
                 </MultiDataTrigger.Conditions>
                 <Setter Property="IsOpen" Value="True"/>
