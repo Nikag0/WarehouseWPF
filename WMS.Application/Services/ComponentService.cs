@@ -24,10 +24,11 @@ namespace WMS.Application.Services
             return components
                 .Where(c => !c.IsDelet)
                 .Select(c => new ComponentDTO(
-                c.Article,
-                c.Name,
-                c.Manufacturer,
-                c.MinQuantity
+                    c.Id,
+                    c.Article,
+                    c.Name,
+                    c.Manufacturer,
+                    c.MinQuantity
             )).ToList();
         }
 

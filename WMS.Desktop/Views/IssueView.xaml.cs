@@ -37,8 +37,7 @@ namespace WMS.Desktop.Views
             {
                 await viewModel.RefreshAsync();
                 await viewModel.LoadOperators();
-                await viewModel.LoadRacks();
-                await viewModel.LoadCells();
+                await viewModel.LoadWarehouseVisualise();
             }
         }
 

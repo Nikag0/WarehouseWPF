@@ -12,35 +12,46 @@ namespace WMS.Application.Services
     {
         private readonly IStockRepository _stockRepo;
         private readonly IComponentRepository _componentRepo;
+        private readonly IRackRepository _rackRepo;
         private readonly ICellRepository _cellRepo;
 
         public StockService(
             IStockRepository stockRepo,
             IComponentRepository componentRepo,
+            IRackRepository rackRepo,
             ICellRepository cellRepo)
         {
             _stockRepo = stockRepo;
             _componentRepo = componentRepo;
+            _rackRepo = rackRepo;
             _cellRepo = cellRepo;
         }
             
-        public async Task<List<StockDto>> GetAllAsync()
+        public async Task<List<StockViewDto>> GetAllAsync()
         {
             var stocks = await _stockRepo.GetAllAsync();
             var components = await _componentRepo.GetAllAsync();
+            var racks = await _rackRepo.GetAllAsync();
             var cells = await _cellRepo.GetAllAsync();
 
-            return stocks
-                .Join(components, s => s.ComponentId, c => c.Id, (s, c) => new { s, c })
-                .Join(cells, sc => sc.s.CellId, cell => cell.Id, (sc, cell) => new StockDto(
-                    sc.s.ComponentId,
-                    sc.s.CellId,
-                    sc.s.RackId,
-                    sc.c.Article,
-                    sc.c.Name,
-                    sc.c.Manufacturer,
-                    cell.Code,
-                    sc.s.Quantity)).ToList();
+            var result =
+                 from s in stocks
+                 join c in components on s.ComponentId equals c.Id
+                 join rack in racks on s.RackId equals rack.Id
+                 join cell in cells on s.CellId equals cell.Id
+                 select new StockViewDto(
+                     s.ComponentId,
+                     c.Article,
+                     c.Name,
+                     c.Manufacturer,
+                     s.RackId,
+                     rack.RackCode,
+                     s.CellId,
+                     cell.CellCode,
+                     s.Quantity,
+                     0);
+
+            return result.ToList();
         }
 
         public async Task RemoveStock(Stock stock)

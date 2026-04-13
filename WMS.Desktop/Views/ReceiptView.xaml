@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:WMS.Desktop.Views" 
              xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
              d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="1008"
@@ -17,7 +17,6 @@
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
     </UserControl.Resources>
 
-
     <Grid Margin="10,0">
 
         <Grid.ColumnDefinitions>
@@ -26,12 +25,12 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
-            
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
                 <RowDefinition Height="60"/>
                 <RowDefinition/>
-                <RowDefinition Height="400"/>
+                <RowDefinition Height="250"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0"
@@ -43,14 +42,17 @@
 
             <Grid Grid.Row="1">
 
-                <TextBox x:Name="SearchReceipt" Grid.Column="0" Margin="0,10" IsTabStop="False"
-                     Style="{StaticResource WatermarkTextBox}"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Column="0"
+                         x:Name="SearchComponentsToReceipt"  
+                         Margin="0,10" 
+                         IsTabStop="False"
+                         Style="{StaticResource WatermarkTextBox}"
+                         Text="{Binding SearchComponents, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <Popup 
-                         PlacementTarget="{Binding ElementName=SearchReceipt}" 
-                         Tag="{Binding ElementName=SearchReceipt}"
-                         Style="{StaticResource FilterReceiptPopupStyle}"
+                         PlacementTarget="{Binding ElementName=SearchComponentsToReceipt}" 
+                         Tag="{Binding ElementName=SearchComponentsToReceipt}"
+                         Style="{StaticResource FilterComponentsPopupStyle}"
                          Placement="Bottom" 
                          AllowsTransparency="True"
                          StaysOpen="True"
@@ -60,7 +62,7 @@
                     <Border Background="White" 
                          BorderBrush="#DDD" 
                          BorderThickness="1" 
-                         Width="{Binding ElementName=SearchReceipt, Path=ActualWidth}">
+                         Width="{Binding ElementName=SearchComponentsToReceipt, Path=ActualWidth}">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                         </Border.Effect>
@@ -74,22 +76,22 @@
                                     <StackPanel Orientation="Horizontal" Margin="5">
 
                                         <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="  Производитель: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                         <Button Content="Добавить к приёмке"
-                                            Command="{Binding DataContext.AddSelectedComponentCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            Command="{Binding DataContext.AddItemToReceiptCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}">
                                             <Button.Style>
                                                 <Style TargetType="Button">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                 Path=IsMouseOver}" 
-                                                 Value="True">
+                                                             Path=IsMouseOver}" 
+                                                             Value="True">
                                                             <Setter Property="Visibility" Value="Visible"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -104,23 +106,28 @@
                 </Popup>
 
             </Grid>
-            
+
             <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="44*"/>
+                </Grid.ColumnDefinitions>
 
                 <DataGrid ItemsSource="{Binding Stocks}" 
                       AutoGenerateColumns="False" 
                       FontSize="15" 
-                      IsReadOnly="True">
+                      IsReadOnly="True" Grid.ColumnSpan="2">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
                         <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="83" Binding="{Binding RackCode}"/>
                         <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
                         <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
                         <DataGridTemplateColumn Width="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Добавить к приёмке"
-                                        Command="{Binding DataContext.AddToReceiptCommand,
+                                        Command="{Binding DataContext.AddItemToReceiptCommand,
                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Height="20"
@@ -136,12 +143,8 @@
             <Grid Grid.Row="3">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="8*"/>
+                    <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
@@ -149,126 +152,205 @@
                     <ColumnDefinition Width="6*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0"
-                            Grid.Column="0"
-                            Text="Артикул" 
-                            FontSize="15"
-                            Foreground="White" 
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center"/>
-
-                <TextBox Grid.Row="0"
-                            Grid.Column="1" 
-                            Text="{Binding ItemToReceipt.Article}" 
-                            Margin="5"
-                            FontSize="15"
-                            IsReadOnly="True" 
-                            VerticalContentAlignment="Center"
-                            TextAlignment="Center"/>
-
-                <TextBlock Grid.Row="1"
-                            Grid.Column="0" 
-                            Text="Название" 
-                            FontSize="15"
-                            Foreground="White" 
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center"/>
-
-                <TextBox Grid.Row="1"
-                         Grid.Column="1" 
-                         Text="{Binding ItemToReceipt.ComponentName}"  
-                         Margin="5" 
-                         IsReadOnly="True" 
-                         VerticalContentAlignment="Center" 
-                         FontSize="15"
-                         TextAlignment="Center"/>
-
-                <TextBlock Grid.Row="2"
-                           Grid.Column="0" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"
-                           Text="Производитель" 
-                           Foreground="White" 
-                           FontSize="15"/>
-
-                <TextBox Grid.Row="2"
-                         Grid.Column="1" 
-                         Text="{Binding ItemToReceipt.Manufacturer}" 
-                         Margin="5"  
-                         IsReadOnly="True" 
-                         VerticalContentAlignment="Center" 
-                         FontSize="15"
-                         TextAlignment="Center"/>
-
-                <Grid Grid.Row="3"
+                <Grid Grid.Row="0"
                       Grid.Column="0">
 
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="3*"/>
+                    </Grid.RowDefinitions>
+
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="2.5*"/>
+                        <ColumnDefinition Width="7.5*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" 
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Center"
-                        Text="Стеллаж" 
-                        Foreground="White" 
-                        FontSize="15"/>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Text="Артикул" 
+                               FontSize="15"
+                               Foreground="White" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
 
-                    <ComboBox Grid.Column="1" 
-                              ItemsSource="{Binding Racks}"
-                              DisplayMemberPath="RackCode"
-                              SelectedItem="{Binding SelectedRack}"
-                              Foreground="Black" 
-                              Margin="10"
-                              FontSize="15"/>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1" 
+                               Text="{Binding ReceiptItem.Article}" 
+                               Foreground="White" 
+                               Margin="5"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                    <TextBlock Grid.Column="2" 
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0" 
+                               Text="Название" 
+                               FontSize="15"
+                               Foreground="White" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="1" 
+                               Text="{Binding ReceiptItem.ComponentName}"  
+                               Foreground="White" 
+                               Margin="5" 
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0" 
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Center"
-                               Text="Ячейка" 
+                               Text="Производитель" 
                                Foreground="White" 
                                FontSize="15"/>
 
-                    <Grid Grid.Column="3"
-                          Margin="5">
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="1" 
+                               Text="{Binding ReceiptItem.Manufacturer}"
+                               Foreground="White" 
+                               Margin="5"  
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                        <TextBox x:Name="SearchCell" 
+                </Grid>
+
+                <Grid Grid.Row="0"
+                      Grid.Column="1">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="3*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3.5*"/>
+                        <ColumnDefinition Width="7*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="IsEnabled" Value="True"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ReceiptItem.ComponentId}" Value="00000000-0000-0000-0000-000000000000">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="Background" Value="Gray"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+
+                        <TextBlock Grid.Column="0" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Text="Стеллаж" 
+                                   Foreground="White" 
+                                   FontSize="15"/>
+                        
+                        <TextBox Grid.Column="1"
+                                 x:Name="SearchRack" 
+                                 Margin="5"
+                                 IsTabStop="False"
+                                 Style="{StaticResource WatermarkTextBox}"
+                                 Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
+                                 TextAlignment="Center"/>
+
+                        <Popup PlacementTarget="{Binding ElementName=SearchRack}" 
+                               Tag="{Binding ElementName=SearchRack}"
+                               Style="{StaticResource FilterRackPopupStyle}"
+                               Placement="Bottom" 
+                               AllowsTransparency="True"
+                               StaysOpen="True"
+                               HorizontalOffset="0"
+                               VerticalOffset="2">
+
+                            <Border Background="White" 
+                                    BorderBrush="#DDD" 
+                                    BorderThickness="1" 
+                                    Width="{Binding ElementName=SearchRack, Path=ActualWidth}">
+                                
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
+                                </Border.Effect>
+
+                                <ListBox ItemsSource="{Binding FilteredRacks}"
+                                            BorderThickness="0"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5">
+                                                <TextBlock Text="{Binding RackCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <Button Content="Выбрать"
+                                                        Command="{Binding DataContext.SetRackFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                        CommandParameter="{Binding}">
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </Popup>
+
+                        <TextBlock Grid.Column="2" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Text="Ячейка" 
+                                   Foreground="White" 
+                                   FontSize="15"/>
+
+                        <TextBox Grid.Column="3"
+                                 x:Name="SearchCell" 
+                                 Margin="5"
                                  IsTabStop="False"
                                  Style="{StaticResource WatermarkTextBox}"
                                  Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
                         <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
-                            Tag="{Binding ElementName=SearchCell}"
-                            Style="{StaticResource FilterCellPopupStyle}"
-                            Placement="Bottom" 
-                            AllowsTransparency="True"
-                            StaysOpen="True"
-                            HorizontalOffset="0"
-                            VerticalOffset="2">
+                               Tag="{Binding ElementName=SearchCell}"
+                               Style="{StaticResource FilterCellPopupStyle}"
+                               Placement="Bottom" 
+                               AllowsTransparency="True"
+                               StaysOpen="True"
+                               HorizontalOffset="0"
+                               VerticalOffset="2">
 
                             <Border Background="White" 
-                            BorderBrush="#DDD" 
-                            BorderThickness="1" 
-                            Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
+                                    BorderBrush="#DDD" 
+                                    BorderThickness="1" 
+                                    Width="{Binding ElementName=SearchCell, Path=ActualWidth}">
+                                
                                 <Border.Effect>
                                     <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                                 </Border.Effect>
 
                                 <ListBox ItemsSource="{Binding FilteredFreeCells}"
-                               BorderThickness="0"
-                               ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    BorderThickness="0"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
-                                                <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                                <Button Content="Выбрать ячейку"
-                                                    Command="{Binding DataContext.AddSelectedCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <Button Content="Выбрать"
+                                                    Command="{Binding DataContext.SetCellFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
@@ -287,53 +369,39 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
+                                
                             </Border>
-                        </Popup>    
+                        </Popup>
+
+                        <TextBlock Grid.Column="4" 
+                                   Margin="2" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"
+                                   Text="Количество" 
+                                   Foreground="White" 
+                                   FontSize="15"/>
+                        
+                        <xctk:IntegerUpDown Grid.Column="5"
+                                            Value="{Binding ReceiptItem.OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                            Margin="5"
+                                            FontSize="15"
+                                            TextAlignment="Center">
+                        </xctk:IntegerUpDown>
+                        
+
+
                     </Grid>
 
-                </Grid>
-
-                <Grid Grid.Row="3"
-                      Grid.Column="1">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0" 
-                               Margin="2" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"
-                               Text="Количество" 
-                               Foreground="White" 
-                               FontSize="15"/>      
-
-                    <xctk:IntegerUpDown Grid.Column="1"
-                                        Value="{Binding ItemToReceipt.Quantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                        Margin="5"
-                                        FontSize="15"
-                                        TextAlignment="Center">
-                    </xctk:IntegerUpDown>
-                    
-                </Grid>
-
-                <Grid Grid.Row="5"
-                      Grid.Column="0">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0"
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
                                Text="ФИО оператора" 
                                Foreground="White"
                                FontSize="15" 
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Center"/>
 
-                    <ComboBox Grid.Column="1"
+                    <ComboBox Grid.Row="1"
+                              Grid.Column="1"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
                               DisplayMemberPath="FullName"
@@ -342,16 +410,33 @@
                               VerticalContentAlignment="Center"
                               Margin="5"/>
 
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Комментарий" 
+                               Foreground="White"
+                               FontSize="15" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
+
+                    <TextBox Grid.Row="2"
+                             Grid.Column="1" 
+                             Text="{Binding CommentText}" 
+                             Margin="5"
+                             FontSize="15"
+                             IsReadOnly="True" 
+                             VerticalContentAlignment="Center"
+                             TextAlignment="Center"/>
+
                 </Grid>
-                
-                <Button Grid.Row="5" 
-                        Grid.Column="1"
+
+                <Button Grid.Row="1" 
+                        Grid.ColumnSpan="2"
                         Command="{Binding ReceiveCommand}"
                         Content="Приёмка" 
-                        Margin="5"/>
-                
+                        Margin="0,5,5,5"/>
+
             </Grid>
-            
+
         </Grid>
 
         <Grid Grid.Column="1">
@@ -363,136 +448,284 @@
 
             <Grid Grid.Row="0">
 
-                <Image Source="/Images/Warehouse.png" 
-              Width="auto" 
-              Height="auto"
-              Stretch="Fill"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="20*"/>
+                </Grid.RowDefinitions>
 
-                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="20*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Row="0"
+                      Grid.Column="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="29.5*"/>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="6*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="1"
+                               Text="1"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="2"
+                               Text="2"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="3"
+                               Text="3"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <TextBlock Grid.Column="4"
+                               Text="4"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                </Grid>
+
+                <Grid Grid.Row="1"
+                      Grid.Column="0">
 
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="55*"/>
-                        <RowDefinition Height="5*"/>
-                        <RowDefinition Height="38*"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="10*"/>
+                        <RowDefinition Height="17*"/>
+                        <RowDefinition Height="10*"/>
+                        <RowDefinition Height="17*"/>
+                        <RowDefinition Height="5.5*"/>
+                        <RowDefinition Height="9.5*"/>
+                        <RowDefinition Height="17*"/>
+                        <RowDefinition Height="10*"/>
+                        <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0"
-                    Grid.RowSpan="3">
+                    <TextBlock Grid.Row="1"
+                               Text="A"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                        <ItemsControl ItemsSource="{Binding NormalRacks}">
+                    <TextBlock Grid.Row="3"
+                               Text="Б"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="1*"/>
-                                            <RowDefinition Height="10*"/>
-                                            <RowDefinition Height="17*"/>
-                                            <RowDefinition Height="10*"/>
-                                            <RowDefinition Height="17*"/>
-                                            <RowDefinition Height="5.5*"/>
-                                            <RowDefinition Height="9.5*"/>
-                                            <RowDefinition Height="17*"/>
-                                            <RowDefinition Height="10*"/>
-                                            <RowDefinition Height="1*"/>
-                                        </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="5"
+                               Text="В"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="1.5*"/>
-                                            <ColumnDefinition Width="21*"/>
-                                            <ColumnDefinition Width="29.5*"/>
-                                            <ColumnDefinition Width="21*"/>
-                                            <ColumnDefinition Width="21*"/>
-                                            <ColumnDefinition Width="6*"/>
-                                        </Grid.ColumnDefinitions>
-                                    </Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                    <TextBlock Grid.Row="6"
+                               Text="Г"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
 
-                            <ItemsControl.ItemContainerStyle>
-                                <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Row}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
+                    <TextBlock Grid.Row="8"
+                               Text="Д"
+                               Foreground="White"
+                               FontSize="25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
 
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="Gray"
-                                        BorderThickness="1"
-                                        MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                <Grid Grid.Row="1"
+                      Grid.Column="1">
 
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
+                    <Image Source="/Images/Warehouse.png" 
+                            Width="auto" 
+                            Height="auto"
+                            Stretch="Fill"/>
 
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DataContext.ItemToReceipt.SelectedRack, 
-                                                                                   RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                                 Value="{Binding}">
-                                                        <Setter Property="Background" Value="Red"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
+                    <Grid>
 
-                        </ItemsControl>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50*"/>
+                            <RowDefinition Height="5*"/>
+                            <RowDefinition Height="5*"/>
+                            <RowDefinition Height="38*"/>
+                        </Grid.RowDefinitions>
 
-                    </Grid>
+                        <Grid Grid.Row="1">
 
-                    <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="8.6*"/>
+                                <ColumnDefinition Width="16.6*"/>
+                                <ColumnDefinition Width="16.6*"/>
+                                <ColumnDefinition Width="16.6*"/>
+                                <ColumnDefinition Width="16.6*"/>
+                                <ColumnDefinition Width="28*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <ItemsControl ItemsSource="{Binding SpecialRacks}">
+                            <TextBlock Grid.Column="1"
+                                       Text="1"
+                                       Foreground="White"
+                                       FontSize="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
 
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="8.6*"/>
-                                            <ColumnDefinition Width="16.6*"/>
-                                            <ColumnDefinition Width="16.6*"/>
-                                            <ColumnDefinition Width="16.6*"/>
-                                            <ColumnDefinition Width="16.6*"/>
-                                            <ColumnDefinition Width="28*"/>
-                                        </Grid.ColumnDefinitions>
-                                    </Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
+                            <TextBlock Grid.Column="2"
+                                       Text="2"
+                                       Foreground="White"
+                                       FontSize="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
 
-                            <ItemsControl.ItemContainerStyle>
-                                <Style>
-                                    <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
+                            <TextBlock Grid.Column="3"
+                                       Text="3"
+                                       Foreground="White"
+                                       FontSize="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
 
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="Gray"
-                          BorderThickness="1"
-                          MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                            <TextBlock Grid.Column="4"
+                                       Text="4"
+                                       Foreground="White"
+                                       FontSize="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
 
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
+                        </Grid>
 
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
-                                                        <Setter Property="Background" Value="Red"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
+                        <Grid Grid.Row="0"
+                              Grid.RowSpan="4">
 
-                        </ItemsControl>
-                    </Grid>
+                            <ItemsControl ItemsSource="{Binding NormalVisibleRacks}">
 
-                    <!--<Grid Grid.Row="2" 
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1*"/>
+                                                <RowDefinition Height="10*"/>
+                                                <RowDefinition Height="17*"/>
+                                                <RowDefinition Height="10*"/>
+                                                <RowDefinition Height="17*"/>
+                                                <RowDefinition Height="5.5*"/>
+                                                <RowDefinition Height="9.5*"/>
+                                                <RowDefinition Height="17*"/>
+                                                <RowDefinition Height="10*"/>
+                                                <RowDefinition Height="1*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1.5*"/>
+                                                <ColumnDefinition Width="21*"/>
+                                                <ColumnDefinition Width="29.5*"/>
+                                                <ColumnDefinition Width="21*"/>
+                                                <ColumnDefinition Width="21*"/>
+                                                <ColumnDefinition Width="6*"/>
+                                            </Grid.ColumnDefinitions>
+                                        </Grid>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="Grid.Row" Value="{Binding Row}"/>
+                                        <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                            <Setter Property="Background" Value="Yellow"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                            </ItemsControl>
+
+                        </Grid>
+
+                        <Grid Grid.Row="2">
+
+                            <ItemsControl ItemsSource="{Binding SpecialVisibleRacks}">
+
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="8.6*"/>
+                                                <ColumnDefinition Width="16.6*"/>
+                                                <ColumnDefinition Width="16.6*"/>
+                                                <ColumnDefinition Width="16.6*"/>
+                                                <ColumnDefinition Width="16.6*"/>
+                                                <ColumnDefinition Width="28*"/>
+                                            </Grid.ColumnDefinitions>
+                                        </Grid>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="Gray"
+                                            Opacity="0.5"
+                                            BorderThickness="1"
+                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="Transparent"/>
+
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                            <Setter Property="Background" Value="Yellow"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+
+                            </ItemsControl>
+                        </Grid>
+
+                        <!--<Grid Grid.Row="2" 
                     Grid.Column="5"
                     Margin="0,0,3,0">
                   <Rectangle 
@@ -508,6 +741,8 @@
                       Foreground="Black"/>
               </Grid>-->
 
+                    </Grid>
+
                 </Grid>
 
             </Grid>
@@ -515,29 +750,139 @@
             <Grid Grid.Row="1">
 
                 <Grid x:Name="Row1Grid"
-             Visibility="Visible">
+                      Visibility="Visible">
 
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="13*"/>
+                        <RowDefinition Height="6*"/>
+                        <RowDefinition Height="7*"/>
                         <RowDefinition Height="73*"/>
                         <RowDefinition Height="13*"/>
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="36*"/>
+                        <ColumnDefinition Width="32*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="27*"/>
                         <ColumnDefinition Width="36*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Image Grid.Column="1"
-                  Grid.Row="1"
-                  Source="/Images/Row2.jpg" 
-                  Width="auto" 
-                  Height="auto"
-                  Stretch="Fill"/>
-
                     <Grid Grid.Column="1"
-                 Grid.Row="1">
+                          Grid.Row="2">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="13*"/>
+                            <RowDefinition Height="13.5*"/>
+                            <RowDefinition Height="13.5*"/>
+                            <RowDefinition Height="13.5*"/>
+                            <RowDefinition Height="13*"/>
+                            <RowDefinition Height="13*"/>
+                            <RowDefinition Height="13*"/>
+                            <RowDefinition Height="4.5*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="1"
+                            Text="A"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="2"
+                            Text="Б"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="3"
+                            Text="В"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="4"
+                            Text="Г"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="5"
+                            Text="Д"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="6"
+                            Text="E"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Row="7"
+                            Text="Ж"
+                            Foreground="White"
+                            FontSize="25"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Grid>
+
+                    <Grid Grid.Row="1"
+                          Grid.Column="2">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="1"
+                           Text="1"
+                           Foreground="White"
+                           FontSize="25"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="2"
+                           Text="2"
+                           Foreground="White"
+                           FontSize="25"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="3"
+                           Text="3"
+                           Foreground="White"
+                           FontSize="25"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="4"
+                           Text="4"
+                           Foreground="White"
+                           FontSize="25"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+
+                    </Grid>
+
+                    <Image Grid.Column="2"
+                           Grid.Row="2"
+                           Source="/Images/Row2.jpg" 
+                           Width="auto" 
+                           Height="auto"
+                           Stretch="Fill"/>
+
+                    <Grid Grid.Column="2"
+                          Grid.Row="2">
 
                         <ItemsControl ItemsSource="{Binding VisibleCells}">
 
@@ -579,18 +924,17 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="Gray"
-                                      BorderThickness="1"
-                                      MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                                            Opacity="0.5"
+                                            BorderThickness="1"
+                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
 
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DataContext.ItemToReceipt.SelectedCell, 
-                                                                                   RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                                 Value="{Binding}">
-                                                        <Setter Property="Background" Value="Red"/>
+                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                        <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -670,18 +1014,17 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="Gray"
-                                        BorderThickness="1"
-                                        MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                                            Opacity="0.5"
+                                            BorderThickness="1"
+                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
 
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DataContext.ItemToReceipt.SelectedCell, 
-                                                                                   RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                                 Value="{Binding}">
-                                                        <Setter Property="Background" Value="Red"/>
+                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                        <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -757,18 +1100,17 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="Gray"
-                                      BorderThickness="1"
-                                      MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
+                                            Opacity="0.5"
+                                            BorderThickness="1"
+                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
 
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Setter Property="Background" Value="Transparent"/>
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DataContext.ItemToReceipt.SelectedCell, 
-                                                                                   RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                                 Value="{Binding}">
-                                                        <Setter Property="Background" Value="Red"/>
+                                                    <DataTrigger Binding="{Binding IsHighlightedReceipt}" Value="True">
+                                                        <Setter Property="Background" Value="Yellow"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>

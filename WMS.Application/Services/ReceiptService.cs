@@ -25,19 +25,17 @@ namespace WMS.Application.Services
             _operationRepo = operationRepo;
         }
 
-        public async Task<List<ReceiptStockDto>> GetAllComponentsAsync()
+        public async Task<List<ComponentDTO>> GetAllComponentsAsync()
         {
             var components = await _componentRepo.GetAllAsync();
 
-            return components.Select(c => new ReceiptStockDto(
+            return components.Select(c => new ComponentDTO(
                 c.Id,
-                Guid.Empty,
-                Guid.Empty,
                 c.Article,
                 c.Name,
                 c.Manufacturer,
-                "",
-                0)).ToList();
+                10)).
+                ToList();
         }
 
         public async Task ReceiveAsync(OperationDTO item, string operatorName, string? comment = null)

@@ -25,5 +25,10 @@ namespace WMS.Application.Services
         {
             return await _rackRepo.GetAllAsync();
         }
+
+        public async Task<Rack> GetRackAsync(Guid id)
+            {
+            return await _rackRepo.GetRackAsync(id);
+        }
     }
 }

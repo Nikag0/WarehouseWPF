@@ -26,6 +26,11 @@ namespace WMS.Application.Services
             return await _cellRepo.GetAllAsync();
         }
 
+        public async Task<Cell> GetCellAsync(Guid id)
+        {
+            return await _cellRepo.GetCellAsync(id);
+        }
+
         public async Task<List<Cell>> GetFreeCellsAsync(Guid? componentId = null)
         {
             var cells = await _cellRepo.GetAllAsync();

@@ -27,5 +27,14 @@ namespace WMS.Infrastructure
                 .Include(c => c.Rack)
                 .ToListAsync();
         }
+
+        public async Task<Cell> GetCellAsync(Guid id)
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Cells
+                .Include(c => c.Rack)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
     }
 }

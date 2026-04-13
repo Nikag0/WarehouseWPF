@@ -13,40 +13,48 @@ namespace WMS.Application.Services
         private readonly IStockRepository _stockRepo;
         private readonly IComponentRepository _componentRepo;
         private readonly ICellRepository _cellRepo;
+        private readonly IRackRepository _rackRepo;
         private readonly IOperationRepository _operationRepo;
 
         public IssueService(
             IStockRepository stockRepo,
             IComponentRepository componentRepo,
+            IRackRepository rackRepo,
             ICellRepository cellRepo,
             IOperationRepository operationRepo)
         {
             _stockRepo = stockRepo;
             _componentRepo = componentRepo;
+            _rackRepo = rackRepo;
             _cellRepo = cellRepo;
             _operationRepo = operationRepo;
         }
 
-        public async Task<List<IssueStockDto>> GetAllAsync()
+        public async Task<List<StockViewDto>> GetAllAsync()
         {
             var stocks = await _stockRepo.GetAllAsync(); 
             var components = await _componentRepo.GetAllAsync();
+            var racks = await _rackRepo.GetAllAsync();
             var cells = await _cellRepo.GetAllAsync();
 
+            var result =
+                from s in stocks
+                join c in components on s.ComponentId equals c.Id
+                join rack in racks on s.RackId equals rack.Id
+                join cell in cells on s.CellId equals cell.Id
+                select new StockViewDto(
+                    s.ComponentId,
+                    c.Article,
+                    c.Name,
+                    c.Manufacturer,
+                    s.RackId,
+                    rack.RackCode,
+                    s.CellId,
+                    cell.CellCode,
+                    s.Quantity,
+                    0);
 
-            return stocks
-                .Join(components, s => s.ComponentId, c => c.Id, (s, c) => new { s, c })
-                .Join(cells, sc => sc.s.CellId, cell => cell.Id, (sc, cell) => new IssueStockDto(
-                    sc.s.ComponentId,
-                    sc.s.CellId,
-                    sc.s.RackId,
-                    sc.c.Article,
-                    sc.c.Name,
-                    sc.c.Manufacturer,
-                    cell.Code,
-                    sc.s.Quantity,
-                    0))
-                .ToList();
+            return result.ToList();
         }
 
         public async Task IssueAsync(

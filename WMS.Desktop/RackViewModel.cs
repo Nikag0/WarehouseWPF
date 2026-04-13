@@ -5,13 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WMS.Desktop.ViewModels;
 using WMS.Domain;
 
 namespace WMS.Desktop
 {
     public class RackViewModel : INotifyPropertyChanged
     {
-        public Guid Id { get; }
+        public Guid Id { get; set;}
         public int Row
         {
             get
@@ -41,36 +42,35 @@ namespace WMS.Desktop
             }
         }
         public bool IsHighlightedIssue =>
-           _issueItems.Any(i => i.RackId == Id);
+           _selectedItemsToIssue.Any(x => x.RackId == Id);
         public bool IsHighlightedReceipt =>
-         _receiptItems.Any(i => i.RackId == Id);
+           _selectedItemToReceipt.RackId == Id;
 
         private int _row;
         private int _rackNum;
-        private readonly ObservableCollection<IssueStockDto> _issueItems;
-        private readonly ObservableCollection<StockDto> _receiptItems;
+        private readonly ObservableCollection<StockViewDto> _selectedItemsToIssue;
+        private readonly StockViewModel _selectedItemToReceipt;
 
-        public RackViewModel(Rack rack, ObservableCollection<IssueStockDto> issueItems)
+        public RackViewModel(Rack rack, ObservableCollection<StockViewDto> selectedItemsToIssue)
         {
             Id = rack.Id;
             Row = rack.Row;
             RackNum = rack.RackNum;
 
-            _issueItems = issueItems;
-            _issueItems.CollectionChanged += (_, __) =>
+            _selectedItemsToIssue = selectedItemsToIssue;
+            _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
                 OnPropertyChanged(nameof(IsHighlightedIssue));
             };
         }
-
-        public RackViewModel(Rack rack, ObservableCollection<StockDto> receiptItems)
+        public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
         {
             Id = rack.Id;
             Row = rack.Row;
             RackNum = rack.RackNum;
 
-            _receiptItems = receiptItems;
-            _receiptItems.CollectionChanged += (_, __) =>
+            _selectedItemToReceipt = selectedItemToReceipt;
+            _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
                 OnPropertyChanged(nameof(IsHighlightedReceipt));
             };

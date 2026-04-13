@@ -1,4 +1,4 @@
-﻿public record ReceiptStockDto(
+﻿public record StockViewDto(
         Guid ComponentId,
         string Article,
         string ComponentName,
@@ -10,4 +10,5 @@
         Guid CellId,
         string CellCode,
 
-        int Quantity);
+        int Quantity,
+        int OperationQuantity);

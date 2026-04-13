@@ -27,6 +27,7 @@ namespace WMS.Domain
             Column = column;
         }
 
-        public string Code => $"{Rack.Row}-{Rack.RackNum}-{Line}-{Column}";
+        public string CellCode => $"{Line}-{Column}";
+        public string FullCode => $"{Rack.Row}-{Rack.RackNum}-{Line}-{Column}";
     }
 }

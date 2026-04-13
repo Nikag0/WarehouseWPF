@@ -10,5 +10,6 @@ namespace WMS.Application.Abstractions
     public interface ICellRepository
     {
         Task<List<Cell>> GetAllAsync();
+        Task<Cell> GetCellAsync(Guid id);
     }
 }

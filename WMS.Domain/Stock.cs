@@ -4,7 +4,6 @@ namespace WMS.Domain;
 public class Stock
 {
     public Guid Id { get; private set; }
-
     public Guid ComponentId { get; private set; }
     public Guid RackId { get; private set; }
     public Guid CellId { get; private set; }

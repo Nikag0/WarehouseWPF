@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using WMS.Desktop.ViewModels;
 using WMS.Domain;
 
 namespace WMS.Desktop
@@ -14,34 +15,6 @@ namespace WMS.Desktop
     {
         public Guid Id { get; }
         public Guid RackId { get; }
-        public int Row
-        {
-            get
-            {
-                return _row switch
-                {
-                    1 => 1,
-                    2 => 3,
-                    3 => 5,
-                    4 => 6,
-                    5 => 8
-                };
-            }
-            set
-            {
-                _row = value;
-                OnPropertyChanged(nameof(Row));
-            }
-        }
-        public int RackNum
-        {
-            get => _rackNum;
-            set
-            {
-                _rackNum = value;
-                OnPropertyChanged(nameof(RackNum));
-            }
-        }
         public int Line
         {
             get
@@ -64,45 +37,41 @@ namespace WMS.Desktop
             }
         }
         public int ColumnSpan => Line == 1 ? 4 : 1;
-        public bool IsHighlighted =>
-            _issueItems.Any(i => i.CellId == Id);
+        public bool IsHighlightedIssue =>
+            _selectedItemsToIssue.Any(x=> x.CellId == Id);
+        public bool IsHighlightedReceipt =>
+           _selectedItemToReceipt.CellId == Id;
 
-        private int _row;
-        private int _rackNum;
         private int _line;
         private int _column;
-        private readonly ObservableCollection<IssueStockDto> _issueItems;
-        private readonly ObservableCollection<StockDto> _receiptItems;
+        private readonly ObservableCollection<StockViewDto> _selectedItemsToIssue;
+        private readonly StockViewModel _selectedItemToReceipt;
 
-        public CellViewModel(Cell cell, ObservableCollection<IssueStockDto> issueItems)
+        public CellViewModel(Cell cell, ObservableCollection<StockViewDto> selectedItemsToIssue)
         {
             Id = cell.Id;
-            RackId = cell.Rack.Id;
-            Row = cell.Rack.Row;
-            RackNum = cell.Rack.RackNum;
+            RackId = cell.RackId;
             Line = cell.Line;
             Column = cell.Column;
 
-            _issueItems = issueItems;
-            _issueItems.CollectionChanged += (_, __) =>
+            _selectedItemsToIssue = selectedItemsToIssue;
+            _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlighted));
+                OnPropertyChanged(nameof(IsHighlightedIssue));
             };
         }
 
-        public CellViewModel(Cell cell, ObservableCollection<StockDto> receiptItems)
+        public CellViewModel(Cell cell, StockViewModel selectedItemToReceipt)
         {
             Id = cell.Id;
-            RackId = cell.Rack.Id;
-            Row = cell.Rack.Row;
-            RackNum = cell.Rack.RackNum;
+            RackId = cell.RackId;
             Line = cell.Line;
             Column = cell.Column;
 
-            _receiptItems = receiptItems;
-            _receiptItems.CollectionChanged += (_, __) =>
+            _selectedItemToReceipt = selectedItemToReceipt;
+            _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsHighlighted));
+                OnPropertyChanged(nameof(IsHighlightedReceipt));
             };
         }
 

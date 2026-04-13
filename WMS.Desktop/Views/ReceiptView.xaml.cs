@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WMS.Desktop.ViewModels;
+using WMS.Domain;
 
 namespace WMS.Desktop.Views
 {
@@ -31,15 +32,10 @@ namespace WMS.Desktop.Views
         {
             if (DataContext is ReceiptViewModel viewModel)
             {
-                await viewModel.RefreshAsync();
+                await viewModel.LoadWindow();
                 await viewModel.LoadOperators();
-                await viewModel.LoadRacks();
+                await viewModel.LoadWarehouseView();
             }
-        }
-        private void RootGrid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            // Убираем фокус с любого TextBox
-            Keyboard.ClearFocus();
         }
 
         private void RackBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -47,7 +43,7 @@ namespace WMS.Desktop.Views
             if (sender is Border border && border.DataContext is RackViewModel rackVm)
             {
                 var vm = (ReceiptViewModel)DataContext;
-                vm.SelectedRackView = rackVm;
+                vm.SelectedRack= rackVm;
                 int row = rackVm.Row;
                 int column = rackVm.RackNum;
 

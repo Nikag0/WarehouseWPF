@@ -14,11 +14,11 @@ namespace WMS.Desktop.ViewModels
 {
     public class IssueViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<IssueStockDto> IssueItems { get; } = new();
-        public ObservableCollection<IssueStockDto> FilteredStocks { get; } = new();
+        public ObservableCollection<StockViewDto> IssueItems { get; } = new();
+        public ObservableCollection<StockViewDto> FilteredStocks { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
-        public ObservableCollection<CellViewModel> Cells { get; } = new();
-        public ObservableCollection<RackViewModel> Racks { get; set; } = new();
+        private ObservableCollection<RackViewModel> allRacksToVisualise { get; set; } = new();
+        private ObservableCollection<CellViewModel> allCellsToVisualise { get; } = new();
     
         public string SearchText
         {
@@ -57,31 +57,30 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
+        // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
         public RackViewModel SelectedRack
         {
             get => _selectedRack;
             set
             {
                 _selectedRack = value;
-                OnPropertyChanged();
                 OnPropertyChanged(nameof(VisibleCells));
             }
         }
+        private RackViewModel _selectedRack;
+        public IEnumerable<RackViewModel> NormalVisibleRacks =>
+            allRacksToVisualise.Where(r => r.Row != 5);
+        public IEnumerable<RackViewModel> SpecialVisibleRacks =>
+            allRacksToVisualise.Where(r => r.Row == 5);
         public IEnumerable<CellViewModel> VisibleCells =>
-            Cells.Where(c => c.RackId == SelectedRack.Id);
-        public IEnumerable<RackViewModel> NormalRacks =>
-            Racks.Where(r => r.Row != 5);
-        public IEnumerable<RackViewModel> SpecialRacks =>
-            Racks.Where(r => r.Row == 5);
+            allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
 
-
-        private readonly List<IssueStockDto> Stocks = new();
+        private readonly List<StockViewDto> _stocks = new();
         private string _searchText;
         private string _commentText;
         private Operator _operatorName;
         private bool _isLoading;
         private bool _isIssue;
-        private RackViewModel _selectedRack;
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
@@ -113,10 +112,10 @@ namespace WMS.Desktop.ViewModels
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
             ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
 
-            Racks.CollectionChanged += (s, e) =>
+            allRacksToVisualise.CollectionChanged += (s, e) =>
             {
-                OnPropertyChanged(nameof(NormalRacks));
-                OnPropertyChanged(nameof(SpecialRacks));
+                OnPropertyChanged(nameof(NormalVisibleRacks));
+                OnPropertyChanged(nameof(SpecialVisibleRacks));
             };
         }
 
@@ -137,7 +136,7 @@ namespace WMS.Desktop.ViewModels
                         item.ComponentId,
                         item.RackId,
                         item.CellId,
-                        item.IssueQuantity))
+                        item.OperationQuantity))
                     .ToList();
 
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
@@ -164,14 +163,15 @@ namespace WMS.Desktop.ViewModels
         public async Task RefreshAsync()
         {
             if (_isLoading) return;
+
             _isLoading = true;
 
             try
             {
-                Stocks.Clear();
+                _stocks.Clear();
                 var items = await _issueService.GetAllAsync();
                 foreach (var item in items)
-                    Stocks.Add(item);
+                    _stocks.Add(item);
 
                 ApplyFilter();
             }
@@ -212,37 +212,19 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task LoadRacks()
+        public async Task LoadWarehouseVisualise()
         {
             try
             {
-                Racks.Clear();
-                var items = await _rackService.GetAllAsync();
-                foreach (var item in items)
-                    Racks.Add(new RackViewModel(item, IssueItems));
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            finally
-            {
-                _isLoading = false;
-            }
-        }
+                allRacksToVisualise.Clear();
+                var racks = await _rackService.GetAllAsync();
+                foreach (var item in racks)
+                    allRacksToVisualise.Add(new RackViewModel(item, IssueItems));
 
-        public async Task LoadCells()
-        {
-            try
-            {
-                Cells.Clear();
-                var items = await _cellService.GetAllAsync();
-                foreach (var item in items)
-                    Cells.Add(new CellViewModel(item, IssueItems));
+                allCellsToVisualise.Clear();
+                var cells = await _cellService.GetAllAsync();
+                foreach (var item in cells)
+                    allCellsToVisualise.Add(new CellViewModel(item, IssueItems));
             }
             catch (OverallDomainException ex)
             {
@@ -262,7 +244,7 @@ namespace WMS.Desktop.ViewModels
         {
             FilteredStocks.Clear();
 
-            var query = Stocks.AsEnumerable();
+            var query = _stocks.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
@@ -282,23 +264,18 @@ namespace WMS.Desktop.ViewModels
 
         private void AddIssueItem(object obj)
         {
-            if (obj is not IssueStockDto item)
+            if (obj is not StockViewDto item)
                 return;
 
             if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
                 return;
 
             IssueItems.Add(item);
-
-            var cell = Cells.First(c => c.Id == item.CellId);
-            
-            var rackVm = Racks.First(r => r.Id == cell.RackId);
-
         }
 
         private void RemoveIssueItem (object obj)
         {
-            if (obj is not IssueStockDto item)
+            if (obj is not StockViewDto item)
                 return;
 
             IssueItems.Remove(item);
