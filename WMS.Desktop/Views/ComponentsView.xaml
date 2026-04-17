@@ -22,7 +22,7 @@
 
         <Grid Grid.Row="0" Margin="10,0">
             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
-                Text="Список товаров" FontSize="30" Foreground="White"/>
+                Text="Каталог товаров" FontSize="30" Foreground="White"/>
         </Grid>
 
         <Grid Grid.Row="2"
@@ -144,13 +144,6 @@
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>
                     <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*"/>
-                    <DataGridTextColumn Header="Мин. количество" Binding="{Binding MinQuantity}">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

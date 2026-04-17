@@ -151,7 +151,6 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-
             var sb = new StringBuilder();
 
             sb.AppendLine("Вы уверены, что хотите выполнить выдачу?");

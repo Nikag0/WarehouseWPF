@@ -246,6 +246,7 @@ namespace WMS.Desktop.ViewModels
                 ReceiptItem.CellId = Guid.Empty;
                 SearchFreeCell = string.Empty;
                 ReceiptItem.OperationQuantity = 0;
+                CommentText = string.Empty;
 
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
                 await LoadWindow();
