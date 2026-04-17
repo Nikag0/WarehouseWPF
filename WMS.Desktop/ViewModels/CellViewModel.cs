@@ -51,8 +51,8 @@ namespace WMS.Desktop.ViewModels
         {
             Id = cell.Id;
             RackId = cell.RackId;
-            Line = cell.Line;
-            Column = cell.Column;
+            Line = cell.Column;
+            Column = cell.Row;
 
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
@@ -65,8 +65,8 @@ namespace WMS.Desktop.ViewModels
         {
             Id = cell.Id;
             RackId = cell.RackId;
-            Line = cell.Line;
-            Column = cell.Column;
+            Line = cell.Column;
+            Column = cell.Row;
 
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>

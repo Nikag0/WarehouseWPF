@@ -9,21 +9,21 @@ namespace WMS.Domain
     public class Rack
     {
         public Guid Id { get; private set; }
+        public int Column { get; private set; }
         public int Row { get; private set; }
-        public int RackNum { get; private set; }
 
         private readonly List<Cell> _cells = new();
         public IReadOnlyCollection<Cell> Cells => _cells;
 
         private Rack() { } // EF
 
-        public Rack(int row, int rackNum)
+        public Rack(int column, int row)
         {
             Id = Guid.NewGuid();
+            Column = column;
             Row = row;
-            RackNum = rackNum;
         }
 
-        public string RackCode => $"{Row}-{RackNum}";
+        public string RackCode => $"{Column}-{Row}";
     }
 }

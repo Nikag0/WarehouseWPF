@@ -403,8 +403,8 @@ namespace WMS.Desktop.ViewModels
             }
 
             var sortedQuery = query
-                             .OrderByDescending(r => r.Row)
-                             .ThenByDescending(r => r.RackNum);
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
 
             ReplaceCollection(FilteredRacks, sortedQuery);
         }
@@ -440,8 +440,8 @@ namespace WMS.Desktop.ViewModels
             }
 
             var sortedQuery = query
-                             .OrderByDescending(r => r.Line)
-                             .ThenByDescending(r => r.Column);
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
 
             ReplaceCollection(FilteredFreeCells, query);
         }

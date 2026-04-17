@@ -17,13 +17,13 @@ namespace WMS.Infrastructure.Configurations
 
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.Column)
+                .IsRequired();
+
             builder.Property(x => x.Row)
                 .IsRequired();
 
-            builder.Property(x => x.RackNum)
-                .IsRequired();
-
-            builder.HasIndex(x => new { x.Row, x.RackNum })
+            builder.HasIndex(x => new { x.Column, x.Row })
                 .IsUnique();
 
             // Связь (опционально, но полезно явно задать)

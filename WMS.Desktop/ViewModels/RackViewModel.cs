@@ -53,8 +53,8 @@ namespace WMS.Desktop.ViewModels
         public RackViewModel(Rack rack, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
         {
             Id = rack.Id;
-            Row = rack.Row;
-            RackNum = rack.RackNum;
+            Row = rack.Column;
+            RackNum = rack.Row;
 
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
@@ -66,8 +66,8 @@ namespace WMS.Desktop.ViewModels
         public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
         {
             Id = rack.Id;
-            Row = rack.Row;
-            RackNum = rack.RackNum;
+            Row = rack.Column;
+            RackNum = rack.Row;
 
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>

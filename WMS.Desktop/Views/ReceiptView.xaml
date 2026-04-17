@@ -66,8 +66,8 @@
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
                         <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
                         <DataGridTextColumn Header="Производитель" Width="250" Binding="{Binding Manufacturer}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="83" Binding="{Binding RackCode}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="83" Binding="{Binding RackCodeDisplay}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCodeDisplay}"/>
                         <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
                         <DataGridTemplateColumn Width="150">
                             <DataGridTemplateColumn.CellTemplate>

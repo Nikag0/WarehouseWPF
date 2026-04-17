@@ -46,10 +46,10 @@ namespace WMS.Application.Services
                      c.Manufacturer,
                      s.RackId,
                      rack.RackCode,
-                     LocationFormatter.ToRackCode(rack.Row, rack.RackNum),
+                     LocationFormatter.CodeToDisplay(rack.Column, rack.Row),
                      s.CellId,
                      cell.CellCode,
-                     LocationFormatter.ToCellCode(cell.Line, cell.Column),
+                     LocationFormatter.CodeToDisplay(cell.Column, cell.Row),
                      s.Quantity,
                      0);
 

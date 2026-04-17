@@ -20,10 +20,10 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.RackId)
                 .IsRequired();
 
-            builder.Property(x => x.Line)
+            builder.Property(x => x.Column)
                 .IsRequired();
 
-            builder.Property(x => x.Column)
+            builder.Property(x => x.Row)
                 .IsRequired();
 
             // Связь: один Rack -> много Cell
@@ -33,7 +33,7 @@ namespace WMS.Infrastructure.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Уникальность внутри одного Rack
-            builder.HasIndex(x => new { x.RackId, x.Line, x.Column })
+            builder.HasIndex(x => new { x.RackId, x.Column, x.Row })
                 .IsUnique();
         }
     }

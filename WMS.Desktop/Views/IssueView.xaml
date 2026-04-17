@@ -106,7 +106,7 @@
                                         <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="  Стеллаж: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="{Binding RackCodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="    Ячейка" FontSize="14" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="    Ячейка:" Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="{Binding CellCodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
                                         <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                         <Button Content="Добавить к выдаче"

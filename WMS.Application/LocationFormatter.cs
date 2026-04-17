@@ -1,27 +1,22 @@
 ﻿public static class LocationFormatter
 {
-    public static string ToRackCode(int row, int rackNum)
+    public static string CodeToDisplay(int column, int row)
     {
-        return $"{ToLetter(row)}-{rackNum}";
-    }
-
-    public static string ToCellCode(int line, int column)
-    {
-        return $"{ToLetter(line)}-{column}";
+        return $"{ToLetter(column)}-{row}";
     }
 
     private static string ToLetter(int number)
     {
         return number switch
         {
-            1 => "A",
-            2 => "B",
-            3 => "C",
-            4 => "D",
-            5 => "E",
-            6 => "F",
-            7 => "G",
-            8 => "H",
+            1 => "А",
+            2 => "Б",
+            3 => "В",
+            4 => "Г",
+            5 => "Д",
+            6 => "Е",
+            7 => "Ж",
+            8 => "З",
             _ => number.ToString()
         };
     }
