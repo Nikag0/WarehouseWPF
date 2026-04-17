@@ -3,14 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:WMS.Desktop.Views" 
+             xmlns:local="clr-namespace:WMS.Desktop.Views"
              xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
              d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="1008"
-             d:DesignWidth="1920">
+             d:DesignWidth="1920"
+             PreviewMouseDown="Root_PreviewMouseDown">
 
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
@@ -34,7 +35,7 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0"
-                       Text="Приём заказов" 
+                       Text="Приём товаров" 
                        FontSize="30" 
                        HorizontalAlignment="Left" 
                        VerticalAlignment="Center"
@@ -42,68 +43,12 @@
 
             <Grid Grid.Row="1">
 
-                <TextBox Grid.Column="0"
-                         x:Name="SearchComponentsToReceipt"  
+                <TextBox x:Name="SearchToReceipt" 
+                         Grid.Column="0"
                          Margin="0,10" 
                          IsTabStop="False"
                          Style="{StaticResource WatermarkTextBox}"
-                         Text="{Binding SearchComponents, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Popup 
-                         PlacementTarget="{Binding ElementName=SearchComponentsToReceipt}" 
-                         Tag="{Binding ElementName=SearchComponentsToReceipt}"
-                         Style="{StaticResource FilterComponentsPopupStyle}"
-                         Placement="Bottom" 
-                         AllowsTransparency="True"
-                         StaysOpen="True"
-                         HorizontalOffset="0"
-                         VerticalOffset="2">
-
-                    <Border Background="White" 
-                         BorderBrush="#DDD" 
-                         BorderThickness="1" 
-                         Width="{Binding ElementName=SearchComponentsToReceipt, Path=ActualWidth}">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
-                        </Border.Effect>
-
-                        <ListBox ItemsSource="{Binding FilteredComponents}"
-                            BorderThickness="0"
-                            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="5">
-
-                                        <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Name}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="  Производитель: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                        <Button Content="Добавить к приёмке"
-                                            Command="{Binding DataContext.AddItemToReceiptCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                            CommandParameter="{Binding}">
-                                            <Button.Style>
-                                                <Style TargetType="Button">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                             Path=IsMouseOver}" 
-                                                             Value="True">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
-                </Popup>
+                         Text="{Binding SearchtemsToIssue, UpdateSourceTrigger=PropertyChanged}"/>
 
             </Grid>
 
@@ -113,13 +58,14 @@
                     <ColumnDefinition Width="44*"/>
                 </Grid.ColumnDefinitions>
 
-                <DataGrid ItemsSource="{Binding Stocks}" 
-                      AutoGenerateColumns="False" 
-                      FontSize="15" 
-                      IsReadOnly="True" Grid.ColumnSpan="2">
+                <DataGrid ItemsSource="{Binding FilteredItemsToIssue}" 
+                          AutoGenerateColumns="False" 
+                          FontSize="15" 
+                          IsReadOnly="True" Grid.ColumnSpan="2">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
                         <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
+                        <DataGridTextColumn Header="Производитель" Width="250" Binding="{Binding Manufacturer}"/>
                         <DataGridTextColumn Header="Стеллаж" Width="83" Binding="{Binding RackCode}"/>
                         <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCode}"/>
                         <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
@@ -262,18 +208,20 @@
                                    Text="Стеллаж" 
                                    Foreground="White" 
                                    FontSize="15"/>
-                        
-                        <TextBox Grid.Column="1"
-                                 x:Name="SearchRack" 
+
+                        <TextBox x:Name="SearchRack" 
+                                 GotKeyboardFocus="SearchRack_GotKeyboardFocus"
+                                 PreviewKeyDown="SearchRack_PreviewKeyDown"
+                                 Grid.Column="1"
                                  Margin="5"
                                  IsTabStop="False"
                                  Style="{StaticResource WatermarkTextBox}"
                                  Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
-                        <Popup PlacementTarget="{Binding ElementName=SearchRack}" 
-                               Tag="{Binding ElementName=SearchRack}"
-                               Style="{StaticResource FilterRackPopupStyle}"
+                        <Popup x:Name="RackPopup"
+                               PlacementTarget="{Binding ElementName=SearchRack}" 
+                               IsOpen="{Binding IsRackPopupOpen}"
                                Placement="Bottom" 
                                AllowsTransparency="True"
                                StaysOpen="True"
@@ -315,17 +263,19 @@
                                    Foreground="White" 
                                    FontSize="15"/>
 
-                        <TextBox Grid.Column="3"
-                                 x:Name="SearchCell" 
+                        <TextBox x:Name="SearchCell"
+                                 Grid.Column="3"
+                                 GotKeyboardFocus="SearchCell_GotKeyboardFocus"
+                                 PreviewKeyDown="SearchCell_PreviewKeyDown"
                                  Margin="5"
                                  IsTabStop="False"
                                  Style="{StaticResource WatermarkTextBox}"
                                  Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
-                        <Popup PlacementTarget="{Binding ElementName=SearchCell}" 
-                               Tag="{Binding ElementName=SearchCell}"
-                               Style="{StaticResource FilterCellPopupStyle}"
+                        <Popup x:Name="CellPopup"
+                               PlacementTarget="{Binding ElementName=SearchCell}" 
+                               IsOpen="{Binding IsCellPopupOpen}"
                                Placement="Bottom" 
                                AllowsTransparency="True"
                                StaysOpen="True"
@@ -446,693 +396,10 @@
                 <RowDefinition Height="4*"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <local:RacksGridControl x:Name="RacksGrid"
+                                    Grid.Row="0"/>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="20*"/>
-                </Grid.RowDefinitions>
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="20*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Row="0"
-                      Grid.Column="1">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="21*"/>
-                        <ColumnDefinition Width="29.5*"/>
-                        <ColumnDefinition Width="21*"/>
-                        <ColumnDefinition Width="21*"/>
-                        <ColumnDefinition Width="6*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="1"
-                               Text="1"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Column="2"
-                               Text="2"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Column="3"
-                               Text="3"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Column="4"
-                               Text="4"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                </Grid>
-
-                <Grid Grid.Row="1"
-                      Grid.Column="0">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="10*"/>
-                        <RowDefinition Height="17*"/>
-                        <RowDefinition Height="10*"/>
-                        <RowDefinition Height="17*"/>
-                        <RowDefinition Height="5.5*"/>
-                        <RowDefinition Height="9.5*"/>
-                        <RowDefinition Height="17*"/>
-                        <RowDefinition Height="10*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="1"
-                               Text="A"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Row="3"
-                               Text="Б"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Row="5"
-                               Text="В"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Row="6"
-                               Text="Г"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-
-                    <TextBlock Grid.Row="8"
-                               Text="Д"
-                               Foreground="White"
-                               FontSize="25"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                </Grid>
-
-                <Grid Grid.Row="1"
-                      Grid.Column="1">
-
-                    <Image Source="/Images/Warehouse.png" 
-                            Width="auto" 
-                            Height="auto"
-                            Stretch="Fill"/>
-
-                    <Grid>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="50*"/>
-                            <RowDefinition Height="5*"/>
-                            <RowDefinition Height="5*"/>
-                            <RowDefinition Height="38*"/>
-                        </Grid.RowDefinitions>
-
-                        <Grid Grid.Row="1">
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="8.6*"/>
-                                <ColumnDefinition Width="16.6*"/>
-                                <ColumnDefinition Width="16.6*"/>
-                                <ColumnDefinition Width="16.6*"/>
-                                <ColumnDefinition Width="16.6*"/>
-                                <ColumnDefinition Width="28*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Column="1"
-                                       Text="1"
-                                       Foreground="White"
-                                       FontSize="25"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="2"
-                                       Text="2"
-                                       Foreground="White"
-                                       FontSize="25"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="3"
-                                       Text="3"
-                                       Foreground="White"
-                                       FontSize="25"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-
-                            <TextBlock Grid.Column="4"
-                                       Text="4"
-                                       Foreground="White"
-                                       FontSize="25"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-
-                        </Grid>
-
-                        <Grid Grid.Row="0"
-                              Grid.RowSpan="4">
-
-                            <ItemsControl ItemsSource="{Binding NormalVisibleRacks}">
-
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="1*"/>
-                                                <RowDefinition Height="10*"/>
-                                                <RowDefinition Height="17*"/>
-                                                <RowDefinition Height="10*"/>
-                                                <RowDefinition Height="17*"/>
-                                                <RowDefinition Height="5.5*"/>
-                                                <RowDefinition Height="9.5*"/>
-                                                <RowDefinition Height="17*"/>
-                                                <RowDefinition Height="10*"/>
-                                                <RowDefinition Height="1*"/>
-                                            </Grid.RowDefinitions>
-
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="1.5*"/>
-                                                <ColumnDefinition Width="21*"/>
-                                                <ColumnDefinition Width="29.5*"/>
-                                                <ColumnDefinition Width="21*"/>
-                                                <ColumnDefinition Width="21*"/>
-                                                <ColumnDefinition Width="6*"/>
-                                            </Grid.ColumnDefinitions>
-                                        </Grid>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemContainerStyle>
-                                    <Style>
-                                        <Setter Property="Grid.Row" Value="{Binding Row}"/>
-                                        <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
-                                    </Style>
-                                </ItemsControl.ItemContainerStyle>
-
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="Gray"
-                                                BorderThickness="1"
-                                                MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
-
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="Transparent"/>
-
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
-                                                            <Setter Property="Background" Value="Yellow"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-
-                            </ItemsControl>
-
-                        </Grid>
-                                                        <!--<DataTrigger Binding="{Binding IsSelect}" Value="True">
-                                                            <Setter Property="BorderBrush" Value="Red"/>
-                                                            <Setter Property="BorderThickness" Value="4"/>
-                                                        </DataTrigger>-->
-
-                        <Grid Grid.Row="2">
-
-                            <ItemsControl ItemsSource="{Binding SpecialVisibleRacks}">
-
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="8.6*"/>
-                                                <ColumnDefinition Width="16.6*"/>
-                                                <ColumnDefinition Width="16.6*"/>
-                                                <ColumnDefinition Width="16.6*"/>
-                                                <ColumnDefinition Width="16.6*"/>
-                                                <ColumnDefinition Width="28*"/>
-                                            </Grid.ColumnDefinitions>
-                                        </Grid>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-                                <ItemsControl.ItemContainerStyle>
-                                    <Style>
-                                        <Setter Property="Grid.Column" Value="{Binding RackNum}"/>
-                                    </Style>
-                                </ItemsControl.ItemContainerStyle>
-
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border BorderBrush="Gray"
-                                            Opacity="0.5"
-                                            BorderThickness="1"
-                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
-
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="Transparent"/>
-
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
-                                                            <Setter Property="Background" Value="Yellow"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-
-                            </ItemsControl>
-                        </Grid>
-
-                        <!--<Grid Grid.Row="2" 
-                    Grid.Column="5"
-                    Margin="0,0,3,0">
-                  <Rectangle 
-                      Stroke="Gray" 
-                      StrokeThickness="1"
-                      Fill="LightGray" />
-
-                  <TextBlock 
-                      Text="👤" 
-                      HorizontalAlignment="Center" 
-                      VerticalAlignment="Center" 
-                      FontSize="20" 
-                      Foreground="Black"/>
-              </Grid>-->
-
-                    </Grid>
-
-                </Grid>
-
-            </Grid>
-
-            <Grid Grid.Row="1">
-
-                <Grid x:Name="Row1Grid"
-                      Visibility="Visible">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="6*"/>
-                        <RowDefinition Height="7*"/>
-                        <RowDefinition Height="73*"/>
-                        <RowDefinition Height="13*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="32*"/>
-                        <ColumnDefinition Width="4*"/>
-                        <ColumnDefinition Width="27*"/>
-                        <ColumnDefinition Width="36*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Grid Grid.Column="1"
-                          Grid.Row="2">
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*"/>
-                            <RowDefinition Height="13*"/>
-                            <RowDefinition Height="13.5*"/>
-                            <RowDefinition Height="13.5*"/>
-                            <RowDefinition Height="13.5*"/>
-                            <RowDefinition Height="13*"/>
-                            <RowDefinition Height="13*"/>
-                            <RowDefinition Height="13*"/>
-                            <RowDefinition Height="4.5*"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Row="1"
-                            Text="A"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="2"
-                            Text="Б"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="3"
-                            Text="В"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="4"
-                            Text="Г"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="5"
-                            Text="Д"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="6"
-                            Text="E"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Row="7"
-                            Text="Ж"
-                            Foreground="White"
-                            FontSize="25"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                    </Grid>
-
-                    <Grid Grid.Row="1"
-                          Grid.Column="2">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="25*"/>
-                            <ColumnDefinition Width="25*"/>
-                            <ColumnDefinition Width="25*"/>
-                            <ColumnDefinition Width="25*"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="1"
-                           Text="1"
-                           Foreground="White"
-                           FontSize="25"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="2"
-                           Text="2"
-                           Foreground="White"
-                           FontSize="25"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="3"
-                           Text="3"
-                           Foreground="White"
-                           FontSize="25"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="4"
-                           Text="4"
-                           Foreground="White"
-                           FontSize="25"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-
-                    </Grid>
-
-                    <Image Grid.Column="2"
-                           Grid.Row="2"
-                           Source="/Images/Row2.jpg" 
-                           Width="auto" 
-                           Height="auto"
-                           Stretch="Fill"/>
-
-                    <Grid Grid.Column="2"
-                          Grid.Row="2">
-
-                        <ItemsControl ItemsSource="{Binding VisibleCells}">
-
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="1*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="4.5*"/>
-                                        </Grid.RowDefinitions>
-
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="1*"/>
-                                            <ColumnDefinition Width="25*"/>
-                                            <ColumnDefinition Width="25*"/>
-                                            <ColumnDefinition Width="25*"/>
-                                            <ColumnDefinition Width="25*"/>
-                                            <ColumnDefinition Width="1*"/>
-                                        </Grid.ColumnDefinitions>
-                                    </Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                            <ItemsControl.ItemContainerStyle>
-                                <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                                    <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
-
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="Gray"
-                                            Opacity="0.5"
-                                            BorderThickness="1"
-                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
-
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
-
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                                
-                                                
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-
-                        </ItemsControl>
-
-                    </Grid>
-
-                </Grid>
-
-                <Grid x:Name="Row2Grid"
-                Visibility="Collapsed">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="13*"/>
-                        <RowDefinition Height="73*"/>
-                        <RowDefinition Height="13*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="36*"/>
-                        <ColumnDefinition Width="27*"/>
-                        <ColumnDefinition Width="36*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Image Grid.Column="1"
-                     Grid.Row="1"
-                     Source="/Images/Row1.jpg" 
-                     Width="auto" 
-                     Height="auto"
-                     Stretch="Fill"/>
-
-                    <Grid Grid.Column="1"
-                    Grid.Row="1">
-
-                        <ItemsControl ItemsSource="{Binding VisibleCells}">
-
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="2*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13.5*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="4.5*"/>
-                                        </Grid.RowDefinitions>
-
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="0.5*"/>
-                                            <ColumnDefinition Width="33*"/>
-                                            <ColumnDefinition Width="33*"/>
-                                            <ColumnDefinition Width="33*"/>
-                                            <ColumnDefinition Width="0.5*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                    </Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                            <ItemsControl.ItemContainerStyle>
-                                <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                                    <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
-
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="Gray"
-                                            Opacity="0.5"
-                                            BorderThickness="1"
-                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
-
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
-
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-
-                        </ItemsControl>
-
-                    </Grid>
-
-                </Grid>
-
-                <Grid x:Name="Row3Grid"
-                Visibility="Collapsed">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="13*"/>
-                        <RowDefinition Height="73*"/>
-                        <RowDefinition Height="13*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="36*"/>
-                        <ColumnDefinition Width="27*"/>
-                        <ColumnDefinition Width="36*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Image Grid.Column="1"
-                     Grid.Row="1"
-                     Source="/Images/Row3.jpg" 
-                     Width="auto" 
-                     Height="auto"
-                     Stretch="Fill"/>
-
-                    <Grid Grid.Column="1"
-                    Grid.Row="1">
-
-                        <ItemsControl ItemsSource="{Binding VisibleCells}">
-
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="2*"/>
-                                            <RowDefinition Height="11*"/>
-                                            <RowDefinition Height="11.5*"/>
-                                            <RowDefinition Height="11.5*"/>
-                                            <RowDefinition Height="12*"/>
-                                            <RowDefinition Height="13*"/>
-                                            <RowDefinition Height="16*"/>
-                                            <RowDefinition Height="15*"/>
-                                            <RowDefinition Height="7*"/>
-                                        </Grid.RowDefinitions>
-
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="5*"/>
-                                            <ColumnDefinition Width="90*"/>
-                                            <ColumnDefinition Width="5*"/>
-                                        </Grid.ColumnDefinitions>
-                                    </Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                            <ItemsControl.ItemContainerStyle>
-                                <Style>
-                                    <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                                    <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                                </Style>
-                            </ItemsControl.ItemContainerStyle>
-
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border BorderBrush="Gray"
-                                            Opacity="0.5"
-                                            BorderThickness="1"
-                                            MouseLeftButtonDown="RackBorder_MouseLeftButtonDown">
-
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="Transparent"/>
-
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelectToReceipt}" Value="True">
-                                                        <Setter Property="Background" Value="Yellow"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-
-                        </ItemsControl>
-
-                    </Grid>
-
-                </Grid>
-
-            </Grid>
+            <local:CellsGridControl Grid.Row="1"/>
 
         </Grid>
 

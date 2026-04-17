@@ -17,15 +17,13 @@ using WMS.Domain;
 
 namespace WMS.Desktop.Views
 {
-    /// <summary>
-    /// Interaction logic for StockView.xaml
-    /// </summary>
     public partial class ReceiptView : UserControl
     {
         public ReceiptView()
         {
             InitializeComponent();
             this.Loaded += ReceiptViewLoaded;
+            RacksGrid.RackClicked += OnRackClicked;
         }
 
         private async void ReceiptViewLoaded(object sender, RoutedEventArgs e)
@@ -38,34 +36,92 @@ namespace WMS.Desktop.Views
             }
         }
 
-        private void RackBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnRackClicked(RackViewModel rackVm)
         {
-            if (sender is Border border && border.DataContext is RackViewModel rackVm)
-            {
-                var vm = (ReceiptViewModel)DataContext;
-                vm.SelectedRack= rackVm;
-                int row = rackVm.Row;
-                int column = rackVm.RackNum;
+            if (DataContext is not ReceiptViewModel vm)
+                return;
 
-                if (row != 5 && column == 2)
-                {
-                    Row1Grid.Visibility = Visibility.Visible;
-                    Row2Grid.Visibility = Visibility.Collapsed;
-                    Row3Grid.Visibility = Visibility.Collapsed;
-                }
-                else if (row != 5 && (column == 1 || column == 3 || column == 4))
-                {
-                    Row1Grid.Visibility = Visibility.Collapsed;
-                    Row2Grid.Visibility = Visibility.Visible;
-                    Row3Grid.Visibility = Visibility.Collapsed;
-                }
-                else if (row == 5)
-                {
-                    Row1Grid.Visibility = Visibility.Collapsed;
-                    Row2Grid.Visibility = Visibility.Collapsed;
-                    Row3Grid.Visibility = Visibility.Visible;
-                }
+            vm.SelectedRack = rackVm;
+
+            int row = rackVm.Row;
+            int column = rackVm.RackNum;
+
+            if (row != 5 && column == 2)
+                vm.CurrentCellType = CellsType.Cell1;
+
+            else if (row != 5 && (column == 1 || column == 3 || column == 4))
+                vm.CurrentCellType = CellsType.Cell2;
+
+            else if (row == 5)
+                vm.CurrentCellType = CellsType.Cell3;
+        }
+
+        private void SearchRack_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (DataContext is ReceiptViewModel vm)
+            {
+                vm.IsRackPopupOpen = true;
             }
+        }
+
+        private void SearchCell_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (DataContext is ReceiptViewModel vm)
+            {
+                vm.IsCellPopupOpen = true;
+            }
+        }
+
+        private void SearchRack_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (DataContext is ReceiptViewModel vm)
+            {
+                PopupHelper.HandleEscape(e, () =>
+                {
+                    vm.IsRackPopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
+            }
+        }
+
+        private void SearchCell_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (DataContext is ReceiptViewModel vm)
+            {
+                PopupHelper.HandleEscape(e, () =>
+                {
+                    vm.IsCellPopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
+            }
+        }
+
+        private void Root_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not ReceiptViewModel vm)
+                return;
+
+            PopupHelper.HandleOutsideClick(
+                sender,
+                e,
+                RackPopup,
+                SearchRack,
+                () =>
+                {
+                     vm.IsRackPopupOpen = false;
+                     Keyboard.ClearFocus();
+                });
+
+            PopupHelper.HandleOutsideClick(
+                sender,
+                e,
+                CellPopup,
+                SearchCell,
+                () =>
+                {
+                    vm.IsCellPopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
         }
     }
 }

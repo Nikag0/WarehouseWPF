@@ -27,7 +27,7 @@ namespace WMS.Application.Services
             _cellRepo = cellRepo;
         }
             
-        public async Task<List<StockViewDto>> GetAllAsync()
+        public async Task<List<ViewItemDTO>> GetAllAsync()
         {
             var stocks = await _stockRepo.GetAllAsync();
             var components = await _componentRepo.GetAllAsync();
@@ -39,15 +39,17 @@ namespace WMS.Application.Services
                  join c in components on s.ComponentId equals c.Id
                  join rack in racks on s.RackId equals rack.Id
                  join cell in cells on s.CellId equals cell.Id
-                 select new StockViewDto(
+                 select new ViewItemDTO(
                      s.ComponentId,
                      c.Article,
                      c.Name,
                      c.Manufacturer,
                      s.RackId,
                      rack.RackCode,
+                     LocationFormatter.ToRackCode(rack.Row, rack.RackNum),
                      s.CellId,
                      cell.CellCode,
+                     LocationFormatter.ToCellCode(cell.Line, cell.Column),
                      s.Quantity,
                      0);
 

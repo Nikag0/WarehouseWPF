@@ -25,20 +25,29 @@ namespace WMS.Application.Services
             _operationRepo = operationRepo;
         }
 
-        public async Task<List<ComponentDTO>> GetAllComponentsAsync()
+        public async Task<List<ViewItemDTO>> GetAllComponentsAsync()
         {
             var components = await _componentRepo.GetAllAsync();
 
-            return components.Select(c => new ComponentDTO(
-                c.Id,
-                c.Article,
-                c.Name,
-                c.Manufacturer,
-                10)).
-                ToList();
+            return components
+                .Where(c => !c.IsDelet)
+                .Select(c => new ViewItemDTO(
+                    c.Id,
+                    c.Article,
+                    c.Name,
+                    c.Manufacturer,
+                    Guid.Empty,
+                    "-",
+                    "-",
+                    Guid.Empty,
+                    "-",
+                    "-",
+                    0,
+                    0
+            )).ToList();
         }
 
-        public async Task ReceiveAsync(OperationDTO item, string operatorName, string? comment = null)
+        public async Task ReceiveAsync(ServiceItemDTO item, string operatorName, string? comment = null)
         {
             if (item == null)
                 return;

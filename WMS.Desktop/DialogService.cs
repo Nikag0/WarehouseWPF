@@ -24,5 +24,12 @@ namespace WMS.Desktop
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+
+        public bool ShowConfirmation(string message, string title = "Подтверждение")
+        {
+            var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            return result == MessageBoxResult.Yes;
+        }
     }
 }

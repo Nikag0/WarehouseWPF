@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Input;
@@ -14,8 +15,8 @@ namespace WMS.Desktop.ViewModels
 {
     public class IssueViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<StockViewDto> IssueItems { get; } = new();
-        public ObservableCollection<StockViewDto> FilteredStocks { get; } = new();
+        public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
+        public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
         private ObservableCollection<RackViewModel> allRacksToVisualise { get; set; } = new();
         private ObservableCollection<CellViewModel> allCellsToVisualise { get; } = new();
@@ -57,8 +58,8 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
-        public RackViewModel SelectedRack
+        
+        public RackViewModel SelectedRack // Свойство решает, ячейки какого стеллажа будут визуализироваться.
         {
             get => _selectedRack;
             set
@@ -74,13 +75,34 @@ namespace WMS.Desktop.ViewModels
             allRacksToVisualise.Where(r => r.Row == 5);
         public IEnumerable<CellViewModel> VisibleCells =>
             allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
+        public CellsType CurrentCellType
+        {
+            get => _currentCellType;
+            set
+            {
+                _currentCellType = value;
+                OnPropertyChanged();
+            }
+        }
+        private CellsType _currentCellType;
 
-        private readonly List<StockViewDto> _stocks = new();
+        private readonly List<ViewItemDTO> _stocks = new();
         private string _searchText;
         private string _commentText;
         private Operator _operatorName;
         private bool _isLoading;
         private bool _isIssue;
+
+        private bool _isIssuePopupOpen;
+        public bool IsIssuePopupOpen
+        {
+            get => _isIssuePopupOpen;
+            set
+            {
+                _isIssuePopupOpen = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ICommand IssueCommand { get; }
         public ICommand AddIssueItemCommand { get; }
@@ -129,10 +151,29 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("Вы уверены, что хотите выполнить выдачу?");
+            sb.AppendLine();
+            sb.AppendLine("Список товаров:");
+
+            foreach (var item in IssueItems)
+            {
+                sb.AppendLine($"• {item.Article} | {item.ComponentName}");
+                sb.AppendLine($"  Производитель: {item.Manufacturer}");
+                sb.AppendLine($"  Количество: {item.OperationQuantity}");
+                sb.AppendLine($"  Стеллаж: {item.RackCode} Ячейка: {item.CellCode}");
+                sb.AppendLine();
+            }
+
+            if (!_dialogService.ShowConfirmation(sb.ToString()))
+                return;
+
             try
             {
                 var issueOperation = IssueItems
-                    .Select(item => new OperationDTO(
+                    .Select(item => new ServiceItemDTO(
                         item.ComponentId,
                         item.RackId,
                         item.CellId,
@@ -240,6 +281,20 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        public void SelectRack(RackViewModel rackVm)
+        {
+            SelectedRack = rackVm;
+
+            if (rackVm.Row != 5 && rackVm.RackNum == 2)
+                CurrentCellType = CellsType.Cell1;
+
+            else if (rackVm.Row != 5 && (rackVm.RackNum == 1 || rackVm.RackNum == 3 || rackVm.RackNum == 4))
+                CurrentCellType = CellsType.Cell2;
+
+            else if (rackVm.Row == 5)
+                CurrentCellType = CellsType.Cell3;
+        }
+
         private void ApplyFilter()
         {
             FilteredStocks.Clear();
@@ -264,7 +319,7 @@ namespace WMS.Desktop.ViewModels
 
         private void AddIssueItem(object obj)
         {
-            if (obj is not StockViewDto item)
+            if (obj is not ViewItemDTO item)
                 return;
 
             if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
@@ -275,7 +330,7 @@ namespace WMS.Desktop.ViewModels
 
         private void RemoveIssueItem (object obj)
         {
-            if (obj is not StockViewDto item)
+            if (obj is not ViewItemDTO item)
                 return;
 
             IssueItems.Remove(item);

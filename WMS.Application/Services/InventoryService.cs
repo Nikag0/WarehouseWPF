@@ -22,7 +22,7 @@ namespace WMS.Application.Services
         }
 
         public async Task InventoryAsync(
-            IReadOnlyCollection<OperationDTO> items,
+            IReadOnlyCollection<ServiceItemDTO> items,
             string? comment = null)
         {
             if (items.Count == 0)

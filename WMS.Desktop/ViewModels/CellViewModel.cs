@@ -6,10 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
-using WMS.Desktop.ViewModels;
 using WMS.Domain;
 
-namespace WMS.Desktop
+namespace WMS.Desktop.ViewModels
 {
     public class CellViewModel : INotifyPropertyChanged
     {
@@ -37,17 +36,18 @@ namespace WMS.Desktop
             }
         }
         public int ColumnSpan => Line == 1 ? 4 : 1;
-        public bool IsSelectToIssue =>
-            _selectedItemsToIssue.Any(x=> x.CellId == Id);
-        public bool IsSelectToReceipt =>
-           _selectedItemToReceipt.CellId == Id;
+
+        public bool IsSelectedCell =>
+                    _selectedItemsToIssue != null && _selectedItemsToIssue.Any(x => x.CellId == Id)
+                    ||
+                    _selectedItemToReceipt != null && _selectedItemToReceipt.CellId == Id;
 
         private int _line;
         private int _column;
-        private readonly ObservableCollection<StockViewDto> _selectedItemsToIssue;
+        private readonly ObservableCollection<ViewItemDTO> _selectedItemsToIssue;
         private readonly StockViewModel _selectedItemToReceipt;
 
-        public CellViewModel(Cell cell, ObservableCollection<StockViewDto> selectedItemsToIssue)
+        public CellViewModel(Cell cell, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
         {
             Id = cell.Id;
             RackId = cell.RackId;
@@ -57,7 +57,7 @@ namespace WMS.Desktop
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsSelectToIssue));
+                OnPropertyChanged(nameof(IsSelectedCell));
             };
         }
 
@@ -71,7 +71,7 @@ namespace WMS.Desktop
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsSelectToReceipt));
+                OnPropertyChanged(nameof(IsSelectedCell));
             };
         }
 

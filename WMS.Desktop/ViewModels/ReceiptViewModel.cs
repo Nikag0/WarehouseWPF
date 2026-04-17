@@ -15,22 +15,33 @@ namespace WMS.Desktop.ViewModels
     public class ReceiptViewModel : INotifyPropertyChanged
     {
         // Поиск по компонентам. Верхняя левая часть экрана ReceiptView.
-        private readonly List<ComponentDTO> _allComponents = new();
-        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
-        public string SearchComponents
+        private readonly List<ViewItemDTO> _allComponents = new();
+        public ObservableCollection<ViewItemDTO> FilteredItemsToIssue { get; } = new();
+        public string SearchtemsToIssue
         {
-            get => _searchComponents;
+            get => _searchtemsToIssue;
             set
             {
-                _searchComponents = value;
+                _searchtemsToIssue = value;
                 OnPropertyChanged();
-                FilterComponents();
+                FilterItemsToIssue();
             }
         }
-        private string _searchComponents;
+        private string _searchtemsToIssue;
+        public bool IsReceiptPopupOpen
+        {
+            get => _isReceiptPopupOpen;
+            set
+            {
+                _isReceiptPopupOpen = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _isReceiptPopupOpen;
 
         // Отображение остатков. Средняя левая часть экрана ReceiptView.
-        public ObservableCollection<StockViewDto> Stocks { get; } = new();
+        private readonly List<ViewItemDTO> _allStocks = new();
+        public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
 
         // Приёмка. Нижняя левая часть экрана ReceiptView.
         public StockViewModel ReceiptItem
@@ -59,6 +70,16 @@ namespace WMS.Desktop.ViewModels
             }
         }
         private string _searchRacks;
+        public bool IsRackPopupOpen
+        {
+            get => _isRackPopupOpen;
+            set
+            {
+                _isRackPopupOpen = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _isRackPopupOpen;
 
         private readonly List<Cell> _cells = new();
         private readonly List<Cell> _freeCells = new();
@@ -75,6 +96,16 @@ namespace WMS.Desktop.ViewModels
             }
         }
         private string _searchFreeCell;
+        public bool IsCellPopupOpen
+        {
+            get => _isCellPopupOpen;
+            set
+            {
+                _isCellPopupOpen = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _isCellPopupOpen;
 
         public ObservableCollection<Operator> Operators { get; } = new();
         public Operator OperatorName
@@ -98,12 +129,19 @@ namespace WMS.Desktop.ViewModels
         }
         private string _commentText;
 
-
         // Визуализация
         private ObservableCollection<RackViewModel> racksVisualise { get; set; } = new();
         private ObservableCollection<CellViewModel> cellsVisualise { get; } = new();
-
-        // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
+        public CellsType CurrentCellType
+        {
+            get => _currentCellType;
+            set
+            {
+                _currentCellType = value;
+                OnPropertyChanged();
+            }
+        }
+        private CellsType _currentCellType;
         public RackViewModel SelectedRack
         {
             get => _selectedRack;
@@ -112,7 +150,7 @@ namespace WMS.Desktop.ViewModels
                 _selectedRack = value;
                 OnPropertyChanged(nameof(VisibleCells));
             }
-        }
+        } // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
         private RackViewModel _selectedRack;
         public IEnumerable<RackViewModel> NormalVisibleRacks =>
                 racksVisualise.Where(r => r.Row != 5);
@@ -120,6 +158,7 @@ namespace WMS.Desktop.ViewModels
                 racksVisualise.Where(r => r.Row == 5);
         public IEnumerable<CellViewModel> VisibleCells =>
                 cellsVisualise.Where(c => c.RackId == SelectedRack.Id);
+
 
         private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -130,11 +169,11 @@ namespace WMS.Desktop.ViewModels
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
 
-        public ICommand AddItemToReceiptCommand { get; }
         public ICommand SetRackFromListCommand { get; }
         public ICommand SetCellFromListCommand { get; }
         public ICommand RefreshCommand { get; }
         public ICommand ReceiveCommand { get; }
+        public ICommand AddItemToReceiptCommand { get; }
 
         public ReceiptViewModel(
                StockService stockService,
@@ -152,9 +191,8 @@ namespace WMS.Desktop.ViewModels
             _operatorrService = operatorrService;
 
             RefreshCommand = new RelayCommand(LoadWindow);
+            AddItemToReceiptCommand = new RelayCommand(AddItemToReceipt);
             ReceiveCommand = new RelayCommand(ReceiveAsync);
-            AddItemToReceiptCommand = new RelayCommand(AddItemToReceipt);
-            AddItemToReceiptCommand = new RelayCommand(AddItemToReceipt);
             SetRackFromListCommand = new RelayCommand(SetRackFromList);
             SetCellFromListCommand = new RelayCommand(SetCellFromList);
 
@@ -186,11 +224,18 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
+            if (!_dialogService.ShowConfirmation("Вы уверены, что хотите выполнить приёмку товара? \n" +
+                $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
+                $"Производитель: {ReceiptItem.Manufacturer}\n" +
+                $"Количество: {ReceiptItem.OperationQuantity}\n" +
+                $"Cтеллаж: {SearchRacks} Ячейка: {SearchFreeCell}"))
+                return;
+
             await _lock.WaitAsync();
 
             try
             {
-                var receiptDto = new OperationDTO(
+                var receiptDto = new ServiceItemDTO(
                     ReceiptItem.ComponentId,
                     ReceiptItem.RackId,
                     ReceiptItem.CellId,
@@ -230,6 +275,9 @@ namespace WMS.Desktop.ViewModels
                 _allComponents.Clear();
                 _allComponents.AddRange(await _receiptService.GetAllComponentsAsync());
 
+                _allStocks.Clear();
+                _allStocks.AddRange(await _stockService.GetAllAsync());
+
                 _racks.Clear();
                 _racks.AddRange(await _rackService.GetAllAsync());
 
@@ -238,7 +286,7 @@ namespace WMS.Desktop.ViewModels
 
                 ReplaceCollection(Stocks, await _stockService.GetAllAsync());
 
-                FilterComponents();
+                FilterItemsToIssue();
                 FilterFreeCells();
             }
             catch (OverallDomainException ex)
@@ -293,23 +341,52 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private void FilterComponents()
+        public void SelectRack(RackViewModel rackVm)
         {
-            var query = _allComponents.AsEnumerable();
+            SelectedRack = rackVm;
 
-            if (!string.IsNullOrWhiteSpace(SearchComponents))
+            if (rackVm.Row != 5 && rackVm.RackNum == 2)
+                CurrentCellType = CellsType.Cell1;
+
+            else if (rackVm.Row != 5 && (rackVm.RackNum == 1 || rackVm.RackNum == 3 || rackVm.RackNum == 4))
+                CurrentCellType = CellsType.Cell2;
+
+            else if (rackVm.Row == 5)
+                CurrentCellType = CellsType.Cell3;
+        }
+
+        private void FilterItemsToIssue()
+        {
+            if (string.IsNullOrWhiteSpace(SearchtemsToIssue))
             {
-                var text = SearchComponents.ToLower();
-
-                query = query.Where(c =>
-                        (c.Article?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                        (c.Name?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                        (c.Manufacturer?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false));
+                ReplaceCollection(FilteredItemsToIssue,
+                    _allStocks.OrderByDescending(x => x.ComponentName));
+                return;
             }
 
-            var sortedQuery = query.OrderByDescending(r => r.Name);
+            var text = SearchtemsToIssue;
 
-            ReplaceCollection(FilteredComponents, query);
+            var filteredStocks = _allStocks.Where(FilterPredicate);
+            var filteredComponents = _allComponents.Where(FilterPredicate);
+
+            var stockIds = _allStocks
+                .Select(x => x.ComponentId)
+                .ToHashSet();
+
+            var result = filteredStocks
+                        .Concat(filteredComponents.Where(c =>
+                        !filteredStocks.Any(s => s.ComponentId == c.ComponentId)));
+
+            ReplaceCollection(FilteredItemsToIssue,
+                result.OrderByDescending(x => x.ComponentName));
+        }
+
+        private bool FilterPredicate(ViewItemDTO c)
+        {
+            return
+                (c.Article?.Contains(SearchtemsToIssue, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.ComponentName?.Contains(SearchtemsToIssue, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.Manufacturer?.Contains(SearchtemsToIssue, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         private void FilterRacks()
@@ -387,17 +464,7 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                if (obj is ComponentDTO component)
-                {
-                    ReceiptItem.ComponentId = component.Id;
-                    ReceiptItem.Article = component.Article;
-                    ReceiptItem.ComponentName = component.Name;
-                    ReceiptItem.Manufacturer = component.Manufacturer;
-                    ReceiptItem.RackId = Guid.Empty;
-                    ReceiptItem.CellId = Guid.Empty;
-                }
-
-                if (obj is StockViewDto stock)
+                if (obj is ViewItemDTO stock)
                 {
                     ReceiptItem.ComponentId = stock.ComponentId;
                     ReceiptItem.Article = stock.Article;

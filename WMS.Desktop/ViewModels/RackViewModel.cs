@@ -5,10 +5,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WMS.Desktop.ViewModels;
 using WMS.Domain;
 
-namespace WMS.Desktop
+namespace WMS.Desktop.ViewModels
 {
     public class RackViewModel : INotifyPropertyChanged
     {
@@ -41,17 +40,17 @@ namespace WMS.Desktop
                 OnPropertyChanged(nameof(RackNum));
             }
         }
-        public bool IsSelectToIssue =>
-           _selectedItemsToIssue.Any(x => x.RackId == Id);
-        public bool IsSelectToReceipt =>
-           _selectedItemToReceipt.RackId == Id;
+        public bool IsSelectedRack =>
+                   _selectedItemsToIssue != null && _selectedItemsToIssue.Any(x => x.RackId == Id)
+                   ||
+                   _selectedItemToReceipt != null && _selectedItemToReceipt.RackId == Id;
 
         private int _row;
         private int _rackNum;
-        private readonly ObservableCollection<StockViewDto> _selectedItemsToIssue;
+        private readonly ObservableCollection<ViewItemDTO> _selectedItemsToIssue;
         private readonly StockViewModel _selectedItemToReceipt;
 
-        public RackViewModel(Rack rack, ObservableCollection<StockViewDto> selectedItemsToIssue)
+        public RackViewModel(Rack rack, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
         {
             Id = rack.Id;
             Row = rack.Row;
@@ -60,9 +59,10 @@ namespace WMS.Desktop
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsSelectToIssue));
+                OnPropertyChanged(nameof(IsSelectedRack));
             };
         }
+
         public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
         {
             Id = rack.Id;
@@ -72,7 +72,7 @@ namespace WMS.Desktop
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>
             {
-                OnPropertyChanged(nameof(IsSelectToReceipt));
+                OnPropertyChanged(nameof(IsSelectedRack));
             };
         }
 

@@ -28,10 +28,11 @@ namespace WMS.Desktop.Views
         public IssueView()
         {
             InitializeComponent();
-            this.Loaded += UsersViewLoaded;
+            this.Loaded += IssueViewLoaded;
+            RacksGrid.RackClicked += OnRackClicked;
         }
 
-        private async void UsersViewLoaded(object sender, RoutedEventArgs e)
+        private async void IssueViewLoaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is IssueViewModel viewModel)
             {
@@ -41,34 +42,61 @@ namespace WMS.Desktop.Views
             }
         }
 
-        private void RackBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnRackClicked(RackViewModel rackVm)
         {
-            if (sender is Border border && border.DataContext is RackViewModel rackVm)
-            {
-                var vm = (IssueViewModel)DataContext;
-                vm.SelectedRack = rackVm;
-                int row = rackVm.Row;
-                int column = rackVm.RackNum;
+            if (DataContext is not IssueViewModel vm)
+                return;
 
-                if (row != 5 && column == 2)
-                {
-                    Row1Grid.Visibility = Visibility.Visible;
-                    Row2Grid.Visibility = Visibility.Collapsed;
-                    Row3Grid.Visibility = Visibility.Collapsed;
-                }
-                else if (row != 5 && (column == 1 || column == 3 || column == 4))
-                {
-                    Row1Grid.Visibility = Visibility.Collapsed;
-                    Row2Grid.Visibility = Visibility.Visible;
-                    Row3Grid.Visibility = Visibility.Collapsed;
-                }
-                else if (row == 5)
-                {
-                    Row1Grid.Visibility = Visibility.Collapsed;
-                    Row2Grid.Visibility = Visibility.Collapsed;
-                    Row3Grid.Visibility = Visibility.Visible;
-                }
+            vm.SelectedRack = rackVm;
+
+            int row = rackVm.Row;
+            int column = rackVm.RackNum;
+
+            if (row != 5 && column == 2)
+                vm.CurrentCellType = CellsType.Cell1;
+
+            else if (row != 5 && (column == 1 || column == 3 || column == 4))
+                vm.CurrentCellType = CellsType.Cell2;
+
+            else if (row == 5)
+                vm.CurrentCellType = CellsType.Cell3;
+        }
+
+        private void SearchToIssue_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (DataContext is IssueViewModel vm)
+            {
+                vm.IsIssuePopupOpen = true;
             }
+        }
+
+        private void SearchToIssue_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (DataContext is IssueViewModel vm)
+            {
+                PopupHelper.HandleEscape(e, () =>
+                {
+                    vm.IsIssuePopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
+            }
+        }
+
+        private void Root_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not IssueViewModel vm)
+                return;
+
+            PopupHelper.HandleOutsideClick(
+                sender,
+                e,
+                IssuePopup,
+                SearchToIssue,
+                () =>
+                {
+                    vm.IsIssuePopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
         }
     }
 }
