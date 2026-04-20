@@ -24,15 +24,16 @@
     {
         return $"{ToCode(column)}-{row}";
     }
+
     private static int ToCode(int number)
     {
         return number switch
         {
             1 => 1,
-            2 => 1,
-            3 => 1,
-            4 => 1,
-            5 => 1
+            2 => 3,
+            3 => 4,
+            4 => 6,
+            5 => 8
         };
     }
 }

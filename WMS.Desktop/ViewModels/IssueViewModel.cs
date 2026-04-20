@@ -65,16 +65,16 @@ namespace WMS.Desktop.ViewModels
             set
             {
                 _selectedRack = value;
-                OnPropertyChanged(nameof(VisibleCells));
+                //OnPropertyChanged(nameof(VisibleCells));
             }
         }
         private RackViewModel _selectedRack;
-        public IEnumerable<RackViewModel> NormalVisibleRacks =>
-            allRacksToVisualise.Where(r => r.Row != 4);
-        public IEnumerable<RackViewModel> SpecialVisibleRacks =>
-            allRacksToVisualise.Where(r => r.Row == 4);
-        public IEnumerable<CellViewModel> VisibleCells =>
-            allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
+        //public IEnumerable<RackViewModel> NormalVisibleRacks =>
+        //    allRacksToVisualise.Where(r => r.Row != 4);
+        //public IEnumerable<RackViewModel> SpecialVisibleRacks =>
+        //    allRacksToVisualise.Where(r => r.Row == 4);
+        //public IEnumerable<CellViewModel> VisibleCells =>
+        //    allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
         public CellsType CurrentCellType
         {
             get => _currentCellType;
@@ -134,11 +134,11 @@ namespace WMS.Desktop.ViewModels
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
             ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
 
-            allRacksToVisualise.CollectionChanged += (s, e) =>
-            {
-                OnPropertyChanged(nameof(NormalVisibleRacks));
-                OnPropertyChanged(nameof(SpecialVisibleRacks));
-            };
+            //allRacksToVisualise.CollectionChanged += (s, e) =>
+            //{
+            //    OnPropertyChanged(nameof(NormalVisibleRacks));
+            //    OnPropertyChanged(nameof(SpecialVisibleRacks));
+            //};
         }
 
         public async Task IssueAsync()
@@ -266,47 +266,47 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task LoadWarehouseVisualise()
-        {
-            try
-            {
-                allRacksToVisualise.Clear();
-                var racks = await _rackService.GetAllAsync();
-                foreach (var item in racks)
-                    allRacksToVisualise.Add(new RackViewModel(item, IssueItems));
+        //public async Task LoadWarehouseVisualise()
+        //{
+        //    try
+        //    {
+        //        allRacksToVisualise.Clear();
+        //        var racks = await _rackService.GetAllAsync();
+        //        foreach (var item in racks)
+        //            allRacksToVisualise.Add(new RackViewModel(item, IssueItems));
 
-                allCellsToVisualise.Clear();
-                var cells = await _cellService.GetAllAsync();
-                foreach (var item in cells)
-                    allCellsToVisualise.Add(new CellViewModel(item, IssueItems));
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            finally
-            {
-                _isLoading = false;
-            }
-        }
+        //        allCellsToVisualise.Clear();
+        //        var cells = await _cellService.GetAllAsync();
+        //        foreach (var item in cells)
+        //            allCellsToVisualise.Add(new CellViewModel(item, IssueItems));
+        //    }
+        //    catch (OverallDomainException ex)
+        //    {
+        //        _dialogService.ShowWarning(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _dialogService.ShowWarning(ex.Message);
+        //    }
+        //    finally
+        //    {
+        //        _isLoading = false;
+        //    }
+        //}
 
-        public void SelectRack(RackViewModel rackVm)
-        {
-            SelectedRack = rackVm;
+        //public void SelectRack(RackViewModel rackVm)
+        //{
+        //    SelectedRack = rackVm;
 
-            if (rackVm.Column != 5 && rackVm.Row == 2)
-                CurrentCellType = CellsType.Cell1;
+        //    if (rackVm.Column != 5 && rackVm.Row == 2)
+        //        CurrentCellType = CellsType.Cell1;
 
-            else if (rackVm.Column != 5 && (rackVm.Row == 1 || rackVm.Row == 3 || rackVm.Row == 4))
-                CurrentCellType = CellsType.Cell2;
+        //    else if (rackVm.Column != 5 && (rackVm.Row == 1 || rackVm.Row == 3 || rackVm.Row == 4))
+        //        CurrentCellType = CellsType.Cell2;
 
-            else if (rackVm.Column == 5)
-                CurrentCellType = CellsType.Cell3;
-        }
+        //    else if (rackVm.Column == 5)
+        //        CurrentCellType = CellsType.Cell3;
+        //}
 
         private void ApplyFilter()
         {

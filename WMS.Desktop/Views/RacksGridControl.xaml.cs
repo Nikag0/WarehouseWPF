@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,5 +34,16 @@ namespace WMS.Desktop.Views
                 RackClicked?.Invoke(rackVm);
             }
         }
+
+        public ObservableCollection<RackViewModel> Racks
+        {
+            get => (ObservableCollection<RackViewModel>)GetValue(RacksProperty);
+            set => SetValue(RacksProperty, value);
+        }
+
+        public static readonly DependencyProperty RacksProperty =
+        DependencyProperty.Register(nameof(Racks),
+            typeof(ObservableCollection<RackViewModel>),
+            typeof(RacksGridControl));
     }
 }

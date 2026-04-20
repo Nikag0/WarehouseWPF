@@ -23,7 +23,7 @@ namespace WMS.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += ReceiptViewLoaded;
-            RacksGrid.RackClicked += OnRackClicked;
+            //RacksGrid.RackClicked += OnRackClicked;
         }
 
         private async void ReceiptViewLoaded(object sender, RoutedEventArgs e)
@@ -32,29 +32,29 @@ namespace WMS.Desktop.Views
             {
                 await viewModel.LoadWindow();
                 await viewModel.LoadOperators();
-                await viewModel.LoadWarehouseView();
+                //await viewModel.LoadWarehouseView();
             }
         }
 
-        private void OnRackClicked(RackViewModel rackVm)
-        {
-            if (DataContext is not ReceiptViewModel vm)
-                return;
+        //private void OnRackClicked(RackViewModel rackVm)
+        //{
+        //    if (DataContext is not ReceiptViewModel vm)
+        //        return;
 
-            vm.SelectedRack = rackVm;
+        //    vm.SelectedRack = rackVm;
 
-            int column = rackVm.Column;
-            int row = rackVm.Row;
+        //    int column = rackVm.Column;
+        //    int row = rackVm.Row;
 
-            if (column == 3 && row != 4)
-                vm.CurrentCellType = CellsType.Cell1;
+        //    if (column == 3 && row != 4)
+        //        vm.CurrentCellType = CellsType.Cell1;
 
-            else if ((column == 1 || column == 2 || column == 4) && row != 4)
-                vm.CurrentCellType = CellsType.Cell2;
+        //    else if ((column == 1 || column == 2 || column == 4) && row != 4)
+        //        vm.CurrentCellType = CellsType.Cell2;
 
-            else if (row == 4)
-                vm.CurrentCellType = CellsType.Cell3;
-        }
+        //    else if (row == 4)
+        //        vm.CurrentCellType = CellsType.Cell3;
+        //}
 
         private void SearchRack_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {

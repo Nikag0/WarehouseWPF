@@ -398,9 +398,10 @@
             </Grid.RowDefinitions>
 
             <local:RacksGridControl x:Name="RacksGrid"
-                                    Grid.Row="0"/>
+                                    Grid.Row="0"
+                                    Racks="{Binding Racks}" />
 
-            <local:CellsGridControl Grid.Row="1"/>
+            <!--<local:CellsGridControl Grid.Row="1"/>-->
 
         </Grid>
 

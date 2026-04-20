@@ -1,6 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
@@ -8,11 +13,12 @@ using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
+using Xceed.Wpf.AvalonDock.Layout;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
 {
-    public class ReceiptViewModel : INotifyPropertyChanged
+    public partial class ReceiptViewModel : INotifyPropertyChanged
     {
         // Поиск по компонентам. Верхняя левая часть экрана ReceiptView.
         private readonly List<ViewItemDTO> _allComponents = new();
@@ -148,16 +154,18 @@ namespace WMS.Desktop.ViewModels
             set
             {
                 _selectedRack = value;
-                OnPropertyChanged(nameof(VisibleCells));
+                //OnPropertyChanged(nameof(VisibleCells));
             }
         } // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
         private RackViewModel _selectedRack;
-        public IEnumerable<RackViewModel> NormalVisibleRacks =>
-                racksVisualise.Where(r => r.Row != 4);
-        public IEnumerable<RackViewModel> SpecialVisibleRacks =>
-                racksVisualise.Where(r => r.Row == 4);
-        public IEnumerable<CellViewModel> VisibleCells =>
-                cellsVisualise.Where(c => c.RackId == SelectedRack.Id);
+        //public IEnumerable<RackViewModel> NormalVisibleRacks =>
+        //        racksVisualise.Where(r => r.Row != 4);
+        //public IEnumerable<RackViewModel> SpecialVisibleRacks =>
+        //        racksVisualise.Where(r => r.Row == 4);
+        //public IEnumerable<CellViewModel> VisibleCells =>
+        //        cellsVisualise.Where(c => c.RackId == SelectedRack.Id);
+
+        public ObservableCollection<RackViewModel> Racks { get; } = new();
 
         private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -175,12 +183,12 @@ namespace WMS.Desktop.ViewModels
         public ICommand AddItemToReceiptCommand { get; }
 
         public ReceiptViewModel(
-               StockService stockService,
-               ReceiptService receiptService,
-               CellService cellService,
-               DialogService dialogService,
-               OperatorService operatorrService,
-               RackService rackService)
+            StockService stockService,
+            ReceiptService receiptService,
+            CellService cellService,
+            DialogService dialogService,
+            OperatorService operatorrService,
+            RackService rackService)
         {
             _stockService = stockService;
             _receiptService = receiptService;
@@ -195,11 +203,11 @@ namespace WMS.Desktop.ViewModels
             SetRackFromListCommand = new RelayCommand(SetRackFromList);
             SetCellFromListCommand = new RelayCommand(SetCellFromList);
 
-            racksVisualise.CollectionChanged += (s, e) =>
-            {
-                OnPropertyChanged(nameof(NormalVisibleRacks));
-                OnPropertyChanged(nameof(SpecialVisibleRacks));
-            };
+            //racksVisualise.CollectionChanged += (s, e) =>
+            //{
+            //    OnPropertyChanged(nameof(NormalVisibleRacks));
+            //    OnPropertyChanged(nameof(SpecialVisibleRacks));
+            //};
         }
 
         public async Task ReceiveAsync()
@@ -292,6 +300,9 @@ namespace WMS.Desktop.ViewModels
 
                 ReplaceCollection(Stocks, await _stockService.GetAllAsync());
 
+                Racks.Clear();
+                LoadRacks();
+
                 FilterItemsToIssue();
                 FilterFreeCells();
             }
@@ -324,42 +335,72 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task LoadWarehouseView()
+        private void LoadRacks()
         {
-            try
-            {
-                racksVisualise.Clear();
-                foreach (var rack in _racks)
-                    racksVisualise.Add(new RackViewModel(rack, ReceiptItem));
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "layout.json");
+            Debug.WriteLine(path);
 
-                cellsVisualise.Clear();
-                var cells = await _cellService.GetAllAsync();
-                foreach (var cell in cells)
-                    cellsVisualise.Add(new CellViewModel(cell, ReceiptItem));
-            }
-            catch (OverallDomainException ex)
+            var layouts = JsonSerializer.Deserialize<List<RackLayout>>(
+                File.ReadAllText("layout.json"));
+
+            var layoutDict = layouts.ToDictionary(l => l.Code);
+
+            foreach (var rack in _racks)
             {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
+                if (!layoutDict.TryGetValue(rack.RackCode, out var layout))
+                    continue;
+
+                Racks.Add(new RackViewModel(rack, layout));
             }
         }
 
-        public void SelectRack(RackViewModel rackVm)
+        [RelayCommand]
+        private void SelectRack(RackViewModel rack)
         {
-            SelectedRack = rackVm;
+            foreach (var r in Racks)
+                r.IsSelected = false;
 
-            if (rackVm.Column == 3 && rackVm.Row != 4)
-                CurrentCellType = CellsType.Cell1;
+            if (rack != null) rack.IsSelected = true;
 
-            else if ((rackVm.Column == 1 || rackVm.Column == 2 || rackVm.Column == 4) && rackVm.Column != 4 )
-                CurrentCellType = CellsType.Cell2;
-
-            else if (rackVm.Row == 4)
-                CurrentCellType = CellsType.Cell3;
+            Debug.WriteLine($"Racks count: {Racks.Count}");
         }
+
+        //public async Task LoadWarehouseView()
+        //{
+        //    try
+        //    {
+        //        racksVisualise.Clear();
+        //        foreach (var rack in _racks)
+        //            racksVisualise.Add(new RackViewModel(rack, ReceiptItem));
+
+        //        cellsVisualise.Clear();
+        //        var cells = await _cellService.GetAllAsync();
+        //        foreach (var cell in cells)
+        //            cellsVisualise.Add(new CellViewModel(cell, ReceiptItem));
+        //    }
+        //    catch (OverallDomainException ex)
+        //    {
+        //        _dialogService.ShowWarning(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _dialogService.ShowWarning(ex.Message);
+        //    }
+        //}
+
+        //public void SelectRack(RackViewModel rackVm)
+        //{
+        //    SelectedRack = rackVm;
+
+        //    if (rackVm.Column == 3 && rackVm.Row != 4)
+        //        CurrentCellType = CellsType.Cell1;
+
+        //    else if ((rackVm.Column == 1 || rackVm.Column == 2 || rackVm.Column == 4) && rackVm.Column != 4 )
+        //        CurrentCellType = CellsType.Cell2;
+
+        //    else if (rackVm.Row == 4)
+        //        CurrentCellType = CellsType.Cell3;
+        //}
 
         private void FilterItemsToIssue()
         {

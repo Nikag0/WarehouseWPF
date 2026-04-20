@@ -11,70 +11,38 @@ namespace WMS.Desktop.ViewModels
 {
     public class RackViewModel : INotifyPropertyChanged
     {
-        public Guid Id { get; set;}
-        public int Column
+        public Guid Id { get; }
+        public string Code { get; }
+
+        public double X { get; }
+        public double Y { get; }
+        public double Width { get; }
+        public double Height { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
         {
-            get => _column;
+            get => _isSelected;
             set
             {
-                _column = value;
-                OnPropertyChanged(nameof(Column));
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
             }
         }
-        public int Row
-        {
-            get => _row switch
-            {
-                1 => 1,
-                2 => 3,
-                3 => 4,
-                4 => 6,
-                5 => 8
-            };
-            set
-            {
-                _row = value;
-                OnPropertyChanged(nameof(Row));
-            }
-        }
-        public bool IsSelectedRack =>
-                   _selectedItemsToIssue != null && _selectedItemsToIssue.Any(x => x.RackId == Id)
-                   ||
-                   _selectedItemToReceipt != null && _selectedItemToReceipt.RackId == Id;
 
-        private int _column;
-        private int _row;
-        private readonly ObservableCollection<ViewItemDTO> _selectedItemsToIssue;
-        private readonly StockViewModel _selectedItemToReceipt;
-
-        public RackViewModel(Rack rack, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
+        public RackViewModel(Rack rack, RackLayout layout)
         {
             Id = rack.Id;
-            Column = rack.Column;
-            Row = rack.Row;
+            Code = rack.RackCode;
 
-            _selectedItemsToIssue = selectedItemsToIssue;
-            _selectedItemsToIssue.CollectionChanged += (_, __) =>
-            {
-                OnPropertyChanged(nameof(IsSelectedRack));
-            };
-        }
-
-        public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
-        {
-            Id = rack.Id;
-            Column = rack.Column;
-            Row = rack.Row;
-
-            _selectedItemToReceipt = selectedItemToReceipt;
-            _selectedItemToReceipt.PropertyChanged += (_, __) =>
-            {
-                OnPropertyChanged(nameof(IsSelectedRack));
-            };
+            X = layout.X;
+            Y = layout.Y;
+            Width = layout.Width;
+            Height = layout.Height;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
+        protected void OnPropertyChanged(string name)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

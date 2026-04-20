@@ -120,7 +120,7 @@
             <Grid Grid.Column="2"
                   Grid.Row="2">
 
-                <ItemsControl ItemsSource="{Binding VisibleCells}">
+                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -163,7 +163,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 
-                </ItemsControl>
+                </ItemsControl>-->
 
             </Grid>
 
@@ -248,7 +248,7 @@
             <Grid Grid.Column="2"
                   Grid.Row="2">
 
-                <ItemsControl ItemsSource="{Binding VisibleCells}">
+                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -291,7 +291,7 @@
                             </DataTemplate>
                     </ItemsControl.ItemTemplate>
 
-                </ItemsControl>
+                </ItemsControl>-->
 
             </Grid>
 
@@ -366,7 +366,7 @@
             <Grid Grid.Column="2"
                   Grid.Row="2">
 
-                <ItemsControl ItemsSource="{Binding VisibleCells}">
+                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -405,7 +405,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
 
-                </ItemsControl>
+                </ItemsControl>-->
 
             </Grid>
 
