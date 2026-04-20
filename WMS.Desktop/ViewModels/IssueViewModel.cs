@@ -70,9 +70,9 @@ namespace WMS.Desktop.ViewModels
         }
         private RackViewModel _selectedRack;
         public IEnumerable<RackViewModel> NormalVisibleRacks =>
-            allRacksToVisualise.Where(r => r.Row != 5);
+            allRacksToVisualise.Where(r => r.Row != 4);
         public IEnumerable<RackViewModel> SpecialVisibleRacks =>
-            allRacksToVisualise.Where(r => r.Row == 5);
+            allRacksToVisualise.Where(r => r.Row == 4);
         public IEnumerable<CellViewModel> VisibleCells =>
             allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
         public CellsType CurrentCellType
@@ -143,7 +143,26 @@ namespace WMS.Desktop.ViewModels
 
         public async Task IssueAsync()
         {
-            if (!IssueItems.Any()) return;
+            var invalidItems = IssueItems
+                              .Where(x => x.OperationQuantity <= 0)
+                              .ToList();
+
+            var sb = new StringBuilder();
+
+            if (invalidItems.Any())
+            {
+                sb.AppendLine("Количество товаров для выдачи должно быть больше 0:");
+                sb.AppendLine();
+
+                foreach (var item in invalidItems)
+                {
+                    sb.AppendLine($"• {item.ComponentName}");
+                }
+
+                _dialogService.ShowWarning(sb.ToString());
+                sb.Clear();
+                return;
+            }
 
             if (OperatorName == null)
             {
@@ -151,18 +170,13 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            var sb = new StringBuilder();
-
             sb.AppendLine("Вы уверены, что хотите выполнить выдачу?");
             sb.AppendLine();
             sb.AppendLine("Список товаров:");
 
             foreach (var item in IssueItems)
             {
-                sb.AppendLine($"• {item.Article} | {item.ComponentName}");
-                sb.AppendLine($"  Производитель: {item.Manufacturer}");
-                sb.AppendLine($"  Количество: {item.OperationQuantity}");
-                sb.AppendLine($"  Стеллаж: {item.RackCode} Ячейка: {item.CellCode}");
+                sb.AppendLine($"• {item.ComponentName} Количество: {item.OperationQuantity}");
                 sb.AppendLine();
             }
 
@@ -284,13 +298,13 @@ namespace WMS.Desktop.ViewModels
         {
             SelectedRack = rackVm;
 
-            if (rackVm.Row != 5 && rackVm.RackNum == 2)
+            if (rackVm.Column != 5 && rackVm.Row == 2)
                 CurrentCellType = CellsType.Cell1;
 
-            else if (rackVm.Row != 5 && (rackVm.RackNum == 1 || rackVm.RackNum == 3 || rackVm.RackNum == 4))
+            else if (rackVm.Column != 5 && (rackVm.Row == 1 || rackVm.Row == 3 || rackVm.Row == 4))
                 CurrentCellType = CellsType.Cell2;
 
-            else if (rackVm.Row == 5)
+            else if (rackVm.Column == 5)
                 CurrentCellType = CellsType.Cell3;
         }
 

@@ -140,7 +140,8 @@
                         <DataGridTemplateColumn Header="К выдаче">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <xctk:IntegerUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                    <xctk:IntegerUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                        Minimum="0">
                                         <xctk:IntegerUpDown.Style>
                                             <Style TargetType="xctk:IntegerUpDown">
                                                 <Setter Property="IsEnabled" Value="True"/>

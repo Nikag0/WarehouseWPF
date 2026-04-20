@@ -12,32 +12,29 @@ namespace WMS.Desktop.ViewModels
     public class RackViewModel : INotifyPropertyChanged
     {
         public Guid Id { get; set;}
+        public int Column
+        {
+            get => _column;
+            set
+            {
+                _column = value;
+                OnPropertyChanged(nameof(Column));
+            }
+        }
         public int Row
         {
-            get
+            get => _row switch
             {
-                return _row switch
-                {
-                    1 => 1,
-                    2 => 3,
-                    3 => 5,
-                    4 => 6,
-                    5 => 8
-                };
-            }
+                1 => 1,
+                2 => 3,
+                3 => 4,
+                4 => 6,
+                5 => 8
+            };
             set
             {
                 _row = value;
                 OnPropertyChanged(nameof(Row));
-            }
-        }
-        public int RackNum
-        {
-            get => _rackNum;
-            set
-            {
-                _rackNum = value;
-                OnPropertyChanged(nameof(RackNum));
             }
         }
         public bool IsSelectedRack =>
@@ -45,16 +42,16 @@ namespace WMS.Desktop.ViewModels
                    ||
                    _selectedItemToReceipt != null && _selectedItemToReceipt.RackId == Id;
 
+        private int _column;
         private int _row;
-        private int _rackNum;
         private readonly ObservableCollection<ViewItemDTO> _selectedItemsToIssue;
         private readonly StockViewModel _selectedItemToReceipt;
 
         public RackViewModel(Rack rack, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
         {
             Id = rack.Id;
-            Row = rack.Column;
-            RackNum = rack.Row;
+            Column = rack.Column;
+            Row = rack.Row;
 
             _selectedItemsToIssue = selectedItemsToIssue;
             _selectedItemsToIssue.CollectionChanged += (_, __) =>
@@ -66,8 +63,8 @@ namespace WMS.Desktop.ViewModels
         public RackViewModel(Rack rack, StockViewModel selectedItemToReceipt)
         {
             Id = rack.Id;
-            Row = rack.Column;
-            RackNum = rack.Row;
+            Column = rack.Column;
+            Row = rack.Row;
 
             _selectedItemToReceipt = selectedItemToReceipt;
             _selectedItemToReceipt.PropertyChanged += (_, __) =>

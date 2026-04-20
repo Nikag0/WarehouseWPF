@@ -153,12 +153,11 @@ namespace WMS.Desktop.ViewModels
         } // SelectedRack - свойство решает, ячейки какого стеллажа будут визуализироваться.
         private RackViewModel _selectedRack;
         public IEnumerable<RackViewModel> NormalVisibleRacks =>
-                racksVisualise.Where(r => r.Row != 5);
+                racksVisualise.Where(r => r.Row != 4);
         public IEnumerable<RackViewModel> SpecialVisibleRacks =>
-                racksVisualise.Where(r => r.Row == 5);
+                racksVisualise.Where(r => r.Row == 4);
         public IEnumerable<CellViewModel> VisibleCells =>
                 cellsVisualise.Where(c => c.RackId == SelectedRack.Id);
-
 
         private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -215,6 +214,12 @@ namespace WMS.Desktop.ViewModels
             if (ReceiptItem.RackId == Guid.Empty|| ReceiptItem.CellId == Guid.Empty)
             {
                 _dialogService.ShowWarning("Стеллаж или ячейка не выбраны.");
+                return;
+            }
+
+            if (ReceiptItem.RackId == Guid.Empty|| ReceiptItem.OperationQuantity <= 0)
+            {
+                _dialogService.ShowWarning("Количество товаров для приёмки должно быть больше 0.");
                 return;
             }
 
@@ -346,13 +351,13 @@ namespace WMS.Desktop.ViewModels
         {
             SelectedRack = rackVm;
 
-            if (rackVm.Row != 5 && rackVm.RackNum == 2)
+            if (rackVm.Column == 3 && rackVm.Row != 4)
                 CurrentCellType = CellsType.Cell1;
 
-            else if (rackVm.Row != 5 && (rackVm.RackNum == 1 || rackVm.RackNum == 3 || rackVm.RackNum == 4))
+            else if ((rackVm.Column == 1 || rackVm.Column == 2 || rackVm.Column == 4) && rackVm.Column != 4 )
                 CurrentCellType = CellsType.Cell2;
 
-            else if (rackVm.Row == 5)
+            else if (rackVm.Row == 4)
                 CurrentCellType = CellsType.Cell3;
         }
 
@@ -472,9 +477,9 @@ namespace WMS.Desktop.ViewModels
                     ReceiptItem.ComponentName = stock.ComponentName;
                     ReceiptItem.Manufacturer = stock.Manufacturer;
                     ReceiptItem.RackId = stock.RackId;
-                    SearchRacks = stock.RackCode;
+                    SearchRacks = stock.RackCode == "-" ? string.Empty : stock.RackCodeDisplay;
                     ReceiptItem.CellId = stock.CellId;
-                    SearchFreeCell = stock.CellCode;
+                    SearchFreeCell = stock.CellCode == "-" ? string.Empty : stock.CellCodeDisplay;
                 }
 
                 _freeCells.Clear();

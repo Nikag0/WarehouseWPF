@@ -333,6 +333,7 @@
                         
                         <xctk:IntegerUpDown Grid.Column="5"
                                             Value="{Binding ReceiptItem.OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                            Minimum="0"
                                             Margin="5"
                                             FontSize="15"
                                             TextAlignment="Center">

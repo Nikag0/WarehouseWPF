@@ -49,16 +49,16 @@ namespace WMS.Desktop.Views
 
             vm.SelectedRack = rackVm;
 
+            int column = rackVm.Column;
             int row = rackVm.Row;
-            int column = rackVm.RackNum;
 
-            if (row != 5 && column == 2)
+            if (column == 3 && row != 4)
                 vm.CurrentCellType = CellsType.Cell1;
 
-            else if (row != 5 && (column == 1 || column == 3 || column == 4))
+            else if ((column == 1 || column == 2 || column == 4) && row != 4)
                 vm.CurrentCellType = CellsType.Cell2;
 
-            else if (row == 5)
+            else if (row == 4)
                 vm.CurrentCellType = CellsType.Cell3;
         }
 
