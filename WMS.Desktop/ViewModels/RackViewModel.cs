@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WMS.Domain;
 
@@ -13,6 +14,7 @@ namespace WMS.Desktop.ViewModels
     {
         public Guid Id { get; }
         public string Code { get; }
+        public RackType Type { get; }
 
         public double X { get; }
         public double Y { get; }
@@ -34,6 +36,7 @@ namespace WMS.Desktop.ViewModels
         {
             Id = rack.Id;
             Code = rack.RackCode;
+            Type = layout.Type;
 
             X = layout.X;
             Y = layout.Y;

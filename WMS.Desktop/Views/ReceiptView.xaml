@@ -48,7 +48,7 @@
                          Margin="0,10" 
                          IsTabStop="False"
                          Style="{StaticResource WatermarkTextBox}"
-                         Text="{Binding SearchtemsToIssue, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
 
             </Grid>
 
@@ -58,7 +58,7 @@
                     <ColumnDefinition Width="44*"/>
                 </Grid.ColumnDefinitions>
 
-                <DataGrid ItemsSource="{Binding FilteredItemsToIssue}" 
+                <DataGrid ItemsSource="{Binding FilteredItemsToReceipt}" 
                           AutoGenerateColumns="False" 
                           FontSize="15" 
                           IsReadOnly="True" Grid.ColumnSpan="2">
@@ -244,7 +244,7 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding RackCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
                                                         Command="{Binding DataContext.SetRackFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}">
@@ -270,7 +270,7 @@
                                  Margin="5"
                                  IsTabStop="False"
                                  Style="{StaticResource WatermarkTextBox}"
-                                 Text="{Binding SearchFreeCell, UpdateSourceTrigger=PropertyChanged}"
+                                 Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
                         <Popup x:Name="CellPopup"
@@ -291,14 +291,14 @@
                                     <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                                 </Border.Effect>
 
-                                <ListBox ItemsSource="{Binding FilteredFreeCells}"
-                                    BorderThickness="0"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox ItemsSource="{Binding FilteredCells}"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding CellCode}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
                                                     Command="{Binding DataContext.SetCellFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}">
@@ -401,7 +401,10 @@
                                     Grid.Row="0"
                                     Racks="{Binding Racks}" />
 
-            <!--<local:CellsGridControl Grid.Row="1"/>-->
+            <local:CellsGridControl Grid.Row="1"
+                                    Cells="{Binding Cells}"
+                                    RackType="{Binding SelectedRack.Type, Mode=OneWay, FallbackValue=RackType1, TargetNullValue=RackType1}"
+                                    SelectedCell="{Binding SelectedCell}"/>
 
         </Grid>
 

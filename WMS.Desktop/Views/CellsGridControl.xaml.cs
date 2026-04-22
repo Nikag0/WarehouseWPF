@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,45 @@ namespace WMS.Desktop.Views
             {
                 CellClicked?.Invoke(cellVm);
             }
+        }
+
+        public ObservableCollection<CellViewModel> Cells
+        {
+            get => (ObservableCollection<CellViewModel>)GetValue(CellsProperty);
+            set => SetValue(CellsProperty, value);
+        }
+
+        public static readonly DependencyProperty CellsProperty =
+            DependencyProperty.Register(
+                nameof(Cells),
+                typeof(ObservableCollection<CellViewModel>),
+                typeof(CellsGridControl),
+                new PropertyMetadata(null));
+
+        public RackType RackType
+        {
+            get => (RackType)GetValue(RackTypeProperty);
+            set => SetValue(RackTypeProperty, value);
+        }
+
+        public static readonly DependencyProperty RackTypeProperty =
+            DependencyProperty.Register(
+                nameof(RackType),
+                typeof(RackType),
+                typeof(CellsGridControl),
+                new PropertyMetadata(RackType.RackType1));
+
+        public static readonly DependencyProperty SelectedCellProperty =
+            DependencyProperty.Register(
+                nameof(SelectedCell),
+                typeof(CellViewModel),
+                typeof(CellsGridControl),
+                new PropertyMetadata(null));
+
+        public CellViewModel SelectedCell
+        {
+            get => (CellViewModel)GetValue(SelectedCellProperty);
+            set => SetValue(SelectedCellProperty, value);
         }
     }
 }

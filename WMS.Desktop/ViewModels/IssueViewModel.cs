@@ -18,8 +18,6 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
         public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
-        private ObservableCollection<RackViewModel> allRacksToVisualise { get; set; } = new();
-        private ObservableCollection<CellViewModel> allCellsToVisualise { get; } = new();
     
         public string SearchText
         {
@@ -75,7 +73,7 @@ namespace WMS.Desktop.ViewModels
         //    allRacksToVisualise.Where(r => r.Row == 4);
         //public IEnumerable<CellViewModel> VisibleCells =>
         //    allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
-        public CellsType CurrentCellType
+        public RackType CurrentCellType
         {
             get => _currentCellType;
             set
@@ -84,7 +82,7 @@ namespace WMS.Desktop.ViewModels
                 OnPropertyChanged();
             }
         }
-        private CellsType _currentCellType;
+        private RackType _currentCellType;
 
         private readonly List<ViewItemDTO> _stocks = new();
         private string _searchText;

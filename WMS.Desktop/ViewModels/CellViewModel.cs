@@ -14,69 +14,41 @@ namespace WMS.Desktop.ViewModels
     {
         public Guid Id { get; }
         public Guid RackId { get; }
-        public int Line
+
+        public double X { get; }
+        public double Y { get; }
+
+        public double Width { get; }
+        public double Height { get; }
+
+        public string Code { get; }
+
+        private bool _isSelected;
+        public bool IsSelected
         {
-            get
-            {
-                return _line;
-            }
+            get => _isSelected;
             set
             {
-                _line = value;
-                OnPropertyChanged(nameof(Line));
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
             }
         }
-        public int Column
-        {
-            get => _column;
-            set
-            {
-                _column = value;
-                OnPropertyChanged(nameof(Column));
-            }
-        }
-        public int ColumnSpan => Line == 1 ? 4 : 1;
 
-        public bool IsSelectedCell =>
-                    _selectedItemsToIssue != null && _selectedItemsToIssue.Any(x => x.CellId == Id)
-                    ||
-                    _selectedItemToReceipt != null && _selectedItemToReceipt.CellId == Id;
 
-        private int _line;
-        private int _column;
-        private readonly ObservableCollection<ViewItemDTO> _selectedItemsToIssue;
-        private readonly StockViewModel _selectedItemToReceipt;
-
-        public CellViewModel(Cell cell, ObservableCollection<ViewItemDTO> selectedItemsToIssue)
+        public CellViewModel(Cell cell, CellLayout layout)
         {
             Id = cell.Id;
+            Code = cell.CellCode;
             RackId = cell.RackId;
-            Line = cell.Column;
-            Column = cell.Row;
 
-            _selectedItemsToIssue = selectedItemsToIssue;
-            _selectedItemsToIssue.CollectionChanged += (_, __) =>
-            {
-                OnPropertyChanged(nameof(IsSelectedCell));
-            };
-        }
-
-        public CellViewModel(Cell cell, StockViewModel selectedItemToReceipt)
-        {
-            Id = cell.Id;
-            RackId = cell.RackId;
-            Line = cell.Column;
-            Column = cell.Row;
-
-            _selectedItemToReceipt = selectedItemToReceipt;
-            _selectedItemToReceipt.PropertyChanged += (_, __) =>
-            {
-                OnPropertyChanged(nameof(IsSelectedCell));
-            };
+            X = layout.X;
+            Y = layout.Y;
+            Width = layout.Width;
+            Height = layout.Height;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string name = null)
+        protected void OnPropertyChanged(string name)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -1,0 +1,138 @@
+[
+  {
+    "Code": "1-1",
+    "Type": "RackType1",
+    "X": 60,
+    "Y": 10,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "2-1",
+    "Type": "RackType1",
+    "X": 275,
+    "Y": 10,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "3-1",
+    "Type": "RackType2",
+    "X": 490,
+    "Y": 10,
+    "Width": 280,
+    "Height": 80
+  },
+  {
+    "Code": "4-1",
+    "Type": "RackType1",
+    "X": 775,
+    "Y": 10,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "2-2",
+    "Type": "RackType1",
+    "X": 275,
+    "Y": 230,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "3-2",
+    "Type": "RackType2",
+    "X": 490,
+    "Y": 230,
+    "Width": 280,
+    "Height": 80
+  },
+  {
+    "Code": "4-2",
+    "Type": "RackType1",
+    "X": 775,
+    "Y": 230,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "1-3",
+    "Type": "RackType3",
+    "X": 275,
+    "Y": 315,
+    "Width": 155,
+    "Height": 35
+  },
+  {
+    "Code": "2-3",
+    "Type": "RackType3",
+    "X": 435,
+    "Y": 315,
+    "Width": 155,
+    "Height": 35
+  },
+  {
+    "Code": "3-3",
+    "Type": "RackType3",
+    "X": 600,
+    "Y": 315,
+    "Width": 155,
+    "Height": 35
+  },
+  {
+    "Code": "4-3",
+    "Type": "RackType3",
+    "X": 765,
+    "Y": 315,
+    "Width": 160,
+    "Height": 35
+  },
+  {
+    "Code": "2-4",
+    "Type": "RackType1",
+    "X": 275,
+    "Y": 485,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "3-4",
+    "Type": "RackType2",
+    "X": 490,
+    "Y": 485,
+    "Width": 280,
+    "Height": 80
+  },
+  {
+    "Code": "4-4",
+    "Type": "RackType1",
+    "X": 775,
+    "Y": 485,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "2-5",
+    "Type": "RackType1",
+    "X": 275,
+    "Y": 710,
+    "Width": 210,
+    "Height": 80
+  },
+  {
+    "Code": "3-5",
+    "Type": "RackType2",
+    "X": 490,
+    "Y": 710,
+    "Width": 280,
+    "Height": 80
+  },
+  {
+    "Code": "4-5",
+    "Type": "RackType1",
+    "X": 775,
+    "Y": 710,
+    "Width": 210,
+    "Height": 80
+  }
+]

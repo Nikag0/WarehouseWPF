@@ -4,412 +4,205 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS.Desktop.Views"
+             xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
-        
+        <converters:RackTypeToVisibilityConverter x:Key="RackTypeToVisibilityConverter"/>   
+        <converters:RackImageConverter x:Key="RackImageConverter"/>
+
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="25"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-
-        <Style x:Key="CellBorderStyle" TargetType="Border">
-            <Setter Property="BorderBrush" Value="Gray"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Opacity" Value="0.5"/>
-            <Setter Property="Background" Value="Transparent"/>
-
-            <EventSetter Event="MouseLeftButtonDown"
-                 Handler="RackBorder_MouseLeftButtonDown"/>
-
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsSelectedCell}" Value="True">
-                    <Setter Property="Background" Value="Yellow"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        
     </UserControl.Resources>
-    
-    
-    
-    <Grid>
-        
-        <Grid>
+
+    <Grid MaxHeight="450" MaxWidth="300">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="19*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="11*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header / подписи для разных типов стеллажей -->
+        <Grid Grid.Column="1" Grid.Row="0"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType1}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="А"/>
+            <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="Б"/>
+            <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="В"/>
+            
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="0"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType2}">
+            <!-- Вариант 2 для RackType1 (4 колонки) -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="А"/>
+            <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="Б"/>
+            <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="В"/>
+            <TextBlock Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="Г"/>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="0"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType3}">
+            <!-- Вариант для RackType2 -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="А"/>
+        </Grid>
+
+        <!-- левый столбец с номерами рядов (вариант для RackType1) -->
+        <Grid Grid.Column="0" Grid.Row="1"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType1}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
+            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
+            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
+            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
+            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
+            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
+            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+            
+        </Grid>
+
+        <!-- левый столбец номеров для RackType2 -->
+        <Grid Grid.Column="0" Grid.Row="1"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType2}">
             
             <Grid.RowDefinitions>
-                <RowDefinition Height="6*"/>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="73*"/>
-                <RowDefinition Height="13*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
+            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
+            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
+            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
+            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
+            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
+            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+        </Grid>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="32*"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="27*"/>
-                <ColumnDefinition Width="36*"/>
-            </Grid.ColumnDefinitions>
+        <!-- левый столбец номеров для RackType3 -->
+        <Grid Grid.Column="0" Grid.Row="1"
+              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                                   Converter={StaticResource RackTypeToVisibilityConverter},
+                                   ConverterParameter=RackType3}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
+            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
+            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
+            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
+            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
+            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
+            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+        </Grid>
 
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding CurrentCellType}" Value="Cell1">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
+        <Viewbox Grid.Column="1"
+                 Grid.Row="1"
+                 Stretch="Fill">
+            <Grid>
 
-            <Grid Grid.Column="1"
-                  Grid.Row="2">
+                <Image Source="{Binding SelectedRack.Type, Converter={StaticResource RackImageConverter}}"
+                       Stretch="Fill"/>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="4.5*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-                <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-                <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-                <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-                <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-                <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-                <TextBlock Grid.Row="7" Style="{StaticResource HeaderTextStyle}" Text="7"/>
-
-
-            </Grid>
-
-            <Grid Grid.Row="1"
-                  Grid.Column="2">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="A"/>
-                <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="Б"/>
-                <TextBlock Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="В"/>
-                <TextBlock Grid.Column="4" Style="{StaticResource HeaderTextStyle}" Text="Г"/>
-
-            </Grid>
-
-            <Image Grid.Column="2"
-                   Grid.Row="2"
-                   Source="/Images/Row2.jpg" 
-                   Width="auto" 
-                   Height="auto"
-                   Stretch="Fill"/>
-
-            <Grid Grid.Column="2"
-                  Grid.Row="2">
-
-                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
-
+                <ItemsControl ItemsSource="{Binding Cells, RelativeSource={RelativeSource AncestorType=UserControl}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="1*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="4.5*"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1*"/>
-                                    <ColumnDefinition Width="25*"/>
-                                    <ColumnDefinition Width="25*"/>
-                                    <ColumnDefinition Width="25*"/>
-                                    <ColumnDefinition Width="25*"/>
-                                    <ColumnDefinition Width="1*"/>
-                                </Grid.ColumnDefinitions>
-                            </Grid>
+                            <Canvas />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemContainerStyle>
                         <Style>
-                            <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                            <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                            <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
+                            <Setter Property="Canvas.Left" Value="{Binding X}" />
+                            <Setter Property="Canvas.Top" Value="{Binding Y}" />
                         </Style>
                     </ItemsControl.ItemContainerStyle>
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource CellBorderStyle}"/>
+                            <Border Width="{Binding Width}"
+                                    Height="{Binding Height}"
+                                    BorderBrush="Black"
+                                    BorderThickness="1">
+                                
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="Transparent"/>
+
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <Border.InputBindings>
+                                    <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                      CommandParameter="{Binding}" />
+                                </Border.InputBindings>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
-
-                </ItemsControl>-->
-
-            </Grid>
-
-        </Grid>
-
-        <Grid>
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="6*"/>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="73*"/>
-                <RowDefinition Height="13*"/>
-            </Grid.RowDefinitions>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="32*"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="27*"/>
-                <ColumnDefinition Width="36*"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid.Style>
-                    <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding CurrentCellType}" Value="Cell2">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-
-            <Grid Grid.Column="1"
-                  Grid.Row="2">
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13.5*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="4.5*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-                <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-                <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-                <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-                <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-                <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-                <TextBlock Grid.Row="7" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+                </ItemsControl>
 
             </Grid>
-
-            <Grid Grid.Row="1"
-                    Grid.Column="2">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="25*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="A"/>
-                <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="Б"/>
-                <TextBlock Grid.Column="3" Style="{StaticResource HeaderTextStyle}" Text="В"/>
-
-            </Grid>
-
-            <Image Grid.Column="2"
-                    Grid.Row="2"
-                    Source="/Images/Row1.jpg" 
-                    Width="auto" 
-                    Height="auto"
-                    Stretch="Fill"/>
-
-            <Grid Grid.Column="2"
-                  Grid.Row="2">
-
-                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
-
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="2*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13.5*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="4.5*"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="0.5*"/>
-                                    <ColumnDefinition Width="33*"/>
-                                    <ColumnDefinition Width="33*"/>
-                                    <ColumnDefinition Width="33*"/>
-                                    <ColumnDefinition Width="0.5*"/>
-                                </Grid.ColumnDefinitions>
-
-                            </Grid>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-
-                    <ItemsControl.ItemContainerStyle>
-                        <Style>
-                            <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                            <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                            <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                                <Border Style="{StaticResource CellBorderStyle}"/>
-                            </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-
-                </ItemsControl>-->
-
-            </Grid>
-
-        </Grid>
-
-        <Grid>
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="6*"/>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="73*"/>
-                <RowDefinition Height="13*"/>
-            </Grid.RowDefinitions>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="32*"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="27*"/>
-                <ColumnDefinition Width="36*"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding CurrentCellType}" Value="Cell3">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-
-            <Grid Grid.Column="1"
-                  Grid.Row="2">
-                
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="11*"/>
-                    <RowDefinition Height="11.5*"/>
-                    <RowDefinition Height="11.5*"/>
-                    <RowDefinition Height="12*"/>
-                    <RowDefinition Height="13*"/>
-                    <RowDefinition Height="16*"/>
-                    <RowDefinition Height="15*"/>
-                    <RowDefinition Height="7*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-                <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-                <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-                <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-                <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-                <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-                <TextBlock Grid.Row="7" Style="{StaticResource HeaderTextStyle}" Text="7"/>
-
-            </Grid>
-
-            <Grid Grid.Row="1"
-                  Grid.Column="2">
-
-                <TextBlock Style="{StaticResource HeaderTextStyle}" Text="A"/>
-                
-            </Grid>
-
-            <Image Grid.Column="2"
-                   Grid.Row="2"
-                   Source="/Images/Row3.jpg" 
-                   Width="auto" 
-                   Height="auto"
-                   Stretch="Fill"/>
-
-            <Grid Grid.Column="2"
-                  Grid.Row="2">
-
-                <!--<ItemsControl ItemsSource="{Binding VisibleCells}">
-
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="2*"/>
-                                    <RowDefinition Height="11*"/>
-                                    <RowDefinition Height="11.5*"/>
-                                    <RowDefinition Height="11.5*"/>
-                                    <RowDefinition Height="12*"/>
-                                    <RowDefinition Height="13*"/>
-                                    <RowDefinition Height="16*"/>
-                                    <RowDefinition Height="15*"/>
-                                    <RowDefinition Height="7*"/>
-                                </Grid.RowDefinitions>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="5*"/>
-                                    <ColumnDefinition Width="90*"/>
-                                    <ColumnDefinition Width="5*"/>
-                                </Grid.ColumnDefinitions>
-                            </Grid>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-
-                    <ItemsControl.ItemContainerStyle>
-                        <Style>
-                            <Setter Property="Grid.Row" Value="{Binding Line}"/>
-                            <Setter Property="Grid.Column" Value="{Binding Column}"/>
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource CellBorderStyle}"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-
-                </ItemsControl>-->
-
-            </Grid>
-
-        </Grid>
-
+        </Viewbox>
     </Grid>
 </UserControl>
