@@ -1,9 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
@@ -13,10 +17,14 @@ using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
 {
-    public class IssueViewModel : INotifyPropertyChanged
+    public partial class IssueViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
         public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
+        public ObservableCollection<RackViewModel> Racks { get; } = new();
+        public List<Cell> _cells { get; } = new();
+        public ObservableCollection<CellViewModel> Cells{ get; } = new();
+        private Dictionary<RackType, List<CellLayout>> _cellLayouts;
         public ObservableCollection<Operator> Operators { get; } = new();
     
         public string SearchText
@@ -57,33 +65,16 @@ namespace WMS.Desktop.ViewModels
             }
         }
         
-        public RackViewModel SelectedRack // Свойство решает, ячейки какого стеллажа будут визуализироваться.
+        public RackViewModel SelectedRack 
         {
             get => _selectedRack;
             set
             {
                 _selectedRack = value;
-                //OnPropertyChanged(nameof(VisibleCells));
-            }
-        }
-        private RackViewModel _selectedRack;
-        //public IEnumerable<RackViewModel> NormalVisibleRacks =>
-        //    allRacksToVisualise.Where(r => r.Row != 4);
-        //public IEnumerable<RackViewModel> SpecialVisibleRacks =>
-        //    allRacksToVisualise.Where(r => r.Row == 4);
-        //public IEnumerable<CellViewModel> VisibleCells =>
-        //    allCellsToVisualise.Where(c => c.RackId == SelectedRack.Id);
-        public RackType CurrentCellType
-        {
-            get => _currentCellType;
-            set
-            {
-                _currentCellType = value;
                 OnPropertyChanged();
             }
         }
-        private RackType _currentCellType;
-
+        private RackViewModel _selectedRack;
         private readonly List<ViewItemDTO> _stocks = new();
         private string _searchText;
         private string _commentText;
@@ -131,12 +122,6 @@ namespace WMS.Desktop.ViewModels
             AddIssueItemCommand = new RelayCommand(AddIssueItem);
             RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
             ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
-
-            //allRacksToVisualise.CollectionChanged += (s, e) =>
-            //{
-            //    OnPropertyChanged(nameof(NormalVisibleRacks));
-            //    OnPropertyChanged(nameof(SpecialVisibleRacks));
-            //};
         }
 
         public async Task IssueAsync()
@@ -193,7 +178,7 @@ namespace WMS.Desktop.ViewModels
 
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
-                await RefreshAsync();
+                await LoadStocks();
                 CommentText = string.Empty;
                 IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
@@ -212,7 +197,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task RefreshAsync()
+        public async Task LoadWindow()
         {
             if (_isLoading) return;
 
@@ -220,10 +205,16 @@ namespace WMS.Desktop.ViewModels
 
             try
             {
-                _stocks.Clear();
-                var items = await _issueService.GetAllAsync();
-                foreach (var item in items)
-                    _stocks.Add(item);
+                await LoadStocks();
+
+                await LoadRacks();
+
+                _cells.Clear();
+                var cells = await _cellService.GetAllAsync();
+                foreach (var item in cells)
+                    _cells.Add(item);
+
+                LoadCellLayouts();
 
                 ApplyFilter();
             }
@@ -239,6 +230,14 @@ namespace WMS.Desktop.ViewModels
             {
                 _isLoading = false;
             }
+        }
+
+        private async Task LoadStocks()
+        {
+            _stocks.Clear();
+            var items = await _issueService.GetAllAsync();
+            foreach (var item in items)
+                _stocks.Add(item);
         }
 
         public async Task LoadOperators()
@@ -264,47 +263,103 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        //public async Task LoadWarehouseVisualise()
-        //{
-        //    try
-        //    {
-        //        allRacksToVisualise.Clear();
-        //        var racks = await _rackService.GetAllAsync();
-        //        foreach (var item in racks)
-        //            allRacksToVisualise.Add(new RackViewModel(item, IssueItems));
+        private async Task LoadRacks()
+        {
+            Racks.Clear();
 
-        //        allCellsToVisualise.Clear();
-        //        var cells = await _cellService.GetAllAsync();
-        //        foreach (var item in cells)
-        //            allCellsToVisualise.Add(new CellViewModel(item, IssueItems));
-        //    }
-        //    catch (OverallDomainException ex)
-        //    {
-        //        _dialogService.ShowWarning(ex.Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _dialogService.ShowWarning(ex.Message);
-        //    }
-        //    finally
-        //    {
-        //        _isLoading = false;
-        //    }
-        //}
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RackDescription.json");
 
-        //public void SelectRack(RackViewModel rackVm)
-        //{
-        //    SelectedRack = rackVm;
+            var layouts = JsonSerializer.Deserialize<List<RackLayout>>(
+                File.ReadAllText(path));
 
-        //    if (rackVm.Column != 5 && rackVm.Row == 2)
-        //        CurrentCellType = CellsType.Cell1;
+            var layoutDict = layouts.ToDictionary(l => l.Code);
 
-        //    else if (rackVm.Column != 5 && (rackVm.Row == 1 || rackVm.Row == 3 || rackVm.Row == 4))
-        //        CurrentCellType = CellsType.Cell2;
+            var racksDb = await _rackService.GetAllAsync();
 
-        //    else if (rackVm.Column == 5)
-        //        CurrentCellType = CellsType.Cell3;
-        //}
+            foreach (var rack in racksDb)
+            {
+                if (!layoutDict.TryGetValue(rack.RackCode, out var layout))
+                    continue;
+
+                Racks.Add(new RackViewModel(rack, layout));
+            }
+        }
+
+        private void LoadCellLayouts()
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CellDescription.json");
+
+            var raw = JsonSerializer.Deserialize<List<CellLayoutRoot>>(File.ReadAllText(path));
+
+            _cellLayouts = raw.ToDictionary(
+                x => Enum.Parse<RackType>(x.Type),
+                x => x.Cells);
+        }
+
+        private void UpdateRackHighlights()
+        {
+            var rackIds = IssueItems
+                .Select(x => x.RackId)
+                .ToHashSet();
+
+            foreach (var rack in Racks)
+            {
+                rack.IsHighlighted = rackIds.Contains(rack.Id);
+            }
+        }
+
+        private void UpdateCellHighlights()
+        {
+            var cellIds = IssueItems
+                .Select(x => x.CellId)
+                .ToHashSet();
+
+            foreach (var cell in Cells)
+            {
+                cell.IsHighlighted = cellIds.Contains(cell.Id);
+            }
+        }
+
+        [RelayCommand]
+        private async void SelectRack(RackViewModel rack)
+        {
+            if (rack == null)
+                return;
+
+            SelectedRack = rack;
+
+            await LoadCellsForSelectedRack();
+        }
+
+        [RelayCommand]
+        private void SelectCell(CellViewModel cell)
+        {
+            return;
+        }
+
+        private async Task LoadCellsForSelectedRack()
+        {
+            if (SelectedRack == null)
+                return;
+
+            Cells.Clear();
+
+            if (!_cellLayouts.TryGetValue(SelectedRack.Type, out var layout))
+                return;
+
+            var rackCells = _cells.Where(c => c.RackId == SelectedRack.Id);
+
+            foreach (var cell in rackCells)
+            {
+                var cellLayout = layout.FirstOrDefault(l => l.Code == cell.CellCode);
+                if (cellLayout == null)
+                    continue;
+
+                Cells.Add(new CellViewModel(cell, cellLayout));
+            }
+
+            UpdateCellHighlights();
+        }
 
         private void ApplyFilter()
         {
@@ -337,6 +392,8 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Add(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
         }
 
         private void RemoveIssueItem (object obj)
@@ -345,11 +402,15 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             IssueItems.Remove(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
         }
 
         private void ClearIssueItems()
         {
             IssueItems.Clear();
+            UpdateRackHighlights();
+            UpdateCellHighlights();
             IsIssue = false; 
         }
 

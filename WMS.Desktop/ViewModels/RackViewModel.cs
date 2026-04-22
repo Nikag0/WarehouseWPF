@@ -13,7 +13,11 @@ namespace WMS.Desktop.ViewModels
     public class RackViewModel : INotifyPropertyChanged
     {
         public Guid Id { get; }
+
         public string Code { get; }
+        public int Column { get; }
+        public int Row { get; }
+        public string CodeDisplay => LocationFormatter.CodeToDisplay(Column, Row);
         public RackType Type { get; }
 
         public double X { get; }
@@ -32,10 +36,23 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        private bool _isHighlighted;
+        public bool IsHighlighted
+        {
+            get => _isHighlighted;
+            set
+            {
+                _isHighlighted = value;
+                OnPropertyChanged(nameof(IsHighlighted));
+            }
+        }
+
         public RackViewModel(Rack rack, RackLayout layout)
         {
             Id = rack.Id;
             Code = rack.RackCode;
+            Column = rack.Column;
+            Row = rack.Row;
             Type = layout.Type;
 
             X = layout.X;

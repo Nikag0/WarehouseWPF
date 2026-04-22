@@ -14,6 +14,10 @@ namespace WMS.Desktop.ViewModels
     {
         public Guid Id { get; }
         public Guid RackId { get; }
+        public string Code { get; }
+        public int Column { get; }
+        public int Row { get; }
+        public string CodeDisplay => LocationFormatter.CodeToDisplay(Column, Row);
 
         public double X { get; }
         public double Y { get; }
@@ -21,7 +25,6 @@ namespace WMS.Desktop.ViewModels
         public double Width { get; }
         public double Height { get; }
 
-        public string Code { get; }
 
         private bool _isSelected;
         public bool IsSelected
@@ -34,11 +37,24 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        private bool _isHighlighted;
+        public bool IsHighlighted
+        {
+            get => _isHighlighted;
+            set
+            {
+                _isHighlighted = value;
+                OnPropertyChanged(nameof(IsHighlighted));
+            }
+        }
+
 
         public CellViewModel(Cell cell, CellLayout layout)
         {
             Id = cell.Id;
             Code = cell.CellCode;
+            Column = cell.Column;
+            Row = cell.Row;
             RackId = cell.RackId;
 
             X = layout.X;

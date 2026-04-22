@@ -177,7 +177,8 @@
                             <Border Width="{Binding Width}"
                                     Height="{Binding Height}"
                                     BorderBrush="Black"
-                                    BorderThickness="1">
+                                    BorderThickness="1"
+                                    Opacity="0.5">
                                 
                                 <Border.Style>
                                     <Style TargetType="Border">
@@ -186,8 +187,12 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="Background" Value="Red"/>
-                                                <Setter Property="Opacity" Value="0.5"/>
                                             </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                            </DataTrigger>
+                                            
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>

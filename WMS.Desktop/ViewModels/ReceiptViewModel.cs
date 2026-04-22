@@ -104,7 +104,7 @@ namespace WMS.Desktop.ViewModels
         private bool _isRackPopupOpen;
 
 
-        // Объект выбранной ячейки.
+        // Объект ячеек выбранного стеллажа.
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
 
         public CellViewModel SelectedCell
@@ -225,7 +225,6 @@ namespace WMS.Desktop.ViewModels
                 _cells.AddRange(await _cellService.GetAllAsync());
 
                 LoadCellLayouts();
-
 
                 await LoadOperators();
 
@@ -395,7 +394,7 @@ namespace WMS.Desktop.ViewModels
             if (ReceiptItem.Article == null) return;
 
             SelectedRack = rack;
-            SearchRacks = rack.Code;
+            SearchRacks = rack.CodeDisplay;
         }
 
         private void FilterRacks()
@@ -407,19 +406,20 @@ namespace WMS.Desktop.ViewModels
                 var text = SearchRacks.ToLower();
 
                 query = query.Where(c =>
-                        c.Code != null
-                        && c.Code.ToLower().Contains(text));
+                        c.CodeDisplay != null
+                        && c.CodeDisplay.ToLower().Contains(text));
             }
 
             var sortedQuery = query
-                             .OrderByDescending(r => r.Code);
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
 
             ReplaceCollection(FilteredRacks, sortedQuery);
         }
 
         private void AutomaticRackSelection()
         {
-            var rack = Racks.FirstOrDefault(x => x.Code == SearchRacks);
+            var rack = Racks.FirstOrDefault(x => x.CodeDisplay == SearchRacks);
 
             SelectedRack = rack;
         }
@@ -480,7 +480,7 @@ namespace WMS.Desktop.ViewModels
 
             if (cell != null)
             {
-                SearchCell = cell.Code;
+                SearchCell = cell.CodeDisplay;
             }
         }
         private void SetCellFromList(object obj)
@@ -489,7 +489,7 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             SelectedCell = cell;
-            SearchCell = cell.Code;
+            SearchCell = cell.CodeDisplay;
             IsCellPopupOpen = false;
         }
 
@@ -504,22 +504,20 @@ namespace WMS.Desktop.ViewModels
                 var text = SearchCell.ToLower();
 
                 query = query.Where(c =>
-                        c.Code != null
-                        && c.Code.ToLower().Contains(text));
+                        c.CodeDisplay != null
+                        && c.CodeDisplay.ToLower().Contains(text));
             }
 
             var sortedQuery = query
-                             .OrderByDescending(r => r.Code);
-            //var sortedQuery = query
-            //                 .OrderByDescending(r => r.Column)
-            //                 .ThenByDescending(r => r.Row);
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
 
-            ReplaceCollection(FilteredCells, query);
+            ReplaceCollection(FilteredCells, sortedQuery);
         }
 
         private void AutomaticCellSelection()
         {
-            var cell = Cells.FirstOrDefault(x => x.Code == SearchCell);
+            var cell = Cells.FirstOrDefault(x => x.CodeDisplay == SearchCell);
 
             SelectedCell = cell;
         }
@@ -536,9 +534,15 @@ namespace WMS.Desktop.ViewModels
                     ReceiptItem.ComponentName = stock.ComponentName;
                     ReceiptItem.Manufacturer = stock.Manufacturer;
                     if (stock.RackId != Guid.Empty)
+                    {
                         SelectedRack = Racks.FirstOrDefault(r => r.Id == stock.RackId);
+                        SearchRacks = SelectedRack.CodeDisplay;
+                    }
                     if (stock.CellId != Guid.Empty)
+                    {
                         SelectedCell = Cells.FirstOrDefault(c => c.Id == stock.CellId);
+                        SearchCell = SelectedCell.CodeDisplay;
+                    }
                 }
             }
             catch (OverallDomainException ex)

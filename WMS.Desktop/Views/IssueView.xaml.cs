@@ -29,38 +29,16 @@ namespace WMS.Desktop.Views
         {
             InitializeComponent();
             this.Loaded += IssueViewLoaded;
-            //RacksGrid.RackClicked += OnRackClicked;
         }
 
         private async void IssueViewLoaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is IssueViewModel viewModel)
             {
-                await viewModel.RefreshAsync();
+                await viewModel.LoadWindow();
                 await viewModel.LoadOperators();
-                //await viewModel.LoadWarehouseVisualise();
             }
         }
-
-        //private void OnRackClicked(RackViewModel rackVm)
-        //{
-        //    if (DataContext is not IssueViewModel vm)
-        //        return;
-
-        //    vm.SelectedRack = rackVm;
-
-        //    int column = rackVm.Column;
-        //    int row = rackVm.Row;
-
-        //    if (column == 3 && row != 4)
-        //        vm.CurrentCellType = CellsType.Cell1;
-
-        //    else if ((column == 1 || column == 2 || column == 4) && row != 4)
-        //        vm.CurrentCellType = CellsType.Cell2;
-
-        //    else if (row == 4)
-        //        vm.CurrentCellType = CellsType.Cell3;
-        //}
 
         private void SearchToIssue_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {

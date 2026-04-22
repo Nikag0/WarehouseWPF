@@ -20,20 +20,4 @@
             _ => number.ToString()
         };
     }
-    public static string DataToCode(int column, int row)
-    {
-        return $"{ToCode(column)}-{row}";
-    }
-
-    private static int ToCode(int number)
-    {
-        return number switch
-        {
-            1 => 1,
-            2 => 3,
-            3 => 4,
-            4 => 6,
-            5 => 8
-        };
-    }
 }
