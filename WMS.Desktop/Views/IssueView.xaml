@@ -18,15 +18,14 @@
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Margin="10, 0">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0"
-              Margin="10,0">
+        <Grid Grid.Column="0">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
@@ -38,7 +37,7 @@
             <Grid Grid.Row="0">
 
                 <TextBlock 
-                    Text="Поиск для выдачи"
+                    Text="Выдача товаров"
                     FontSize="30"
                     Foreground="White"
                     HorizontalAlignment="Left" 
@@ -297,7 +296,8 @@
 
             <local:RacksGridControl x:Name="RacksGrid"
                                     Grid.Row="0"
-                                    Racks="{Binding Racks}" />
+                                    Racks="{Binding Racks}" 
+                                    SelectedRack="{Binding SelectedRack}"/>
 
             <local:CellsGridControl Grid.Row="1"
                                     Cells="{Binding Cells}"

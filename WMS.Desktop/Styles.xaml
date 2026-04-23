@@ -30,7 +30,7 @@
 
                             <!-- watermark -->
                             <TextBlock x:Name="Watermark"
-                                   Text="🔍 Поиск..."
+                                   Text="🔍 Поиск"
                                    Foreground="#777"
                                    Margin="{TemplateBinding Padding}"
                                    VerticalAlignment="Center"

@@ -72,9 +72,15 @@ namespace WMS.Desktop.ViewModels
             {
                 _selectedRack = value;
                 OnPropertyChanged();
+
+                foreach (var rack in Racks)
+                    rack.IsSelected = rack == value;
+
+                _ = LoadCellsForSelectedRack(); 
             }
         }
         private RackViewModel _selectedRack;
+
         private readonly List<ViewItemDTO> _stocks = new();
         private string _searchText;
         private string _commentText;
@@ -327,8 +333,6 @@ namespace WMS.Desktop.ViewModels
                 return;
 
             SelectedRack = rack;
-
-            await LoadCellsForSelectedRack();
         }
 
         [RelayCommand]

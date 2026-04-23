@@ -45,5 +45,18 @@ namespace WMS.Desktop.Views
         DependencyProperty.Register(nameof(Racks),
             typeof(ObservableCollection<RackViewModel>),
             typeof(RacksGridControl));
+
+        public static readonly DependencyProperty SelectedRackProperty =
+    DependencyProperty.Register(
+        nameof(SelectedRack),
+        typeof(RackViewModel),
+        typeof(RacksGridControl),
+        new PropertyMetadata(null));
+
+        public RackViewModel SelectedRack
+        {
+            get => (RackViewModel)GetValue(SelectedRackProperty);
+            set => SetValue(SelectedRackProperty, value);
+        }
     }
 }

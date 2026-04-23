@@ -53,7 +53,7 @@
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
                                    ConverterParameter=RackType2}">
-            <!-- Вариант 2 для RackType1 (4 колонки) -->
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
@@ -70,36 +70,56 @@
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
                                    ConverterParameter=RackType3}">
-            <!-- Вариант для RackType2 -->
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="А"/>
         </Grid>
 
-        <!-- левый столбец с номерами рядов (вариант для RackType1) -->
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
                                    ConverterParameter=RackType1}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
-            
+
+            <TextBlock Grid.Row="0" Text="1" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="1" Text="2" Margin="0,15,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="2" Text="3" Margin="0,20,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="3" Text="4" Margin="0,15,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="4" Text="5" Margin="0,15,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="5" Text="6" Margin="0,20,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="6" Text="7" Margin="0,15,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
         </Grid>
 
         <!-- левый столбец номеров для RackType2 -->
@@ -107,47 +127,92 @@
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
                                    ConverterParameter=RackType2}">
-            
+
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+
+            <TextBlock Grid.Row="0" Text="1" Margin="0,10,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="1" Text="2" Margin="0,15,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="2" Text="3" Margin="0,20,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="3" Text="4" Margin="0,15,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="4" Text="5" Margin="0,15,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="5" Text="6" Margin="0,20,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="6" Text="7" Margin="0,15,0,0" 
+         HorizontalAlignment="Center" 
+         Style="{StaticResource HeaderTextStyle}"/>
         </Grid>
 
-        <!-- левый столбец номеров для RackType3 -->
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
                                    ConverterParameter=RackType3}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-            <TextBlock Grid.Row="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-            <TextBlock Grid.Row="4" Style="{StaticResource HeaderTextStyle}" Text="5"/>
-            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="6"/>
-            <TextBlock Grid.Row="6" Style="{StaticResource HeaderTextStyle}" Text="7"/>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="1" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+                <TextBlock Grid.Row="1" Text="2" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+                
+                <TextBlock Grid.Row="2" Text="3" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+                
+                <TextBlock Grid.Row="3" Text="4" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+                <TextBlock Grid.Row="4" Text="5" Margin="0,20,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+                
+                <TextBlock Grid.Row="5" Text="6" Margin="0,30,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+
+                <TextBlock Grid.Row="6" Text="7" Margin="0,10,0,0" 
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource HeaderTextStyle}"/>
+            </Grid>
         </Grid>
 
         <Viewbox Grid.Column="1"
@@ -186,7 +251,8 @@
 
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="Background" Value="Red"/>
+                                                <Setter Property="BorderBrush" Value="Red"/>
+                                                <Setter Property="BorderThickness" Value="3"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">

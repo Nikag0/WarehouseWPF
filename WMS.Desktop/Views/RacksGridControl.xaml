@@ -34,21 +34,33 @@
               Grid.Row="1">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="13*"/>
-                <RowDefinition Height="7*"/>
-                <RowDefinition Height="13*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="13*"/>
-                <RowDefinition Height="13*"/>
-                <RowDefinition Height="9*"/>
-                <RowDefinition Height="13*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
-            <TextBlock Grid.Row="2" Style="{StaticResource HeaderTextStyle}" Text="2"/>
-            <TextBlock Grid.Row="3" Style="{StaticResource HeaderTextStyle}" Text="3"/>
-            <TextBlock Grid.Row="5" Style="{StaticResource HeaderTextStyle}" Text="4"/>
-            <TextBlock Grid.Row="7" Style="{StaticResource HeaderTextStyle}" Text="5"/>
+            <TextBlock Grid.Row="0" Text="1" Margin="0,15,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="1" Text="2" Margin="0,120,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="2" Text="3" Margin="0,10,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="3" Text="4" Margin="0,100,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="4" Text="5" Margin="0,120,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
 
         </Grid>
 
@@ -69,19 +81,15 @@
 
         </Grid>
 
-
-
         <Viewbox  Grid.Column="1"
                   Grid.Row="1"
                   Stretch="Fill">
             
             <Grid Width="1000" Height="800">
 
-                <!-- Фон -->
                 <Image Source="/Images/Warehouse.png"
                        Stretch="Fill"/>
 
-                <!-- Оверлей -->
                 <ItemsControl ItemsSource="{Binding Racks, RelativeSource={RelativeSource AncestorType=UserControl}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -99,17 +107,20 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Width="{Binding Width}"
-                                    Height="{Binding Height}"
-                                    BorderBrush="Black"
-                                    BorderThickness="1"
-                                    Opacity="0.5">
+                                    Height="{Binding Height}">
 
                                 <Border.Style>
+                                    
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderBrush" Value="Black"/>
+                                        <Setter Property="BorderThickness" Value="1"/>
+                                        <Setter Property="Opacity" Value="0.5"/>
+                                        
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="Background" Value="Red"/>
+                                                <Setter Property="Opacity" Value="1"/>
+                                                <Setter Property="Background" Value="Green"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">

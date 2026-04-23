@@ -54,9 +54,7 @@ namespace WMS.Desktop.ViewModels
             get => _receiptItem;
             set
             {
-
                 _receiptItem = value;
-               
             }
         }
         private StockViewModel _receiptItem = new();
@@ -72,7 +70,7 @@ namespace WMS.Desktop.ViewModels
 
                 // Подсветка
                 foreach (var r in Racks)
-                    r.IsSelected = r == value;
+                    r.IsHighlighted = r == value;
 
                 _ = LoadCellsForSelectedRack();
             }
@@ -118,8 +116,7 @@ namespace WMS.Desktop.ViewModels
 
                 foreach (var cell in Cells)
                 {
-                    cell.IsSelected = _selectedCell != null && cell.Id == _selectedCell.Id;
-
+                    cell.IsHighlighted = _selectedCell != null && cell.Id == _selectedCell.Id;
                 }
             }
         }
