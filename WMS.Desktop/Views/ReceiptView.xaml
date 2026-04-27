@@ -336,7 +336,8 @@
                                             Minimum="0"
                                             Margin="5"
                                             FontSize="15"
-                                            TextAlignment="Center">
+                                            TextAlignment="Center"
+                                            ButtonSpinnerWidth="35">
                         </xctk:IntegerUpDown>
                         
 

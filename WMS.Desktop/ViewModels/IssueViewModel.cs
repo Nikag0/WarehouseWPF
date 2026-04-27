@@ -34,7 +34,7 @@ namespace WMS.Desktop.ViewModels
             {
                 _searchText = value;
                 OnPropertyChanged();
-                ApplyFilter();
+                StocksFilter();
             }
         }
         public string CommentText
@@ -185,6 +185,7 @@ namespace WMS.Desktop.ViewModels
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
                 await LoadStocks();
+                StocksFilter();
                 CommentText = string.Empty;
                 IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
@@ -214,6 +215,7 @@ namespace WMS.Desktop.ViewModels
                 await LoadStocks();
 
                 await LoadRacks();
+                UpdateRackHighlights();
 
                 _cells.Clear();
                 var cells = await _cellService.GetAllAsync();
@@ -221,8 +223,14 @@ namespace WMS.Desktop.ViewModels
                     _cells.Add(item);
 
                 LoadCellLayouts();
+                UpdateCellHighlights();
 
-                ApplyFilter();
+                StocksFilter();
+
+                if (SelectedRack != null)
+                {
+                    SelectedRack = Racks.FirstOrDefault(r => r.Id == SelectedRack.Id);
+                }
             }
             catch (OverallDomainException ex)
             {
@@ -365,7 +373,7 @@ namespace WMS.Desktop.ViewModels
             UpdateCellHighlights();
         }
 
-        private void ApplyFilter()
+        private void StocksFilter()
         {
             FilteredStocks.Clear();
 

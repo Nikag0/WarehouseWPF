@@ -90,7 +90,7 @@
                 <Image Source="/Images/Warehouse.png"
                        Stretch="Fill"/>
 
-                <ItemsControl ItemsSource="{Binding Racks, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <ItemsControl ItemsSource="{Binding Racks, RelativeSource={RelativeSource AncestorType=local:RacksGridControl}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <Canvas />
@@ -119,12 +119,12 @@
                                         
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="Opacity" Value="1"/>
-                                                <Setter Property="Background" Value="Green"/>
+                                                <Setter Property="BorderBrush" Value="DarkOrange"/>
+                                                <Setter Property="BorderThickness" Value="6"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
-                                                <Setter Property="Background" Value="Red"/>
+                                                <Setter Property="Background" Value="Yellow"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>

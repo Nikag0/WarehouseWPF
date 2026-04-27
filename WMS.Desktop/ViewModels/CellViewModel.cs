@@ -48,7 +48,6 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-
         public CellViewModel(Cell cell, CellLayout layout)
         {
             Id = cell.Id;

@@ -68,7 +68,9 @@ namespace WMS.Desktop.ViewModels
                 _selectedRack = value;
                 OnPropertyChanged();
 
-                // Подсветка
+                if (value != null)
+                    ReceiptItem.RackId = value.Id;
+
                 foreach (var r in Racks)
                     r.IsHighlighted = r == value;
 
@@ -101,7 +103,6 @@ namespace WMS.Desktop.ViewModels
         }
         private bool _isRackPopupOpen;
 
-
         // Объект ячеек выбранного стеллажа.
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
 
@@ -113,6 +114,9 @@ namespace WMS.Desktop.ViewModels
                 _selectedCell = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Cells));
+
+                if (value != null)
+                    ReceiptItem.CellId = value.Id;
 
                 foreach (var cell in Cells)
                 {
@@ -227,6 +231,7 @@ namespace WMS.Desktop.ViewModels
 
                 FilterItemsToReceipt();
                 FilterCells();
+                UpdateHighlights();
             }
             catch (OverallDomainException ex)
             {
@@ -480,6 +485,7 @@ namespace WMS.Desktop.ViewModels
                 SearchCell = cell.CodeDisplay;
             }
         }
+
         private void SetCellFromList(object obj)
         {
             if (obj is not CellViewModel cell)
@@ -552,6 +558,14 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        private void UpdateHighlights()
+        {
+            foreach (var rack in Racks)
+                rack.IsHighlighted = rack.Id == ReceiptItem.RackId;
+
+            foreach (var cell in Cells)
+                cell.IsHighlighted = cell.Id == ReceiptItem.CellId;
+        }
 
         private void ReplaceCollection<T>(
             ObservableCollection<T> target,

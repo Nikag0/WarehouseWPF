@@ -17,7 +17,8 @@
     <TabControl Grid.Column="0"
                 ItemContainerStyle="{StaticResource MenuTabItemStyle}"
                 TabStripPlacement="Left"
-                Background="#36495b">
+                Background="#36495b"
+                VirtualizingStackPanel.IsVirtualizing="False">
 
         <TabItem>
             <TabItem.Header>

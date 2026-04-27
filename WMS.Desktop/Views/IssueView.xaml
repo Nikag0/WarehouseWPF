@@ -144,6 +144,7 @@
                                         <xctk:IntegerUpDown.Style>
                                             <Style TargetType="xctk:IntegerUpDown">
                                                 <Setter Property="IsEnabled" Value="True"/>
+                                                <Setter Property="ButtonSpinnerWidth" Value="35"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False"/>
