@@ -4,8 +4,7 @@
 
     <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
 
-    <Style x:Key="WatermarkTextBox" TargetType="TextBox">
-        <!-- базовые свойства -->
+    <Style x:Key="SearchTextBox" TargetType="TextBox">
         <Setter Property="Background" Value="White"/>
         <Setter Property="Foreground" Value="Black"/>
         <Setter Property="BorderBrush" Value="#CCC"/>
@@ -24,11 +23,9 @@
                         IsEnabled ="True">
 
                         <Grid>
-                            <!-- текст -->
                             <ScrollViewer x:Name="PART_ContentHost"
                                       Margin="{TemplateBinding Padding}"/>
 
-                            <!-- watermark -->
                             <TextBlock x:Name="Watermark"
                                    Text="🔍 Поиск"
                                    Foreground="#777"
@@ -40,14 +37,12 @@
                     </Border>
 
                     <ControlTemplate.Triggers>
-                        <!-- показать watermark -->
                         <Trigger Property="Text" Value="">
                             <Setter TargetName="Watermark"
                                 Property="Visibility"
                                 Value="Visible"/>
                         </Trigger>
 
-                        <!-- фокус -->
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Border"
                                 Property="BorderBrush"
@@ -75,8 +70,12 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="TextBoxStyle" TargetType="TextBox">
-        <Setter Property="Tag" Value="5"/>
+    <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Padding" Value="8,5"/>
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
 
         <Setter Property="Template">
             <Setter.Value>
@@ -87,25 +86,184 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="4">
                         <ScrollViewer x:Name="PART_ContentHost" 
-                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                  Margin="{TemplateBinding Padding}"/>
+                            Padding="{TemplateBinding Padding}" 
+                            Focusable="false" 
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="Red"/>
-        <Setter Property="FontSize" Value="25"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Style TargetType="{x:Type DataGridColumnHeader}">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="10,5" />
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Stretch" 
+                                          VerticalAlignment="Stretch"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WindowNames" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="30"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <Style TargetType="{x:Type DataGridColumnHeader}">
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="Padding" Value="10,5" />
+    <Style x:Key="InputFieldName" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="TextDataInDataGrid" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#CCC"/>
+        <Setter Property="BorderThickness" Value="1"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border x:Name="MainBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition MaxWidth="20" Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              IsHitTestVisible="False"/>
+
+                                <ToggleButton Grid.ColumnSpan="2"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}">
+                                    
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent">
+                                                <Path x:Name="Arrow"
+                                                  Data="M0,0 L4,4 L8,0 Z"
+                                                  Fill="#444"
+                                                  HorizontalAlignment="Right"
+                                                  Margin="0,0,10,0"
+                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                            </Grid>
+                        </Border>
+
+                        <Popup x:Name="PART_Popup"
+                           AllowsTransparency="true"
+                           IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                           Placement="Bottom"
+                           PopupAnimation="Slide">
+                            
+                            <Border x:Name="DropDownBorder"
+                                MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                Background="White"
+                                BorderBrush="#CCC"
+                                BorderThickness="1"
+                                CornerRadius="0,0,4,4">
+                                
+                                <ScrollViewer SnapsToDevicePixels="True">
+                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#888"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <!-- CornerRadius задает скругление -->
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4">
+                        
+                        <ContentPresenter HorizontalAlignment="Center" 
+                                      VerticalAlignment="Center"
+                                      Margin="{TemplateBinding Padding}"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Эффект при наведении -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#BEE6FD"/>
+                        </Trigger>
+                        <!-- Эффект при нажатии -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#C4E5F6"/>
+                            <Setter Property="BorderBrush" Value="#2C628B"/>
+                        </Trigger>
+                        <!-- Состояние отключенной кнопки -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="#CCCCCC"/>
+                            <Setter Property="Foreground" Value="#888888"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

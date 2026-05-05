@@ -526,7 +526,7 @@ namespace WMS.Desktop.ViewModels
         }
 
         [RelayCommand]
-        private async Task AddItemToReceipt(object obj)
+        private void AddItemToReceipt(object obj)
         {
             try
             {

@@ -119,8 +119,10 @@
                                         
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
+
                                                 <Setter Property="BorderBrush" Value="DarkOrange"/>
                                                 <Setter Property="BorderThickness" Value="6"/>
+
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">

@@ -15,15 +15,9 @@
 
 
     <UserControl.Resources>
-        <ResourceDictionary>
 
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Styles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
+        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
 
-            <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-
-        </ResourceDictionary>
     </UserControl.Resources>
 
 
@@ -43,19 +37,10 @@
                 <RowDefinition Height="160"/>
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <TextBlock Text="Выдача товаров"
+                       Style="{StaticResource WindowNames}"/>
 
-                <TextBlock 
-                    Text="Выдача товаров"
-                    FontSize="30"
-                    Foreground="White"
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Center"/>
-
-            </Grid>
-
-            <Grid x:Name="SearchToIssueGrid" 
-                  Grid.Row="1"
+            <Grid Grid.Row="1"
                   Margin="0,10">
 
                 <TextBox x:Name="SearchToIssue" 
@@ -66,7 +51,7 @@
                          IsTabStop="False">
 
                     <TextBox.Style>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource WatermarkTextBox}">
+                        <Style TargetType="TextBox" BasedOn="{StaticResource SearchTextBox}">
                             <Setter Property="IsEnabled" Value="True"/>
 
                             <Style.Triggers>
@@ -135,17 +120,19 @@
                 <DataGrid x:Name="IssueGrid" 
                           ItemsSource="{Binding IssueItems}" 
                           AutoGenerateColumns="False" 
-                          FontSize="15">
+                          IsReadOnly="True" 
+                          FontSize="15"
+                          RowHeight="40">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding ComponentName}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
 
-                        <DataGridTemplateColumn Header="К выдаче" Width="100">
+                        <DataGridTemplateColumn Header="К выдаче" Width="100" IsReadOnly="False" >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <xctk:IntegerUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -171,14 +158,12 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Удалить"
-                                            Command="{Binding DataContext.RemoveIssueItemCommand,
-                                            RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                            CommandParameter="{Binding}"
-                                            Height="20"
-                                            FontSize="12">
-
+                                        Command="{Binding DataContext.RemoveIssueItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        FontSize="15"
+                                        Margin="3">
                                         <Button.Style>
-                                            <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                 <Setter Property="IsEnabled" Value="True"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
@@ -242,22 +227,16 @@
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="120"/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0"
                                Text="Комментарий&#x0a;к выдаче"
-                               Foreground="White"
-                               FontSize="15"
-                               HorizontalAlignment="Left" 
-                               VerticalAlignment="Center"/>
+                               Style="{StaticResource InputFieldName}"/>
 
                     <TextBox Grid.Column="1"
                              Text="{Binding CommentText}"
-                             AcceptsReturn="True" 
-                             TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource TextBoxStyle}"/>
+                             Style="{StaticResource InputTextBoxStyle}"/>
 
                 </Grid>
 
@@ -272,19 +251,18 @@
 
                     <TextBlock Grid.Column="0"
                                Text="ФИО оператора" 
-                               Foreground="White"
-                               FontSize="15" 
-                               HorizontalAlignment="Left" 
-                               VerticalAlignment="Center"/>
+                               Style="{StaticResource InputFieldName}"/>
 
-                    <ComboBox x:Name="OperatorCompobox"
-                              Grid.Column="1"
+                    <ComboBox Grid.Column="1"
                               ItemsSource="{Binding Operators}"
-                              SelectedItem="{Binding OperatorName}"
-                              DisplayMemberPath="FullName"
-                              FontSize="20"
-                              HorizontalContentAlignment="Center" 
-                              VerticalContentAlignment="Center"/>
+                              SelectedItem="{Binding OperatorName}">
+
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FullName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <Button Grid.Column="2"
                             Content="Выдать" 

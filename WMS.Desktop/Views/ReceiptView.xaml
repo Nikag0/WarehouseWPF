@@ -34,56 +34,51 @@
                 <RowDefinition Height="250"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"
-                       Text="Приём товаров" 
-                       FontSize="30" 
-                       HorizontalAlignment="Left" 
-                       VerticalAlignment="Center"
-                       Foreground="White"/>
+            <TextBlock Text="Приём товаров" 
+                       Style="{StaticResource WindowNames}"/>
 
-            <Grid Grid.Row="1">
-
-                <TextBox x:Name="SearchToReceipt" 
-                         Grid.Column="0"
-                         Margin="0,10" 
-                         IsTabStop="False"
-                         Style="{StaticResource WatermarkTextBox}"
-                         Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
-
-            </Grid>
+            <TextBox Grid.Row="1"
+                     Margin="0,10" 
+                     Style="{StaticResource SearchTextBox}"
+                     Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Grid Grid.Row="2">
+                
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="13*"/>
                     <ColumnDefinition Width="44*"/>
                 </Grid.ColumnDefinitions>
 
                 <DataGrid ItemsSource="{Binding FilteredItemsToReceipt}" 
+                          Grid.ColumnSpan="2"
                           AutoGenerateColumns="False" 
                           FontSize="15" 
-                          IsReadOnly="True" Grid.ColumnSpan="2">
+                          IsReadOnly="True" 
+                          RowHeight="40">
+                    
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
-                        <DataGridTextColumn Header="Название" Width="50*" Binding="{Binding ComponentName}"/>
-                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}"/>
-                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity}"/>
-                        <DataGridTemplateColumn Width="150">
+                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="50*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTemplateColumn Width="150" IsReadOnly="False">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Добавить к приёмке"
                                         Command="{Binding DataContext.AddItemToReceiptCommand,
                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
-                                        Height="20"
-                                        FontSize="12">
+                                        FontSize="13"
+                                        Margin="3">
                                     </Button>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+                
             </Grid>
 
             <Grid Grid.Row="3">
@@ -215,7 +210,7 @@
                                  Grid.Column="1"
                                  Margin="5"
                                  IsTabStop="False"
-                                 Style="{StaticResource WatermarkTextBox}"
+                                 Style="{StaticResource SearchTextBox}"
                                  Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
@@ -269,7 +264,7 @@
                                  PreviewKeyDown="SearchCell_PreviewKeyDown"
                                  Margin="5"
                                  IsTabStop="False"
-                                 Style="{StaticResource WatermarkTextBox}"
+                                 Style="{StaticResource SearchTextBox}"
                                  Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
@@ -347,28 +342,25 @@
                     <TextBlock Grid.Row="1"
                                Grid.Column="0"
                                Text="ФИО оператора" 
-                               Foreground="White"
-                               FontSize="15" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"/>
+                               Style="{StaticResource InputFieldName}"/>
 
-                    <ComboBox Grid.Row="1"
-                              Grid.Column="1"
+                    <ComboBox Grid.Column="1"
+                              Margin="5"
+                              Grid.Row="1"
                               ItemsSource="{Binding Operators}"
-                              SelectedItem="{Binding OperatorName}"
-                              DisplayMemberPath="FullName"
-                              FontSize="20"
-                              HorizontalContentAlignment="Center" 
-                              VerticalContentAlignment="Center"
-                              Margin="5"/>
+                              SelectedItem="{Binding OperatorName}">
+
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FullName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <TextBlock Grid.Row="2"
                                Grid.Column="0"
                                Text="Комментарий" 
-                               Foreground="White"
-                               FontSize="15" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"/>
+                               Style="{StaticResource InputFieldName}"/>
 
                     <TextBox Grid.Row="2"
                              Grid.Column="1" 
@@ -376,7 +368,7 @@
                              AcceptsReturn="True" 
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource TextBoxStyle}"
+                             Style="{StaticResource InputTextBoxStyle}"
                              Margin="5"/>
 
                 </Grid>

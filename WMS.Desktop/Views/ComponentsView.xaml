@@ -11,7 +11,7 @@
              d:DesignHeight="1008" d:DesignWidth="1920">
 
 
-    <Grid>
+    <Grid Margin="10,0">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -20,10 +20,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="10,0">
-            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"
-                Text="Каталог товаров" FontSize="30" Foreground="White"/>
-        </Grid>
+        <TextBlock Text="Каталог товаров"
+                   Style="{StaticResource WindowNames}"/>
+
+        <TextBox Grid.Row="1"
+                 Margin="0,10" 
+                 Style="{StaticResource SearchTextBox}"
+                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
         <Grid Grid.Row="2"
               Width="300"
@@ -121,15 +124,6 @@
                     Command="{Binding AddModeOffCommand}"
                     Margin="5,5,10,5"
                     Content="Отменить"/>
-
-        </Grid>
-
-        <Grid Grid.Row="1"
-              Margin="10">
-
-            <TextBox Grid.Column="0"
-                    Style="{StaticResource WatermarkTextBox}"
-                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
         </Grid>
 
