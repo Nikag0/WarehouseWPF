@@ -12,11 +12,20 @@
              d:DesignWidth="1920"
              d:DesignHeight="1008"
              PreviewMouseDown="Root_PreviewMouseDown">
-            
+
 
     <UserControl.Resources>
-        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+
+        </ResourceDictionary>
     </UserControl.Resources>
+
 
     <Grid Margin="10, 0">
 
@@ -129,14 +138,14 @@
                           FontSize="15">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="100*" Binding="{Binding Article}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Название" Width="250*" Binding="{Binding ComponentName}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Производитель" Width="250*" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Стеллаж" Binding="{Binding RackCodeDisplay}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Ячейка" Binding="{Binding CellCodeDisplay}" IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding ComponentName}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity}" IsReadOnly="True"/>
 
-                        <DataGridTemplateColumn Header="К выдаче">
+                        <DataGridTemplateColumn Header="К выдаче" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <xctk:IntegerUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -144,7 +153,8 @@
                                         <xctk:IntegerUpDown.Style>
                                             <Style TargetType="xctk:IntegerUpDown">
                                                 <Setter Property="IsEnabled" Value="True"/>
-                                                <Setter Property="ButtonSpinnerWidth" Value="35"/>
+                                                <Setter Property="ButtonSpinnerWidth" Value="45"/>
+                                                <Setter Property="ButtonSpinnerHeight" Value="35"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False"/>
@@ -157,7 +167,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="75">
+                        <DataGridTemplateColumn Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Удалить"

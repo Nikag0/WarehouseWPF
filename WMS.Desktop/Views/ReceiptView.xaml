@@ -64,11 +64,11 @@
                           IsReadOnly="True" Grid.ColumnSpan="2">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}"/>
-                        <DataGridTextColumn Header="Название" Width="250" Binding="{Binding ComponentName}"/>
-                        <DataGridTextColumn Header="Производитель" Width="250" Binding="{Binding Manufacturer}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="83" Binding="{Binding RackCodeDisplay}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="83" Binding="{Binding CellCodeDisplay}"/>
-                        <DataGridTextColumn Header="Остаток" Binding="{Binding Quantity}"/>
+                        <DataGridTextColumn Header="Название" Width="50*" Binding="{Binding ComponentName}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}"/>
+                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity}"/>
                         <DataGridTemplateColumn Width="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
