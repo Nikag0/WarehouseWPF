@@ -39,6 +39,7 @@
 
             <TextBox Grid.Row="1"
                      Margin="0,10" 
+                     Tag="Поиск:"
                      Style="{StaticResource SearchTextBox}"
                      Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -169,16 +170,9 @@
                         <RowDefinition Height="3*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3.5*"/>
-                        <ColumnDefinition Width="7*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Grid Grid.ColumnSpan="2">
+                    <Grid Grid.Row="0">
+                        
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
@@ -190,27 +184,20 @@
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ReceiptItem.ComponentId}" Value="00000000-0000-0000-0000-000000000000">
                                         <Setter Property="IsEnabled" Value="False"/>
-                                        <Setter Property="Background" Value="Gray"/>
+                                        <Setter Property="Background" Value="LightGray"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Grid.Style>
 
-
-                        <TextBlock Grid.Column="0" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center"
-                                   Text="Стеллаж" 
-                                   Foreground="White" 
-                                   FontSize="15"/>
-
                         <TextBox x:Name="SearchRack" 
                                  GotKeyboardFocus="SearchRack_GotKeyboardFocus"
                                  PreviewKeyDown="SearchRack_PreviewKeyDown"
-                                 Grid.Column="1"
+                                 Grid.Column="0"
                                  Margin="5"
                                  IsTabStop="False"
-                                 Style="{StaticResource SearchTextBox}"
+                                 Style="{StaticResource SearchTextBox}" 
+                                 Tag="Стеллаж:"
                                  Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
@@ -251,18 +238,12 @@
                             </Border>
                         </Popup>
 
-                        <TextBlock Grid.Column="2" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center"
-                                   Text="Ячейка" 
-                                   Foreground="White" 
-                                   FontSize="15"/>
-
                         <TextBox x:Name="SearchCell"
-                                 Grid.Column="3"
+                                 Grid.Column="1"
                                  GotKeyboardFocus="SearchCell_GotKeyboardFocus"
                                  PreviewKeyDown="SearchCell_PreviewKeyDown"
                                  Margin="5"
+                                 Tag="Стеллаж:"
                                  IsTabStop="False"
                                  Style="{StaticResource SearchTextBox}"
                                  Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
@@ -318,14 +299,6 @@
                             </Border>
                         </Popup>
 
-                        <TextBlock Grid.Column="4" 
-                                   Margin="2" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center"
-                                   Text="Количество" 
-                                   Foreground="White" 
-                                   FontSize="15"/>
-                        
                         <xctk:IntegerUpDown Grid.Column="5"
                                             Value="{Binding ReceiptItem.OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                             Minimum="0"
@@ -339,16 +312,11 @@
 
                     </Grid>
 
-                    <TextBlock Grid.Row="1"
-                               Grid.Column="0"
-                               Text="ФИО оператора" 
-                               Style="{StaticResource InputFieldName}"/>
-
-                    <ComboBox Grid.Column="1"
+                    <ComboBox Grid.Row="2"
                               Margin="5"
-                              Grid.Row="1"
                               ItemsSource="{Binding Operators}"
-                              SelectedItem="{Binding OperatorName}">
+                              SelectedItem="{Binding OperatorName}"
+                              Tag="ФИО оператора:">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -356,20 +324,15 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               Text="Комментарий" 
-                               Style="{StaticResource InputFieldName}"/>
-
-                    <TextBox Grid.Row="2"
-                             Grid.Column="1" 
-                             Text="{Binding CommentText}"
-                             AcceptsReturn="True" 
-                             TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"
-                             Style="{StaticResource InputTextBoxStyle}"
-                             Margin="5"/>
+                        
+                    <TextBox Grid.Row="1"
+                                Text="{Binding CommentText}"
+                                AcceptsReturn="True" 
+                                Tag="Комментарий:"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                Style="{StaticResource InputTextBoxStyle}"
+                                Margin="5"/>
 
                 </Grid>
 

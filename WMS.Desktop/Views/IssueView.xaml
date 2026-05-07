@@ -47,6 +47,7 @@
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
                          PreviewKeyDown="SearchToIssue_PreviewKeyDown"
                          Grid.Column="0"
+                         Tag="Поиск:"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          IsTabStop="False">
 
