@@ -11,7 +11,8 @@
              d:DesignHeight="1008" d:DesignWidth="1920">
 
 
-    <Grid Margin="10,0">
+    <Grid Margin="10,0"
+          Background="#36495b">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -46,6 +47,7 @@
 
             <Button Grid.Column="6"
                     Command="{Binding AddModeOnCommand}"
+                    Style="{StaticResource ButtonStyle}"
                     Content="Добавить новый товар"
                     FontSize="15"/>
         
@@ -117,11 +119,13 @@
 
             <Button Grid.Column="6"
                     Command="{Binding AddCommand}"
+                    Style="{StaticResource ButtonStyle}"
                     Margin="5,5,10,5"
                     Content="Применить"/>
 
             <Button Grid.Column="7"
                     Command="{Binding AddModeOffCommand}"
+                    Style="{StaticResource ButtonStyle}"
                     Margin="5,5,10,5"
                     Content="Отменить"/>
 

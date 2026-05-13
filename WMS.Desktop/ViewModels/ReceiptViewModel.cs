@@ -328,15 +328,18 @@ namespace WMS.Desktop.ViewModels
                     SelectedCell.Id,
                     ReceiptItem.OperationQuantity);
 
+
+                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
+                await LoadWindow();
+
+                SelectedRack.IsHighlighted = false;
                 SelectedRack = null;
                 SearchRacks = string.Empty;
+                SelectedCell.IsHighlighted = false;
                 SelectedCell = null;
                 SearchCell = string.Empty;
                 ReceiptItem.OperationQuantity = 0;
                 CommentText = string.Empty;
-
-                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
-                await LoadWindow();
             }
             catch (WrongValueExeption ex)
             {

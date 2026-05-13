@@ -98,7 +98,7 @@
                             <TextBlock x:Name="Watermark"
                                        Grid.Column="0"
                                        Text="{TemplateBinding Tag}" 
-                                       Foreground="#777"
+                                       Foreground="{TemplateBinding Foreground}"
                                        FontSize="15"
                                        Margin="8,0,0,0" 
                                        VerticalAlignment="Center"
@@ -258,7 +258,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Button">
+    <Style x:Key="ButtonStyle" TargetType="Button">
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="BorderThickness" Value="0"/>

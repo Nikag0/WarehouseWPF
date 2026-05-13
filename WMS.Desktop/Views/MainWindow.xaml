@@ -14,7 +14,78 @@
         WindowState="Maximized">
     <!-- Высота 1008, потому что 40 пикселей нижнее меню, 32 верхняя плашка-->
 
-    <TabControl Grid.Column="0"
+    <Grid Background="#36495b">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0">
+
+            <StackPanel>
+
+                <Button Command="{Binding ShowComponentsCommand}">
+
+                    <StackPanel>
+                        <TextBlock Text="📑"
+                                   FontSize="22"
+                                   HorizontalAlignment="Center"/>
+
+                        <TextBlock Text="Каталог"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowIssueCommand}">
+
+                    <StackPanel>
+                        <TextBlock Text="📦"
+                                   FontSize="22"
+                                   HorizontalAlignment="Center"/>
+
+                        <TextBlock Text="Выдача"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
+
+                    <StackPanel>
+                        <TextBlock Text="📥"
+                                   FontSize="22"
+                                   HorizontalAlignment="Center"/>
+
+                        <TextBlock Text="Приёмка"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
+
+                    <StackPanel>
+                        <TextBlock Text="⚙️"
+                       FontSize="22"
+                       HorizontalAlignment="Center"/>
+
+                        <TextBlock Text="Настройки"
+                       FontSize="11"
+                       HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+
+        </Border>
+
+        <ContentControl Grid.Column="1"
+                        Content="{Binding CurrentView}"/>
+    </Grid>
+    
+    <!--<TabControl Grid.Column="0"
                 ItemContainerStyle="{StaticResource MenuTabItemStyle}"
                 TabStripPlacement="Left"
                 Background="#36495b"
@@ -82,6 +153,6 @@
 
         </TabItem>
 
-    </TabControl>
+    </TabControl>-->
     
 </Window>

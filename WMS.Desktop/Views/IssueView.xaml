@@ -21,7 +21,8 @@
     </UserControl.Resources>
 
 
-    <Grid Margin="10, 0">
+    <Grid Margin="10, 0"
+          Background="#36495b">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*"/>
@@ -105,7 +106,8 @@
                                         <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
                                         <Button Content="Добавить к выдаче"
                                                 Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                CommandParameter="{Binding}">
+                                                CommandParameter="{Binding}"
+                                                Style="{StaticResource ButtonStyle}">
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
@@ -155,7 +157,21 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="100">
+                        <DataGridTemplateColumn Width="115">
+
+                            <DataGridTemplateColumn.Header>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="Удалить всё" 
+                                            Width="Auto" 
+                                            Height="Auto" 
+                                            Command="{Binding DataContext.ClearIssueItemsCommand, 
+                                                               RelativeSource={RelativeSource 
+                                                               AncestorType=DataGrid}}"
+                                            Style="{StaticResource ButtonStyle}"/>
+                                    
+                                </StackPanel>
+                            </DataGridTemplateColumn.Header>
+
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Удалить"
@@ -163,8 +179,9 @@
                                         CommandParameter="{Binding}"
                                         FontSize="15"
                                         Margin="3">
+                                        
                                         <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
                                                 <Setter Property="IsEnabled" Value="True"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding DataContext.IsIssue, RelativeSource={RelativeSource AncestorType=DataGrid}}" Value="True">
@@ -192,7 +209,7 @@
                         Background="#4FC3F7">
 
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsIssue}" Value="True">
@@ -202,6 +219,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
+
 
             </Grid>
 
@@ -226,17 +244,11 @@
                 <Grid Grid.Row="0"
                       Margin="0,10">
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="1*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0"
-                               Text="Комментарий&#x0a;к выдаче"
-                               Style="{StaticResource InputFieldName}"/>
 
                     <TextBox Grid.Column="1"
                              Text="{Binding CommentText}"
+                             Tag="Комментарий:"
+                             Foreground="#777"
                              Style="{StaticResource InputTextBoxStyle}"/>
 
                 </Grid>
@@ -245,17 +257,13 @@
                       Margin="0,10">
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0"
-                               Text="ФИО оператора" 
-                               Style="{StaticResource InputFieldName}"/>
-
-                    <ComboBox Grid.Column="1"
+                    <ComboBox Grid.Column="0"
                               ItemsSource="{Binding Operators}"
+                              Tag="ФИО оператора:"
                               SelectedItem="{Binding OperatorName}">
 
                         <ComboBox.ItemTemplate>
@@ -268,9 +276,9 @@
                     <Button Grid.Column="2"
                             Content="Выдать" 
                             Command="{Binding IssueCommand}"
+                            Style="{StaticResource ButtonStyle}"
                             FontSize="20"
-                            Margin="10,0,0,0"/>
-
+                            Margin="5,0,0,0"/>
                 </Grid>
 
             </Grid>

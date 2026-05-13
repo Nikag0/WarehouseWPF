@@ -1,12 +1,34 @@
 ﻿<Application x:Class="WMS.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:WMS.Desktop">
+             xmlns:local="clr-namespace:WMS.Desktop"
+             xmlns:views="clr-namespace:WMS.Desktop.Views"
+             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels">
+
     <Application.Resources>
+
         <ResourceDictionary>
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Components -->
+            <DataTemplate DataType="{x:Type viewmodels:ComponentsViewModel}">
+                <views:ComponentsView/>
+            </DataTemplate>
+
+            <!-- Issue -->
+            <DataTemplate DataType="{x:Type viewmodels:IssueViewModel}">
+                <views:IssueView/>
+            </DataTemplate>
+
+            <!-- Receipt -->
+            <DataTemplate DataType="{x:Type viewmodels:ReceiptViewModel}">
+                <views:ReceiptView/>
+            </DataTemplate>
+
         </ResourceDictionary>
+
     </Application.Resources>
 </Application>
