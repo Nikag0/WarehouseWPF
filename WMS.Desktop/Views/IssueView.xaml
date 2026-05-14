@@ -32,17 +32,18 @@
         <Grid Grid.Column="0">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="35"/>
+                <RowDefinition Height="45"/>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="160"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="Выдача товаров"
-                       Style="{StaticResource WindowNames}"/>
+                       Style="{StaticResource WindowNames}"
+                       Margin="0,0,0,10"/>
 
             <Grid Grid.Row="1"
-                  Margin="0,10">
+                  Margin="0,0,0,10">
 
                 <TextBox x:Name="SearchToIssue" 
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
@@ -118,7 +119,8 @@
 
             </Grid>
 
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="2"
+                  Margin="0,0,0,10">
 
                 <DataGrid x:Name="IssueGrid" 
                           ItemsSource="{Binding IssueItems}" 
@@ -226,8 +228,8 @@
             <Grid Grid.Row="3">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="80"/>
                 </Grid.RowDefinitions>
 
                 <Grid.Style>
@@ -241,30 +243,18 @@
                     </Style>
                 </Grid.Style>
 
-                <Grid Grid.Row="0"
-                      Margin="0,10">
-
-
-                    <TextBox Grid.Column="1"
-                             Text="{Binding CommentText}"
-                             Tag="Комментарий:"
-                             Foreground="#777"
-                             Style="{StaticResource InputTextBoxStyle}"/>
-
-                </Grid>
-
-                <Grid Grid.Row="1"
-                      Margin="0,10">
+                <Grid Grid.Row="0">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
                     <ComboBox Grid.Column="0"
                               ItemsSource="{Binding Operators}"
                               Tag="ФИО оператора:"
-                              SelectedItem="{Binding OperatorName}">
+                              SelectedItem="{Binding OperatorName}"
+                              Margin="0,0,5,10">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -273,14 +263,24 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 
-                    <Button Grid.Column="2"
-                            Content="Выдать" 
-                            Command="{Binding IssueCommand}"
-                            Style="{StaticResource ButtonStyle}"
-                            FontSize="20"
-                            Margin="5,0,0,0"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding CommentText}"
+                             Tag="Комментарий:"
+                             Foreground="#777"
+                             Style="{StaticResource InputTextBoxStyle}"
+                              Margin="5,0,0,10"/>
+
                 </Grid>
 
+                <Button Grid.Row="1"
+                        Content="Выдать товар" 
+                        Command="{Binding IssueCommand}"
+                        Style="{StaticResource ButtonStyle}"
+                        FontSize="20"
+                        Margin="0,0,0,10"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+                
             </Grid>
 
         </Grid>

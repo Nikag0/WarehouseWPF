@@ -32,7 +32,6 @@
             <RowDefinition Height="11*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header / подписи для разных типов стеллажей -->
         <Grid Grid.Column="1" Grid.Row="0"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},

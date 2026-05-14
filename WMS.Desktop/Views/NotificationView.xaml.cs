@@ -12,16 +12,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
     /// <summary>
-    /// Interaction logic for ComponentsView.xaml
+    /// Interaction logic for NotificationView.xaml
     /// </summary>
-    public partial class ComponentsView : UserControl
+    public partial class NotificationView : UserControl
     {
-        public ComponentsView()
+        public NotificationView()
         {
             InitializeComponent();
         }

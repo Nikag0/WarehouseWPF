@@ -22,137 +22,52 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0">
+            <DockPanel LastChildFill="True">
 
-            <StackPanel>
-
-                <Button Command="{Binding ShowComponentsCommand}">
-
+                <Button DockPanel.Dock="Bottom" Command="{Binding ShowSettingsCommand}" Cursor="Hand" Margin="0,10">
                     <StackPanel>
-                        <TextBlock Text="📑"
-                                   FontSize="22"
-                                   HorizontalAlignment="Center"/>
-
-                        <TextBlock Text="Каталог"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="⚙️" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Настройки" FontSize="11" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding ShowIssueCommand}">
+                <StackPanel VerticalAlignment="Top">
 
-                    <StackPanel>
-                        <TextBlock Text="📦"
-                                   FontSize="22"
-                                   HorizontalAlignment="Center"/>
+                    <Button Command="{Binding ShowNotificationCommand}">
+                        <StackPanel>
+                            <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Уведомления" FontSize="11" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
-                        <TextBlock Text="Выдача"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                    <Button Command="{Binding ShowComponentsCommand}">
+                        <StackPanel>
+                            <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
-                <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
+                    <Button Command="{Binding ShowIssueCommand}">
+                        <StackPanel>
+                            <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Выдача" FontSize="11" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
-                    <StackPanel>
-                        <TextBlock Text="📥"
-                                   FontSize="22"
-                                   HorizontalAlignment="Center"/>
+                    <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
+                        <StackPanel>
+                            <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Приёмка" FontSize="11" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
 
-                        <TextBlock Text="Приёмка"
-                                   FontSize="11"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-
-                <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
-
-                    <StackPanel>
-                        <TextBlock Text="⚙️"
-                       FontSize="22"
-                       HorizontalAlignment="Center"/>
-
-                        <TextBlock Text="Настройки"
-                       FontSize="11"
-                       HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-
-            </StackPanel>
-
+            </DockPanel>
         </Border>
+
 
         <ContentControl Grid.Column="1"
                         Content="{Binding CurrentView}"/>
     </Grid>
-    
-    <!--<TabControl Grid.Column="0"
-                ItemContainerStyle="{StaticResource MenuTabItemStyle}"
-                TabStripPlacement="Left"
-                Background="#36495b"
-                VirtualizingStackPanel.IsVirtualizing="False">
-
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"
-                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                    <TextBlock Text="Сообщения" FontSize="11" HorizontalAlignment="Center"
-                                    Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                </StackPanel>
-            </TabItem.Header>
-
-        </TabItem>
-
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                    <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}"/>
-                </StackPanel>
-            </TabItem.Header>
-
-            <views:ComponentsView DataContext="{Binding Components}"/>
-
-        </TabItem>
-
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Выдача" FontSize="11"
-                            HorizontalAlignment="Center"/>
-                </StackPanel>
-            </TabItem.Header>
-
-            <views:IssueView DataContext="{Binding Issue}"/>
-        </TabItem>
-
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Приёмка" FontSize="11"
-                            HorizontalAlignment="Center"/>
-                </StackPanel>
-            </TabItem.Header>
-
-            <views:ReceiptView DataContext="{Binding Receipt}"/>
-
-        </TabItem>
-
-        <TabItem >
-            <TabItem.Header>
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="⚙️" FontSize="22" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Настройки" FontSize="11"
-                            HorizontalAlignment="Center"/>
-                </StackPanel>
-            </TabItem.Header>
-
-        </TabItem>
-
-    </TabControl>-->
     
 </Window>

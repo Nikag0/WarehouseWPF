@@ -86,6 +86,7 @@ namespace WMS.Desktop.ViewModels
                 _searchRacks = value;
                 OnPropertyChanged();
                 FilterRacks();
+                FilterItemInRacks();
                 AutomaticRackSelection();
             }
         }
@@ -174,7 +175,8 @@ namespace WMS.Desktop.ViewModels
         }
         private string _commentText;
 
-        // Визуализация
+        public ObservableCollection<ViewItemDTO> FilteredItemsInRacks { get; } = new();
+
         private readonly SemaphoreSlim _lock = new(1, 1);
 
         private readonly StockService _stockService;
@@ -420,6 +422,27 @@ namespace WMS.Desktop.ViewModels
                              .ThenByDescending(r => r.Row);
 
             ReplaceCollection(FilteredRacks, sortedQuery);
+        }  
+        
+        private void FilterItemInRacks()
+        {
+            var query = _allStocks.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SearchRacks))
+            {
+                var text = SearchRacks.ToLower();
+
+                query = query.Where(c =>
+                        c.RackCodeDisplay != null
+                        && c.RackCodeDisplay.ToLower().Contains(text));
+
+                var sortedQuery = query
+                                 .OrderByDescending(r => r.ComponentName);
+
+                ReplaceCollection(FilteredItemsInRacks, sortedQuery);
+            }
+            else
+                FilteredItemsInRacks.Clear();
         }
 
         private void AutomaticRackSelection()
@@ -544,11 +567,16 @@ namespace WMS.Desktop.ViewModels
                         SelectedRack = Racks.FirstOrDefault(r => r.Id == stock.RackId);
                         SearchRacks = SelectedRack.CodeDisplay;
                     }
+                    else
+                        SearchRacks = string.Empty;
+
                     if (stock.CellId != Guid.Empty)
                     {
                         SelectedCell = Cells.FirstOrDefault(c => c.Id == stock.CellId);
                         SearchCell = SelectedCell.CodeDisplay;
                     }
+                    else
+                        SearchCell = string.Empty;
                 }
             }
             catch (OverallDomainException ex)

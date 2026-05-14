@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WMS.Application.Services;
+using WMS.Desktop.Views;
 
 namespace WMS.Desktop.ViewModels
 {
@@ -24,24 +25,33 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        public NotificationViewModel Notifications { get; }
         public ComponentsViewModel Components { get; }
         public IssueViewModel Issue { get; }
         public ReceiptViewModel Receipt { get; }
 
+        public ICommand ShowNotificationCommand { get; }
         public ICommand ShowComponentsCommand { get; }
         public ICommand ShowIssueCommand { get; }
         public ICommand ShowReceiptCommand { get; }
+        public ICommand ShowSettingsCommand { get; }
 
         public MainViewModel(
-            ComponentsViewModel components,
-            IssueViewModel issue,
-            ReceiptViewModel receipt)
+                    NotificationViewModel notifications,
+                    ComponentsViewModel components,
+                    IssueViewModel issue,
+                    ReceiptViewModel receipt,
+                    Func<SettingsView> settingsWindowFactory)
         {
+            Notifications = notifications;
             Components = components;
             Issue = issue;
             Receipt = receipt;
 
             CurrentView = Components;
+
+            ShowNotificationCommand =
+                new RelayCommand(_ => CurrentView = Notifications);
 
             ShowComponentsCommand =
                 new RelayCommand(_ => CurrentView = Components);
@@ -51,6 +61,16 @@ namespace WMS.Desktop.ViewModels
 
             ShowReceiptCommand =
                 new RelayCommand(_ => CurrentView = Receipt);
+
+            ShowSettingsCommand = new RelayCommand(_ =>
+            {
+                // Запрашиваем у фабрики новый экземпляр окна
+                var window = settingsWindowFactory();
+
+                // ShowDialog() заблокирует главное окно, пока настройки открыты.
+                // Если блокировка не нужна, используйте window.Show();
+                window.ShowDialog();
+            });
         }
     }
 }

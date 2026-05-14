@@ -43,10 +43,11 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private ObservableCollection<ComponentDTO> components = new();
+        private List<ComponentDTO> components = new();
+
+        private readonly IWmsDataStore _dataStore;
         private readonly ComponentService _componentService;
         private readonly DialogService _dialogService;
-        private bool _isLoading;
         private string _searchText;
         private bool _isAdding;
 
@@ -57,30 +58,47 @@ namespace WMS.Desktop.ViewModels
         public ICommand AddModeOffCommand { get; set; }
 
         public ComponentsViewModel(
+            IWmsDataStore dataStore,
             ComponentService componentService, 
             DialogService dialogService)
         {
+            _dataStore = dataStore;
             _componentService = componentService;
             _dialogService = dialogService;
 
-            LoadCommand = new RelayCommand(LoadAsync);
+            LoadCommand = new RelayCommand(RefreshAsync);
             AddCommand = new RelayCommand(AddAsync);
-            DeletCommand = new RelayCommand(DeletAsync);
             AddModeOnCommand = new RelayCommand(_ =>{IsAdding = true;});
             AddModeOffCommand = new RelayCommand(_ =>{IsAdding = false;});
+
+            _dataStore.Components.CollectionChanged += OnComponentsCacheChanged;
+
+            _ = InitializeDataAsync();
         }
 
-        public async Task LoadAsync()
+        private async Task InitializeDataAsync()
         {
-            if (_isLoading) return;
+            if (!_dataStore.Components.Any())
+            {
+                await RefreshAsync();
+            }
+            else
+            {
+                ApplyFilter();
+            }
+        }
+
+        private void OnComponentsCacheChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        public async Task RefreshAsync()
+        {
 
             try
             {
-                _isLoading = true;
-                components.Clear();
-                var items = await _componentService.GetAllAsync();
-                foreach (var item in items)
-                    components.Add(item);
+                await _dataStore.RefreshComponentsAsync();
 
                 ApplyFilter();
             }
@@ -92,10 +110,6 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-            finally
-            {
-                _isLoading = false;
-            }
         }
 
         public async Task AddAsync()
@@ -103,8 +117,12 @@ namespace WMS.Desktop.ViewModels
             try 
             {
                 await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
-                await LoadAsync();
+                await _dataStore.RefreshComponentsAsync();
                 IsAdding = false;
+
+                NewArticle = string.Empty;
+                NewName = string.Empty;
+                NewManufacturer = string.Empty;
             }
             catch (WrongValueExeption ex)
             {
@@ -118,37 +136,11 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-
-        }
-
-        public async Task DeletAsync()
-        {
-            try
-            {
-                await _componentService.AddAsync(NewArticle, NewName, NewManufacturer);
-                await LoadAsync();
-                IsAdding = false;
-            }
-            catch (WrongValueExeption ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-
         }
 
         private void ApplyFilter()
         {
-            FilteredComponents.Clear();
-
-            var query = components.AsEnumerable();
+            var query = _dataStore.Components.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
@@ -160,8 +152,13 @@ namespace WMS.Desktop.ViewModels
                         c.Manufacturer != null && c.Manufacturer.ToLower().Contains(text));
             }
 
-            foreach (var item in query)
-                FilteredComponents.Add(item);
+            var resultList = query.ToList();
+
+            FilteredComponents.Clear();
+
+            foreach (var item in resultList) FilteredComponents.Add(item);
+
+            OnPropertyChanged(nameof(FilteredComponents));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

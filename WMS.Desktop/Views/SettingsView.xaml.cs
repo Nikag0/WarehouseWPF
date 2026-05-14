@@ -11,17 +11,19 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
     /// <summary>
-    /// Логика взаимодействия для SettingsWindow.xaml
+    /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsWindow : Window
+    public partial class SettingsView : Window
     {
-        public SettingsWindow()
+        public SettingsView(SettingsViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel; // Привязываем контекст данных
         }
     }
 }
