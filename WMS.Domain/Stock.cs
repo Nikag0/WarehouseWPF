@@ -7,8 +7,12 @@ public class Stock
     public Guid ComponentId { get; private set; }
     public Guid RackId { get; private set; }
     public Guid CellId { get; private set; }
-
     public int Quantity { get; private set; }
+
+    // Навигационные свойства.
+    public Component Component { get; set; } = null!;
+    public Rack Rack { get; private set; } = null!;
+    public Cell Cell { get; private set; } = null!;
 
     // Для EF Core
     private Stock() { }

@@ -20,7 +20,6 @@ namespace WMS.Desktop.ViewModels
     public class ComponentsViewModel : INotifyPropertyChanged
     {
         public ICollectionView ComponentsView { get; }
-
         public string NewArticle { get; set; }
         public string NewName { get; set; }
         public string NewManufacturer { get; set; }

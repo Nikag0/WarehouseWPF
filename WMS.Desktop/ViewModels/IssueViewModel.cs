@@ -105,6 +105,7 @@ namespace WMS.Desktop.ViewModels
         public ICommand ClearIssueItemsCommand { get; }
 
         private readonly IssueService _issueService;
+        private readonly StockService _stockService;
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorService;
         private readonly CellService _cellService;
@@ -119,6 +120,7 @@ namespace WMS.Desktop.ViewModels
             RackService rackService)
         {
             _issueService = issueService;
+            _stockService = stockService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _cellService = cellService;
@@ -249,9 +251,7 @@ namespace WMS.Desktop.ViewModels
         private async Task LoadStocks()
         {
             _stocks.Clear();
-            var items = await _issueService.GetAllAsync();
-            foreach (var item in items)
-                _stocks.Add(item);
+            _stocks.AddRange(await _stockService.GetAllAsync());
         }
 
         public async Task LoadOperators()

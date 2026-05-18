@@ -28,19 +28,19 @@ namespace WMS.Infrastructure.Configurations
                 .IsUnique();
 
             builder
-                .HasOne<Component>()
+                .HasOne(x => x.Component)
                 .WithMany()
                 .HasForeignKey(x => x.ComponentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder
-               .HasOne<Rack>()
-               .WithMany()
-               .HasForeignKey(x => x.RackId)
-               .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(x => x.Rack)
+                .WithMany()
+                .HasForeignKey(x => x.RackId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder
-                .HasOne<Cell>()
+                .HasOne(x => x.Cell)
                 .WithMany()
                 .HasForeignKey(x => x.CellId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -64,11 +64,8 @@ namespace WMS.Desktop.ViewModels
 
             ShowSettingsCommand = new RelayCommand(_ =>
             {
-                // Запрашиваем у фабрики новый экземпляр окна
                 var window = settingsWindowFactory();
 
-                // ShowDialog() заблокирует главное окно, пока настройки открыты.
-                // Если блокировка не нужна, используйте window.Show();
                 window.ShowDialog();
             });
         }

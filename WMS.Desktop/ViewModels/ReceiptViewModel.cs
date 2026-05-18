@@ -45,7 +45,7 @@ namespace WMS.Desktop.ViewModels
         private bool _isReceiptPopupOpen;
 
         // Отображение остатков. Средняя левая часть экрана ReceiptView.
-        private readonly List<ViewItemDTO> _allStocks = new();
+        private readonly List<ViewItemDTO> _stocks = new();
         public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
 
         // Объект приёмки.
@@ -217,9 +217,8 @@ namespace WMS.Desktop.ViewModels
                 _allComponents.Clear();
                 _allComponents.AddRange(await _receiptService.GetAllComponentsAsync());
 
-                _allStocks.Clear();
-                _allStocks.AddRange(await _stockService.GetAllAsync());
-                ReplaceCollection(Stocks, _allStocks);
+                await LoadStocks();
+                ReplaceCollection(Stocks, _stocks);
 
                 await LoadRacks();
                 ReplaceCollection(FilteredRacks, Racks);
@@ -243,6 +242,12 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
+        }
+
+        private async Task LoadStocks()
+        {
+            _stocks.Clear();
+            _stocks.AddRange(await _stockService.GetAllAsync());
         }
 
         public async Task LoadOperators()
@@ -366,22 +371,22 @@ namespace WMS.Desktop.ViewModels
             if (string.IsNullOrWhiteSpace(SearchtemsToReceipt))
             {
                 ReplaceCollection(FilteredItemsToReceipt,
-                    _allStocks.OrderByDescending(x => x.ComponentName));
+                    _stocks.OrderByDescending(x => x.ComponentName));
                 return;
             }
 
             var text = SearchtemsToReceipt;
 
-            var filteredStocks = _allStocks.Where(FilterPredicate);
+            var filteredStocks = _stocks.Where(FilterPredicate);
+            var filteredStockIds = filteredStocks.Select(x => x.ComponentId).ToHashSet();
             var filteredComponents = _allComponents.Where(FilterPredicate);
 
-            var stockIds = _allStocks
+            var stockIds = _stocks
                 .Select(x => x.ComponentId)
                 .ToHashSet();
 
             var result = filteredStocks
-                        .Concat(filteredComponents.Where(c =>
-                        !filteredStocks.Any(s => s.ComponentId == c.ComponentId)));
+                .Concat(filteredComponents.Where(c => !filteredStockIds.Contains(c.ComponentId)));
 
             ReplaceCollection(FilteredItemsToReceipt,
                 result.OrderByDescending(x => x.ComponentName));
@@ -426,7 +431,7 @@ namespace WMS.Desktop.ViewModels
         
         private void FilterItemInRacks()
         {
-            var query = _allStocks.AsEnumerable();
+            var query = _stocks.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(SearchRacks))
             {
