@@ -21,5 +21,19 @@ namespace WMS.Application.Services
         {
             return await _operatorRepo.GetAllAsync();
         }
+
+        public async Task AddAsync(Operator operatorr)
+        {
+            await _operatorRepo.AddAsync(operatorr);
+        }
+        public async Task RemoveAsync(Operator operatorr)
+        {
+            await _operatorRepo.RemoveAsync(operatorr);
+        }
+
+        public async Task UpdateAsync(Operator operatorr)
+        {
+            await _operatorRepo.UpdateAsync(operatorr);
+        }
     }
 }

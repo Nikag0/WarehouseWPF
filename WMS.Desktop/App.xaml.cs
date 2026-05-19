@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
-using WMS.Desktop.Services;
 using WMS.Desktop.ViewModels;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Migrations;
@@ -27,9 +26,6 @@ namespace WMS.Desktop
 
             services.AddDbContextFactory<WmsDbContext>(opt =>
                 opt.UseNpgsql(config.GetConnectionString("Warehouse")));
-
-            // хранилище
-            services.AddSingleton<IWmsDataStore, WmsDataStore>();
 
             // репозитории
             services.AddScoped<IStockRepository, StockRepository>();
@@ -57,6 +53,8 @@ namespace WMS.Desktop
             services.AddSingleton<ReceiptViewModel>();
             services.AddSingleton<IssueViewModel>();
             services.AddSingleton<SettingsViewModel>();
+            services.AddSingleton<ComponentEditViewModel>();
+            services.AddSingleton<OperatorEditViewModel>();
 
             // views
             services.AddTransient<Views.SettingsView>();

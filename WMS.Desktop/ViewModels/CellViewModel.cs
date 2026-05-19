@@ -48,6 +48,17 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        private bool _hasItemsInCell;
+        public bool HasItemsInCell
+        {
+            get => _hasItemsInCell;
+            set
+            {
+                _hasItemsInCell = value;
+                OnPropertyChanged(nameof(HasItemsInCell));
+            }
+        }
+
         public CellViewModel(Cell cell, CellLayout layout)
         {
             Id = cell.Id;

@@ -33,11 +33,19 @@ namespace WMS.Infrastructure
             await db.SaveChangesAsync();
         }
 
-        public async Task DeletAsync(Component component)
+        public async Task RemoveAsync(Component component)
         {
             using var db = _factory.CreateDbContext();
 
-            db.Components.Add(component);
+            db.Components.Remove(component);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Component component)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Components.Update(component);
             await db.SaveChangesAsync();
         }
 
@@ -46,20 +54,6 @@ namespace WMS.Infrastructure
             using var db = _factory.CreateDbContext();
 
             return await db.Components.FindAsync(id);
-        }
-
-        public async Task<Component?> GetByArticledAsync(string article)
-        {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Components.FindAsync(article);
-        }
-
-        public async Task<bool> ExistsByArticle(string article)
-        {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Components.AnyAsync(x => x.Article == article);
         }
     }
 }

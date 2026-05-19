@@ -31,8 +31,9 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="45"/>
                 <RowDefinition Height="60"/>
-                <RowDefinition/>
-                <RowDefinition Height="270"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="189"/>
+                <RowDefinition Height="80"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="Приём товаров" 
@@ -58,7 +59,7 @@
                           FontSize="15" 
                           IsReadOnly="True" 
                           RowHeight="40"
-                          Margin="0,0,0,10">
+                          Margin="0,5,0,5">
                     
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
@@ -88,23 +89,18 @@
 
             <Grid Grid.Row="3">
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="7*"/>
-                    <RowDefinition Height="80"/>
-                </Grid.RowDefinitions>
-
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="6*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Row="0"
                       Grid.Column="0">
 
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="3*"/>
-                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="63"/>
+                        <RowDefinition Height="63"/>
+                        <RowDefinition Height="63"/>
                     </Grid.RowDefinitions>
 
                     <TextBox Grid.Row="0"
@@ -114,7 +110,7 @@
                              Tag="Артикул:"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
-                             Margin="0,0,5,10"
+                             Margin="0,5,5,5"
                              Background="Transparent"
                              Foreground="White"
                              BorderThickness="2"
@@ -129,7 +125,7 @@
                              Tag="Название:"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
-                              Margin="0,0,5,10"
+                              Margin="0,5,5,5"
                              Background="Transparent"
                              Foreground="White"
                              BorderThickness="2"
@@ -144,7 +140,7 @@
                               Tag="Производитель:"
                               TextWrapping="Wrap"
                               VerticalScrollBarVisibility="Auto"
-                               Margin="0,0,5,10"
+                               Margin="0,5,5,5"
                               Background="Transparent"
                               Foreground="White"
                               BorderThickness="2"
@@ -187,12 +183,13 @@
                                  GotKeyboardFocus="SearchRack_GotKeyboardFocus"
                                  PreviewKeyDown="SearchRack_PreviewKeyDown"
                                  Grid.Column="0"
-                                 Margin="5,0,0,10"
+                                 Margin="5,5,5,5"
                                  IsTabStop="False"
                                  Style="{StaticResource SearchTextBox}" 
                                  Tag="Стеллаж:"
                                  Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
-                                 TextAlignment="Center"/>
+                                 TextAlignment="Center"
+                                 FontSize="15"/>
 
                         <Popup x:Name="RackPopup"
                                PlacementTarget="{Binding ElementName=SearchRack}" 
@@ -235,12 +232,13 @@
                                  Grid.Column="1"
                                  GotKeyboardFocus="SearchCell_GotKeyboardFocus"
                                  PreviewKeyDown="SearchCell_PreviewKeyDown"
-                                 Margin="10,0,0,10"
+                                 Margin="5,5,5,5"
                                  Tag="Ячейка:"
                                  IsTabStop="False"
                                  Style="{StaticResource SearchTextBox}"
                                  Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
-                                 TextAlignment="Center"/>
+                                 TextAlignment="Center"
+                                 FontSize="15"/>
 
                         <Popup x:Name="CellPopup"
                                PlacementTarget="{Binding ElementName=SearchCell}" 
@@ -294,7 +292,7 @@
 
                         <Border Grid.Column="5"
                                 Height="Auto"
-                                Margin="10,0,0,10"
+                                Margin="5,5,0,5"
                                 CornerRadius="4,0,0,4"
                                 BorderBrush="#CCCCCC"
                                 BorderThickness="1"
@@ -325,13 +323,14 @@
                                                     FontSize="15"
                                                     ButtonSpinnerWidth="35"
                                                     VerticalContentAlignment="Center"
-/>
+                                />
                             </Grid>
                         </Border>
+                        
                     </Grid>
 
                     <ComboBox Grid.Row="2"
-                              Margin="5,0,0,10"
+                              Margin="5,5,0,5"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
                               Tag="ФИО оператора:">
@@ -344,30 +343,28 @@
                     </ComboBox>
                         
                     <TextBox Grid.Row="1"
-                                Text="{Binding CommentText}"
-                                AcceptsReturn="True" 
-                                Tag="Комментарий:"
-                                TextWrapping="Wrap"
-                                VerticalScrollBarVisibility="Auto"
-                                Style="{StaticResource InputTextBoxStyle}"
-                               Margin="5,0,0,10"
-                                Foreground="#777"/>
+                             Text="{Binding CommentText}"
+                             AcceptsReturn="True" 
+                             Tag="Комментарий:"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Style="{StaticResource InputTextBoxStyle}"
+                             Margin="5,5,0,5"
+                             FontSize="15"/>
 
                 </Grid>
 
-                <Button Grid.Row="1" 
-                        Grid.ColumnSpan="2"
-                        Command="{Binding ReceiveCommand}"
-                        Style="{StaticResource ButtonStyle}"
-                        Content="Принять товар"
-                        HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        FontSize="20"
-                        Margin="0,0,0,10">
-                        
-                </Button>
-
             </Grid>
+
+            <Button Grid.Row="4" 
+                    Command="{Binding ReceiveCommand}"
+                    Style="{StaticResource ButtonStyle}"
+                    Content="Принять товар"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    FontSize="20"
+                    Margin="0,5,0,10">
+            </Button>
 
         </Grid>
 
@@ -403,9 +400,10 @@
                     </Grid.RowDefinitions>
                     
                     <TextBlock Grid.Row="0"
-                               Text="Товары в стеллаже:"
-                               FontSize="20"
-                               Foreground="White"/>
+                               Text="Товары в стеллаже"
+                               FontSize="25"
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
 
                     <DataGrid Grid.Row="1"
                               ItemsSource="{Binding FilteredItemsInRacks}"

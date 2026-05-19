@@ -5,6 +5,9 @@
     <Compile Update="Views\CellsGridControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\ComponentEditWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\IssueView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -12,6 +15,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\NotificationView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OperatorEditWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\RacksGridControl.xaml.cs">

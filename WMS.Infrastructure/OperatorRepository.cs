@@ -24,5 +24,28 @@ namespace WMS.Infrastructure.Migrations
 
             return await db.Operators.ToListAsync();
         }
+
+        public async Task AddAsync(Operator operatorr)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Operators.Add(operatorr);
+            await db.SaveChangesAsync();
+        }
+        public async Task RemoveAsync(Operator operatorr)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Operators.Remove(operatorr);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Operator operatorr)
+        {
+            using var db = _factory.CreateDbContext();
+
+            db.Operators.Update(operatorr);
+            await db.SaveChangesAsync();
+        }
     }
 }

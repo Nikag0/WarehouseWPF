@@ -10,7 +10,7 @@ public class Stock
     public int Quantity { get; private set; }
 
     // Навигационные свойства.
-    public Component Component { get; set; } = null!;
+    public Component Component { get; private set; } = null!;
     public Rack Rack { get; private set; } = null!;
     public Cell Cell { get; private set; } = null!;
 

@@ -35,15 +35,15 @@
                 <RowDefinition Height="45"/>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="160"/>
+                <RowDefinition Height="143"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="Выдача товаров"
                        Style="{StaticResource WindowNames}"
-                       Margin="0,0,0,10"/>
+                       Margin="0,5,0,5"/>
 
             <Grid Grid.Row="1"
-                  Margin="0,0,0,10">
+                  Margin="0,5,0,5">
 
                 <TextBox x:Name="SearchToIssue" 
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
@@ -120,7 +120,7 @@
             </Grid>
 
             <Grid Grid.Row="2"
-                  Margin="0,0,0,10">
+                  Margin="0,5,0,5">
 
                 <DataGrid x:Name="IssueGrid" 
                           ItemsSource="{Binding IssueItems}" 
@@ -200,7 +200,6 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-
                 <Button Content="Очистить список выдачи"
                         Command="{Binding ClearIssueItemsCommand}"
                         FontSize="20"
@@ -222,13 +221,12 @@
                     </Button.Style>
                 </Button>
 
-
             </Grid>
 
             <Grid Grid.Row="3">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="63"/>
                     <RowDefinition Height="80"/>
                 </Grid.RowDefinitions>
 
@@ -254,7 +252,7 @@
                               ItemsSource="{Binding Operators}"
                               Tag="ФИО оператора:"
                               SelectedItem="{Binding OperatorName}"
-                              Margin="0,0,5,10">
+                              Margin="0,5,5,5">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -266,9 +264,9 @@
                     <TextBox Grid.Column="1"
                              Text="{Binding CommentText}"
                              Tag="Комментарий:"
-                             Foreground="#777"
+                             FontSize="15"
                              Style="{StaticResource InputTextBoxStyle}"
-                              Margin="5,0,0,10"/>
+                             Margin="5,5,0,5"/>
 
                 </Grid>
 
@@ -277,7 +275,7 @@
                         Command="{Binding IssueCommand}"
                         Style="{StaticResource ButtonStyle}"
                         FontSize="20"
-                        Margin="0,0,0,10"
+                        Margin="0,5,0,10"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"/>
                 

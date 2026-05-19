@@ -34,9 +34,6 @@ namespace WMS.Application.Services
 
         public async Task AddAsync(string article, string name, string manufacturer)
         {
-            if (await _componentRepo.ExistsByArticle(article))
-                throw new Exception("Компонент с таким артиклом уже существует");
-
             var component = Component.Create(
                 article,
                 name,
@@ -48,14 +45,25 @@ namespace WMS.Application.Services
             await _componentRepo.AddAsync(component);
         }
 
-        public async Task DeletAsync(string article)
+        public async Task DeletAsync(Guid id)
         {
-            var compoment = await _componentRepo.GetByArticledAsync(article);
+            var compoment = await _componentRepo.GetByIdAsync(id);
 
             if (compoment is null)
                 throw new Exception("Компонент с таким артиклом не найден");
 
             compoment.IsDelet = true;
+        }
+
+        public async Task UpdateAsync(Component component)
+        {
+            await _componentRepo.UpdateAsync(component);
+        }
+
+        public async Task<Component> GetByIdAsync(Guid id)
+        {
+            // Обязательно добавляем return, чтобы вернуть сущность во ViewModel
+            return await _componentRepo.GetByIdAsync(id);
         }
     }
 }

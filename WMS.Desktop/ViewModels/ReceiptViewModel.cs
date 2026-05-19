@@ -19,8 +19,8 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class ReceiptViewModel : INotifyPropertyChanged
     {
-        // Поиск по компонентам. Верхняя левая часть экрана ReceiptView.
-        private readonly List<ViewItemDTO> _allComponents = new();
+        private readonly List<ViewItemDTO> _components = new();
+        private readonly List<ViewItemDTO> _stocks = new();
         public ObservableCollection<ViewItemDTO> FilteredItemsToReceipt { get; } = new();
         public string SearchtemsToReceipt
         {
@@ -45,7 +45,6 @@ namespace WMS.Desktop.ViewModels
         private bool _isReceiptPopupOpen;
 
         // Отображение остатков. Средняя левая часть экрана ReceiptView.
-        private readonly List<ViewItemDTO> _stocks = new();
         public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
 
         // Объект приёмки.
@@ -214,8 +213,8 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                _allComponents.Clear();
-                _allComponents.AddRange(await _receiptService.GetAllComponentsAsync());
+                _components.Clear();
+                _components.AddRange(await _receiptService.GetAllComponentsAsync());
 
                 await LoadStocks();
                 ReplaceCollection(Stocks, _stocks);
@@ -375,11 +374,9 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            var text = SearchtemsToReceipt;
-
             var filteredStocks = _stocks.Where(FilterPredicate);
             var filteredStockIds = filteredStocks.Select(x => x.ComponentId).ToHashSet();
-            var filteredComponents = _allComponents.Where(FilterPredicate);
+            var filteredComponents = _components.Where(FilterPredicate);
 
             var stockIds = _stocks
                 .Select(x => x.ComponentId)
@@ -448,6 +445,26 @@ namespace WMS.Desktop.ViewModels
             }
             else
                 FilteredItemsInRacks.Clear();
+
+            UpdateCellState();
+        }
+
+        private void UpdateCellState()
+        {
+            foreach (var cell in Cells)
+            {
+                cell.HasItemsInCell = false;
+            }
+
+            var occupiedCellIds = FilteredItemsInRacks
+                .Select(x => x.CellId)
+                .Distinct()
+                .ToHashSet();
+
+            foreach (var cell in Cells)
+            {
+                cell.HasItemsInCell = occupiedCellIds.Contains(cell.Id);
+            }
         }
 
         private void AutomaticRackSelection()
@@ -504,6 +521,8 @@ namespace WMS.Desktop.ViewModels
 
                 Cells.Add(new CellViewModel(cell, cellLayout));
             }
+
+            UpdateCellState();
         }
 
         [RelayCommand]

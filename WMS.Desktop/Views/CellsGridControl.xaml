@@ -217,6 +217,7 @@
         <Viewbox Grid.Column="1"
                  Grid.Row="1"
                  Stretch="Fill">
+            
             <Grid>
 
                 <Image Source="{Binding SelectedRack.Type, Converter={StaticResource RackImageConverter}}"
@@ -249,15 +250,20 @@
                                         <Setter Property="Background" Value="Transparent"/>
 
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="BorderBrush" Value="DarkOrange"/>
-                                                <Setter Property="BorderThickness" Value="6"/>
+                                            
+                                            <DataTrigger Binding="{Binding HasItemsInCell}" Value="True">
+                                                <Setter Property="Background" Value="LightGreen"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
                                                 <Setter Property="Background" Value="Yellow"/>
                                             </DataTrigger>
-                                            
+
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BorderBrush" Value="DarkOrange"/>
+                                                <Setter Property="BorderThickness" Value="6"/>
+                                            </DataTrigger>
+
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>

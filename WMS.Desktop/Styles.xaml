@@ -70,39 +70,38 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                            
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4">
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Иконка слева берет данные из свойства Tag -->
                             <TextBlock x:Name="Watermark"
-                                       Grid.Column="0"
-                                       Text="{TemplateBinding Tag}" 
-                                       Foreground="{TemplateBinding Foreground}"
-                                       FontSize="15"
-                                       Margin="8,0,0,0" 
-                                       VerticalAlignment="Center"
-                                       IsHitTestVisible="False"/>
+                                   Grid.Column="0"
+                                   Text="{TemplateBinding Tag}" 
+                                   Foreground="#777"
+                                   FontSize="15"
+                                   Margin="8,0,0,0" 
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False"/>
 
-                            <!-- Поле ввода справа -->
                             <ScrollViewer x:Name="PART_ContentHost"
-                                Grid.Column="1"
-                                VerticalAlignment="Center"/>
+                                      Grid.Column="1"
+                                      VerticalAlignment="Center"
+                                      FontSize="15"
+                                      Foreground="Black"/>
                         </Grid>
-
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style TargetType="{x:Type DataGridColumnHeader}">
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
