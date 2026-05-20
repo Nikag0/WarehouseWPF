@@ -30,7 +30,6 @@ namespace WMS.Application.Services
             var components = await _componentRepo.GetAllAsync();
 
             return components
-                .Where(c => !c.IsDelet)
                 .Select(c => new ViewItemDTO(
                     c.Id,
                     c.Article,

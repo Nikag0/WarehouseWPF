@@ -33,14 +33,14 @@ namespace WMS.Application.Services
 
             return stocks.Select(s => new ViewItemDTO(
                 s.ComponentId,
-                s.Component.Article,       // Данные из связанной таблицы Component
-                s.Component.Name,          // Данные из связанной таблицы Component
-                s.Component.Manufacturer,  // Данные из связанной таблицы Component
+                s.Component.Article,       
+                s.Component.Name,          
+                s.Component.Manufacturer,  
                 s.RackId,
-                s.Rack.RackCode,           // Данные из связанной таблицы Rack
+                s.Rack.RackCode,           
                 LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
                 s.CellId,
-                s.Cell.CellCode,           // Данные из связанной таблицы Cell
+                s.Cell.CellCode,           
                 LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity,
                 0

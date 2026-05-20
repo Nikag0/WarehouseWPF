@@ -11,6 +11,8 @@ namespace WMS.Infrastructure.Configurations
         {
             builder.ToTable("components");
 
+            builder.HasQueryFilter(c => !c.IsDeleted);
+
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Article)

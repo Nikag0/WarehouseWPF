@@ -62,7 +62,7 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<DateOnly?>("ExpirationDate")
                         .HasColumnType("date");
 
-                    b.Property<bool>("IsDelet")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Manufacturer")
@@ -148,7 +148,7 @@ namespace WMS.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsDelet")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")

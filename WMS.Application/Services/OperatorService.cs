@@ -22,10 +22,20 @@ namespace WMS.Application.Services
             return await _operatorRepo.GetAllAsync();
         }
 
+        public async Task<Operator> GetByIdAsync(Guid id)
+        {
+            var op = await _operatorRepo.GetByIdAsync(id);
+            if (op is null)
+                throw new Exception("Оператор с таким Id не найден");
+
+            return op;
+        }
+
         public async Task AddAsync(Operator operatorr)
         {
             await _operatorRepo.AddAsync(operatorr);
         }
+
         public async Task RemoveAsync(Operator operatorr)
         {
             await _operatorRepo.RemoveAsync(operatorr);

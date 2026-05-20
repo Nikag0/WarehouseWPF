@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
 using WMS.Domain.ExceptionControl;
+using WMS.Domain.Interfaces;
 
 namespace WMS.Domain;
 
-public class Component
+public class Component : ISoftDeletable
 {
     public Guid Id { get; private set; }
     public string Article { get; private set; } = null!;
@@ -11,7 +12,17 @@ public class Component
     public string Manufacturer { get; private set; } = null!;
     public DateOnly? ExpirationDate { get; private set; }
     public int MinQuantity { get; private set; }
-    public bool IsDelet { get; set; }
+    public bool IsDeleted { get; private set; }
+
+    public void Delete()
+    {
+        if (IsDeleted) return; 
+
+        // Здесь можно прописать дополнительные бизнес-правила перед удалением, например:
+        // if (CurrentQuantity > 0) throw new OverallDomainException("Нельзя удалить компонент, пока он есть на складе");
+
+        IsDeleted = true;
+    }
 
     // Для EF Core
     private Component() { }
@@ -22,8 +33,7 @@ public class Component
         string name,
         string manufacturer,
         DateOnly? expirationDate,
-        int minQuantity,
-        bool isDelet)
+        int minQuantity)
     {
         Id = id;
         SetArticle(article);
@@ -31,7 +41,6 @@ public class Component
         SetManufacturer(manufacturer);
         SetExpirationDate(expirationDate);
         SetMinQuantity(minQuantity);
-        this.IsDelet = isDelet;
     }
 
     // Factory method
@@ -48,8 +57,7 @@ public class Component
             name,
             manufacturer,
             expirationDate,
-            minQuantity,
-            false);
+            minQuantity);
     }
 
     // -------- Business rules --------

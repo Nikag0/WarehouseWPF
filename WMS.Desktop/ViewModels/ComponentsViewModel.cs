@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Windows.Input;
-using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
@@ -18,9 +11,10 @@ using Component = WMS.Domain.Component;
 
 namespace WMS.Desktop.ViewModels
 {
-    public class ComponentsViewModel : INotifyPropertyChanged
+    public partial class ComponentsViewModel : ObservableObject
     {
-        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
+
+        [ObservableProperty] private ObservableCollection<ComponentDTO> _filteredComponents = new();
         public string NewArticle { get; set; }
         public string NewName { get; set; }
         public string NewManufacturer { get; set; }
@@ -67,27 +61,29 @@ namespace WMS.Desktop.ViewModels
             AddModeOnCommand = new RelayCommand(_ =>{IsAdding = true;});
             AddModeOffCommand = new RelayCommand(_ =>{IsAdding = false;});
 
-            _ = LoadAsync();
+            _ = LoadDataAsync();
         }
 
-        public async Task LoadAsync()
+        private async Task LoadDataAsync()
         {
             try
             {
-                components.Clear();
-                var items = await _componentService.GetAllAsync();
-                foreach (var item in items)
-                    components.Add(item);
+                // Исправлено: получаем объект Result из сервиса компонентов
+                var componentsResult = await _componentService.GetAllAsync();
 
-                ApplyFilter();
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
+                if (componentsResult.IsSuccess)
+                {
+                    // Читаем данные через .Value, как заложено в паттерне Result<T>
+                    FilteredComponents = new ObservableCollection<ComponentDTO>(componentsResult.Value);
+                }
+                else
+                {
+                    _dialogService.ShowWarning(componentsResult.Error, "Ошибка загрузки каталога");
+                }
             }
             catch (Exception ex)
             {
-                _dialogService.ShowWarning(ex.Message);
+                _dialogService.ShowErrror($"Критический сбой при загрузке данных: {ex.Message}");
             }
         }
 

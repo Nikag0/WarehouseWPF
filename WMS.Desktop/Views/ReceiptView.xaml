@@ -329,7 +329,7 @@
                         
                     </Grid>
 
-                    <ComboBox Grid.Row="2"
+                    <ComboBox Grid.Row="1"
                               Margin="5,5,0,5"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
@@ -342,7 +342,7 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                         
-                    <TextBox Grid.Row="1"
+                    <TextBox Grid.Row="2"
                              Text="{Binding CommentText}"
                              AcceptsReturn="True" 
                              Tag="Комментарий:"

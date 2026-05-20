@@ -11,7 +11,7 @@ namespace WMS.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "IsDelet",
+                name: "IsDeleted",
                 table: "operators",
                 type: "boolean",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace WMS.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsDelet",
+                name: "IsDeleted",
                 table: "operators");
         }
     }

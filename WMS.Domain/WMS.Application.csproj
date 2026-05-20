@@ -7,11 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="WMS.Application.csproj" />
+    <ProjectReference Include="..\WMS.Domain\WMS.Domain.csproj" />
   </ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
-	</ItemGroup>
 
 </Project>

@@ -7,6 +7,8 @@ using WMS.Application.Services;
 using WMS.Desktop.ViewModels;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Migrations;
+using Microsoft.Extensions.Logging;
+
 
 namespace WMS.Desktop
 {
@@ -19,6 +21,11 @@ namespace WMS.Desktop
             base.OnStartup(e);
 
             var services = new ServiceCollection();
+
+            services.AddLogging(builder =>
+            {
+                builder.AddDebug(); // Логи будут сыпаться во вкладку Output (Вывод) в Visual Studio
+            });
 
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
@@ -33,7 +40,7 @@ namespace WMS.Desktop
             services.AddScoped<IOperationRepository, OperationRepository>();
             services.AddScoped<ICellRepository, CellRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
-            services.AddScoped<IOperatorRepository, UsersRepository>();
+            services.AddScoped<IOperatorRepository, OperatorRepository>();
 
             // application services
             services.AddScoped<ComponentService>();

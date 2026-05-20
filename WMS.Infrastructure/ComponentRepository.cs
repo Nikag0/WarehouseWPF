@@ -21,39 +21,35 @@ namespace WMS.Infrastructure
         public async Task<List<Component>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
-
             return await db.Components.ToListAsync();
+        }
+
+        public async Task<Component?> GetByIdAsync(Guid id)
+        {
+            using var db = _factory.CreateDbContext();
+            return await db.Components.FindAsync(id);
         }
 
         public async Task AddAsync(Component component)
         {
             using var db = _factory.CreateDbContext();
-
             db.Components.Add(component);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(Component component)
-        {
-            using var db = _factory.CreateDbContext();
-
-            db.Components.Remove(component);
             await db.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Component component)
         {
             using var db = _factory.CreateDbContext();
-
-            db.Components.Update(component);
+            db.Entry(component).State = EntityState.Modified;
             await db.SaveChangesAsync();
         }
 
-        public async Task<Component?> GetByIdAsync(Guid id)
+        public async Task RemoveAsync(Component component)
         {
             using var db = _factory.CreateDbContext();
-
-            return await db.Components.FindAsync(id);
+            component.Delete();
+            db.Entry(component).Property(c => c.IsDeleted).IsModified = true;
+            await db.SaveChangesAsync();
         }
     }
 }

@@ -1,19 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 
 namespace WMS.Infrastructure.Migrations
 {
-    public class UsersRepository : IOperatorRepository
+    public class OperatorRepository : IOperatorRepository
     {
         private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public UsersRepository(IDbContextFactory<WmsDbContext> factory)
+        public OperatorRepository(IDbContextFactory<WmsDbContext> factory)
         {
             _factory = factory;
         }
@@ -21,30 +16,34 @@ namespace WMS.Infrastructure.Migrations
         public async Task<List<Operator>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
-
             return await db.Operators.ToListAsync();
+        }
+
+        public async Task<Operator?> GetByIdAsync(Guid id)
+        {
+            using var db = _factory.CreateDbContext();
+            return await db.Operators.FindAsync(id);
         }
 
         public async Task AddAsync(Operator operatorr)
         {
             using var db = _factory.CreateDbContext();
-
             db.Operators.Add(operatorr);
-            await db.SaveChangesAsync();
-        }
-        public async Task RemoveAsync(Operator operatorr)
-        {
-            using var db = _factory.CreateDbContext();
-
-            db.Operators.Remove(operatorr);
             await db.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Operator operatorr)
         {
             using var db = _factory.CreateDbContext();
+            db.Entry(operatorr).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+        }
 
-            db.Operators.Update(operatorr);
+        public async Task RemoveAsync(Operator operatorr)
+        {
+            using var db = _factory.CreateDbContext();
+            operatorr.Delete();
+            db.Entry(operatorr).Property(o => o.IsDeleted).IsModified = true;
             await db.SaveChangesAsync();
         }
     }

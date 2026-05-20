@@ -1,68 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Application.Services
 {
     public class ComponentService
     {
         private readonly IComponentRepository _componentRepo;
+        private readonly ILogger<ComponentService> _logger;
 
-        public ComponentService(IComponentRepository componentRepo)
+        public ComponentService(IComponentRepository componentRepo, ILogger<ComponentService> logger)
         {
             _componentRepo = componentRepo;
+            _logger = logger;
         }
 
-        public async Task<List<ComponentDTO>> GetAllAsync()
+        public async Task<Result<List<ComponentDTO>>> GetAllAsync()
         {
-            var components =  await _componentRepo.GetAllAsync();
+            try
+            {
+                var components = await _componentRepo.GetAllAsync();
+                var dtos = components.Select(c => new ComponentDTO(
+                    c.Id, c.Article, c.Name, c.Manufacturer, c.MinQuantity
+                )).ToList();
 
-            return components
-                .Where(c => !c.IsDelet)
-                .Select(c => new ComponentDTO(
-                    c.Id,
-                    c.Article,
-                    c.Name,
-                    c.Manufacturer,
-                    c.MinQuantity
-            )).ToList();
+                return Result<List<ComponentDTO>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при получении списка компонентов из базы данных.");
+                throw;
+            }
         }
 
-        public async Task AddAsync(string article, string name, string manufacturer)
+        public async Task<Result> AddAsync(string article, string name, string manufacturer)
         {
-            var component = Component.Create(
-                article,
-                name,
-                manufacturer,
-                DateOnly.FromDateTime(DateTime.Today),
-                10
-            );
+            try
+            {
+                var component = Component.Create(article, name, manufacturer, null, 10);
+                await _componentRepo.AddAsync(component);
 
-            await _componentRepo.AddAsync(component);
+                _logger.LogInformation($"Успешно добавлен компонент: {name}");
+
+                return Result.Success();
+            }
+            catch (OverallDomainException domainEx)
+            {
+                return Result.Failure(domainEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при добавлении компонента в БД");
+                throw;
+            }
         }
 
-        public async Task DeletAsync(Guid id)
+        public async Task<Result> DeleteAsync(Guid id)
         {
-            var compoment = await _componentRepo.GetByIdAsync(id);
+            try
+            {
+                var component = await _componentRepo.GetByIdAsync(id);
+                if (component is null)
+                {
+                    return Result.Failure("Компонент не найден.");
+                }
 
-            if (compoment is null)
-                throw new Exception("Компонент с таким артиклом не найден");
+                await _componentRepo.RemoveAsync(component);
 
-            compoment.IsDelet = true;
+                _logger.LogInformation($"Компонент с ID {id} успешно удален.");
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при удалении компонента {id}");
+                throw;
+            }
         }
 
-        public async Task UpdateAsync(Component component)
+        public async Task<Result> UpdateAsync(Component component)
         {
-            await _componentRepo.UpdateAsync(component);
+            try
+            {
+                await _componentRepo.UpdateAsync(component);
+
+                _logger.LogInformation($"Данные компонента с ID {component.Id} успешно обновлены.");
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {component.Id} в БД");
+                throw;
+            }
         }
 
-        public async Task<Component> GetByIdAsync(Guid id)
+        public async Task<Component?> GetByIdAsync(Guid id)
         {
-            // Обязательно добавляем return, чтобы вернуть сущность во ViewModel
             return await _componentRepo.GetByIdAsync(id);
         }
     }

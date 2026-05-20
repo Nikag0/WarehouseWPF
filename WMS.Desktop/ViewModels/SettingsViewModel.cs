@@ -18,37 +18,56 @@ namespace WMS.Desktop.ViewModels
     {
         private readonly ComponentService _componentService;
         private readonly OperatorService _operatorService;
+        private readonly DialogService _dialogService;
 
         [ObservableProperty] private ObservableCollection<ComponentDTO> _filteredComponents = new();
         [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
 
-        public SettingsViewModel(ComponentService componentService, OperatorService operatorService)
+        public SettingsViewModel(
+            ComponentService componentService,
+            OperatorService operatorService,
+            DialogService dialogService)
         {
             _componentService = componentService;
             _operatorService = operatorService;
+            _dialogService = dialogService;
+
             _ = LoadDataAsync();
         }
 
         private async Task LoadDataAsync()
         {
-            var componentsList = await _componentService.GetAllAsync();
-            var operatorsList = await _operatorService.GetAllAsync();
+            try
+            {
+                var componentsResult = await _componentService.GetAllAsync();
+                var operatorsList = await _operatorService.GetAllAsync();
 
-            FilteredComponents = new ObservableCollection<ComponentDTO>(componentsList);
-            FilteredOperators = new ObservableCollection<Operator>(operatorsList);
+                if (componentsResult.IsSuccess)
+                {
+                    FilteredComponents = new ObservableCollection<ComponentDTO>(componentsResult.Value);
+                }
+                else
+                {
+                    _dialogService.ShowWarning(componentsResult.Error, "Ошибка загрузки каталога");
+                }
+
+                FilteredOperators = new ObservableCollection<Operator>(operatorsList);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowErrror($"Критический сбой при загрузке данных: {ex.Message}");
+            }
         }
-
-        // ================= ДЕЙСТВИЯ КАТАЛОГА =================
 
         [RelayCommand]
         private void AddComponent()
         {
-            var vm = new ComponentEditViewModel(_componentService);
+            var vm = new ComponentEditViewModel(_componentService, _dialogService);
             var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
 
             if (window.ShowDialog() == true)
             {
-                _ = LoadDataAsync(); // Перечитываем базу, если добавили элемент
+                _ = LoadDataAsync();
             }
         }
 
@@ -57,12 +76,12 @@ namespace WMS.Desktop.ViewModels
         {
             if (component == null) return;
 
-            var vm = new ComponentEditViewModel(_componentService, component);
+            var vm = new ComponentEditViewModel(_componentService, _dialogService, component);
             var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
 
             if (window.ShowDialog() == true)
             {
-                _ = LoadDataAsync(); // Перечитываем базу, если сохранили изменения
+                _ = LoadDataAsync();
             }
         }
 
@@ -70,15 +89,22 @@ namespace WMS.Desktop.ViewModels
         private async Task DeleteComponent(ComponentDTO component)
         {
             if (component == null) return;
-            var result = MessageBox.Show($"Удалить {component.Name}?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+
+            if (_dialogService.ShowConfirmation($"Удалить компонент {component.Name}?", "Удаление"))
             {
-                // await _componentService.DeleteAsync(component.Id);
-                FilteredComponents.Remove(component);
+                var result = await _componentService.DeleteAsync(component.Id);
+
+                if (result.IsSuccess)
+                {
+                    FilteredComponents.Remove(component);
+                    _dialogService.ShowInfo("Компонент успешно удален.");
+                }
+                else
+                {
+                    _dialogService.ShowWarning(result.Error, "Предупреждение");
+                }
             }
         }
-
-        // ================= ДЕЙСТВИЯ ОПЕРАТОРОВ =================
 
         [RelayCommand]
         private void AddOperator()

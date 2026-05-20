@@ -4,16 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WMS.Domain.ExceptionControl;
+using WMS.Domain.Interfaces;
 
 namespace WMS.Domain
 {
-    public class Operator
+    public class Operator : ISoftDeletable
     {
         public Guid Id { get; private set; }
         public string Surname { get; private set; }
         public string Name { get; private set; }
         public string Patronymic { get; private set; }
-        public bool IsDelet { get; set; }
+        public bool IsDeleted { get; private set; }
+
+        public void Delete()
+        {
+            IsDeleted = true;
+        }
 
         private Operator() { } // для EF
 
