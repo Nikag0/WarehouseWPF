@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -72,6 +73,13 @@ namespace WMS.Infrastructure
 
             db.Stocks.Update(stock);
             await db.SaveChangesAsync();
+        }
+
+        public async Task<bool> HasStockWithQuantityAsync(Guid componentId)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Stocks
+                .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
         }
     }
 }

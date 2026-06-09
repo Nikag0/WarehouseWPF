@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -136,11 +137,20 @@ namespace WMS.Desktop.ViewModels
         private async Task DeleteOperator(Operator op)
         {
             if (op == null) return;
-            var result = MessageBox.Show($"Удалить {op.Surname} {op.Name}?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+
+            if (_dialogService.ShowConfirmation($"Удалить оператора {op.Surname} {op.Name}?", "Удаление"))
             {
-                // await _operatorService.DeleteAsync(op.Id);
-                FilteredOperators.Remove(op);
+                var result = await _operatorService.DeleteAsync(op.Id);
+
+                if (result.IsSuccess)
+                {
+                    FilteredOperators.Remove(op);
+                    _dialogService.ShowInfo("Оператор успешно удален.");
+                }
+                else
+                {
+                    _dialogService.ShowWarning(result.Error, "Предупреждение");
+                }
             }
         }
     }

@@ -15,5 +15,6 @@ namespace WMS.Application.Abstractions
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
         Task RemoveAsync(Stock stock);
+        Task<bool> HasStockWithQuantityAsync(Guid componentId); // Метод проверяет наличие остатков по ID компонента
     }
 }

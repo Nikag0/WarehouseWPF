@@ -14,7 +14,6 @@ namespace WMS.Desktop.ViewModels
     public class MainViewModel : BaseViewModel
     {
         private object _currentView;
-
         public object CurrentView
         {
             get => _currentView;
@@ -29,11 +28,13 @@ namespace WMS.Desktop.ViewModels
         public ComponentsViewModel Components { get; }
         public IssueViewModel Issue { get; }
         public ReceiptViewModel Receipt { get; }
+        public HistoryViewModel History { get; }
 
         public ICommand ShowNotificationCommand { get; }
         public ICommand ShowComponentsCommand { get; }
         public ICommand ShowIssueCommand { get; }
         public ICommand ShowReceiptCommand { get; }
+        public ICommand ShowHistoryCommand { get; }
         public ICommand ShowSettingsCommand { get; }
 
         public MainViewModel(
@@ -41,12 +42,14 @@ namespace WMS.Desktop.ViewModels
                     ComponentsViewModel components,
                     IssueViewModel issue,
                     ReceiptViewModel receipt,
+                    HistoryViewModel history,
                     Func<SettingsView> settingsWindowFactory)
         {
             Notifications = notifications;
             Components = components;
             Issue = issue;
             Receipt = receipt;
+            History = history;
 
             CurrentView = Components;
 
@@ -61,6 +64,9 @@ namespace WMS.Desktop.ViewModels
 
             ShowReceiptCommand =
                 new RelayCommand(_ => CurrentView = Receipt);
+
+            ShowHistoryCommand =
+                new RelayCommand(_ => CurrentView = History);
 
             ShowSettingsCommand = new RelayCommand(_ =>
             {

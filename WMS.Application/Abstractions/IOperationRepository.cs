@@ -10,5 +10,6 @@ namespace WMS.Application.Abstractions
     public interface IOperationRepository
     {
         Task AddAsync(Operation operation);
+        Task<List<OperationHistoryDto>> GetFilteredHistoryAsync(string searchText, int maxCount = 100);
     }
 }

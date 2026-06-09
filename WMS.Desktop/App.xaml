@@ -33,6 +33,11 @@
                 <views:ReceiptView/>
             </DataTemplate>
 
+            <!-- History -->
+            <DataTemplate DataType="{x:Type viewmodels:HistoryViewModel}">
+                <views:HistoryView/>
+            </DataTemplate>
+
         </ResourceDictionary>
 
     </Application.Resources>

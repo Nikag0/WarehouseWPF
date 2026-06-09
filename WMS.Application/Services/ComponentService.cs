@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
@@ -9,11 +10,15 @@ namespace WMS.Application.Services
     public class ComponentService
     {
         private readonly IComponentRepository _componentRepo;
+        private readonly IStockRepository _stockRepository;
         private readonly ILogger<ComponentService> _logger;
 
-        public ComponentService(IComponentRepository componentRepo, ILogger<ComponentService> logger)
+        public ComponentService(IComponentRepository componentRepo,
+                                IStockRepository stockRepository,
+                                ILogger<ComponentService> logger)
         {
             _componentRepo = componentRepo;
+            _stockRepository = stockRepository;
             _logger = logger;
         }
 
@@ -39,7 +44,7 @@ namespace WMS.Application.Services
         {
             try
             {
-                var component = Component.Create(article, name, manufacturer, null, 10);
+                var component = Domain.Component.Create(article, name, manufacturer, null, 10);
                 await _componentRepo.AddAsync(component);
 
                 _logger.LogInformation($"Успешно добавлен компонент: {name}");
@@ -67,6 +72,12 @@ namespace WMS.Application.Services
                     return Result.Failure("Компонент не найден.");
                 }
 
+                bool hasActiveStock = await _stockRepository.HasStockWithQuantityAsync(id);
+                if (hasActiveStock)
+                {
+                    return Result.Failure("Существуют остатки с этим компонентом");
+                }
+
                 await _componentRepo.RemoveAsync(component);
 
                 _logger.LogInformation($"Компонент с ID {id} успешно удален.");
@@ -80,7 +91,7 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<Result> UpdateAsync(Component component)
+        public async Task<Result> UpdateAsync(Domain.Component component)
         {
             try
             {
@@ -97,7 +108,7 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<Component?> GetByIdAsync(Guid id)
+        public async Task<Domain.Component?> GetByIdAsync(Guid id)
         {
             return await _componentRepo.GetByIdAsync(id);
         }

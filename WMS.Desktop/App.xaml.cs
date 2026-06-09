@@ -55,20 +55,20 @@ namespace WMS.Desktop
 
             // view models
             services.AddSingleton<MainViewModel>();
-            services.AddSingleton<NotificationViewModel>();
-            services.AddSingleton<ComponentsViewModel>();
-            services.AddSingleton<ReceiptViewModel>();
-            services.AddSingleton<IssueViewModel>();
-            services.AddSingleton<SettingsViewModel>();
-            services.AddSingleton<ComponentEditViewModel>();
-            services.AddSingleton<OperatorEditViewModel>();
+            services.AddTransient<NotificationViewModel>();
+            services.AddTransient<ComponentsViewModel>(); 
+            services.AddTransient<ReceiptViewModel>();    
+            services.AddTransient<IssueViewModel>();      
+            services.AddTransient<SettingsViewModel>();
+            services.AddTransient<ComponentEditViewModel>();
+            services.AddTransient<OperatorEditViewModel>();
+            services.AddTransient<HistoryViewModel>();
 
             // views
             services.AddTransient<Views.SettingsView>();
 
             // Func
-            services.AddSingleton<Func<Views.SettingsView>>(provider => () => provider.GetRequiredService<Views.SettingsView>());
-
+            services.AddTransient<Func<Views.SettingsView>>(provider => () => provider.GetRequiredService<Views.SettingsView>());
 
             Services = services.BuildServiceProvider();
 

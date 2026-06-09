@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,10 +12,14 @@ namespace WMS.Application.Services
     public class OperatorService
     {
         private readonly IOperatorRepository _operatorRepo;
+        private readonly ILogger<OperatorService> _logger;
 
-        public OperatorService(IOperatorRepository userRepo)
+
+        public OperatorService(IOperatorRepository userRepo,
+                               ILogger<OperatorService> logger)
         {
             _operatorRepo = userRepo;
+            _logger = logger;
         }
 
         public async Task<List<Operator>> GetAllAsync()
@@ -36,10 +41,29 @@ namespace WMS.Application.Services
             await _operatorRepo.AddAsync(operatorr);
         }
 
-        public async Task RemoveAsync(Operator operatorr)
+        public async Task<Result> DeleteAsync(Guid id)
         {
-            await _operatorRepo.RemoveAsync(operatorr);
+            try
+            {
+                var op = await _operatorRepo.GetByIdAsync(id);
+                if (op is null)
+                {
+                    return Result.Failure("Оператор не найден.");
+                }
+
+                await _operatorRepo.RemoveAsync(op);
+
+                _logger.LogInformation($"Оператор с ID {id} успешно удален.");
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при удалении оператора {id}");
+                throw;
+            }
         }
+
 
         public async Task UpdateAsync(Operator operatorr)
         {
