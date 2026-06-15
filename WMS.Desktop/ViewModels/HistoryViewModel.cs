@@ -52,16 +52,15 @@ namespace WMS.Desktop.ViewModels
                 }
                 catch (OperationCanceledException)
                 {
-                } 
+                    // Задача отменена новым вводом текста — ничего не делаем
+                }
             });
         }
 
         private async Task LoadHistoryAsync()
         {
-            // Запрашиваем отфильтрованные данные из репозитория
             var data = await _operationRepository.GetFilteredHistoryAsync(SearchText);
 
-            // Обновляем коллекцию для отображения
             HistoryItems.Clear();
             foreach (var item in data)
             {

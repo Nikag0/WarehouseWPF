@@ -37,7 +37,7 @@ namespace WMS.Desktop
             // репозитории
             services.AddScoped<IStockRepository, StockRepository>();
             services.AddScoped<IComponentRepository, ComponentRepository>();
-            services.AddScoped<IOperationRepository, OperationRepository>();
+            services.AddScoped<IOperationRepository, HistoryRepository>();
             services.AddScoped<ICellRepository, CellRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IOperatorRepository, OperatorRepository>();

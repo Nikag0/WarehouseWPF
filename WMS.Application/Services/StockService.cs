@@ -31,22 +31,15 @@ namespace WMS.Application.Services
         {
             List<Stock> stocks = await _stockRepo.GetRawStockDataAsync();
 
-            return stocks.Select(s => new ViewItemDTO(
-                s.ComponentId,
-                s.Component.Article,       
-                s.Component.Name,          
-                s.Component.Manufacturer,  
-                s.RackId,
-                s.Rack.RackCode,           
-                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
-                s.CellId,
-                s.Cell.CellCode,           
-                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
-                s.Quantity,
-                0
-            )).ToList();
+            return stocks.Select(MapToViewItemDto).ToList();
         }
 
+        public async Task<List<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount)
+        {
+            List<Stock> stocks = await _stockRepo.GetFilteredStockAsync(searchText, maxCount);
+
+            return stocks.Select(MapToViewItemDto).ToList();
+        }
 
         public async Task<Stock?> GetAsync(Guid  rackId, Guid componentId, Guid cellId)
         {
@@ -65,6 +58,24 @@ namespace WMS.Application.Services
         public async Task UpdateAsync(Stock stock)
         {  
             await _stockRepo.UpdateAsync(stock);
+        }
+
+        private ViewItemDTO MapToViewItemDto(Stock s)
+        {
+            return new ViewItemDTO(
+                s.ComponentId,
+                s.Component.Article,
+                s.Component.Name,
+                s.Component.Manufacturer,
+                s.RackId,
+                s.Rack.RackCode,
+                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
+                s.CellId,
+                s.Cell.CellCode,
+                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
+                s.Quantity,
+                0
+            );
         }
     }
 }

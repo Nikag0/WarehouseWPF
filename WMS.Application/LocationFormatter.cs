@@ -2,10 +2,10 @@
 {
     public static string CodeToDisplay(int column, int row)
     {
-        return $"{ToLetter(column)}-{row}";
+        return $"{NumToLetter(column)}-{row}";
     }
 
-    private static string ToLetter(int number)
+    public static string NumToLetter(int number)
     {
         return number switch
         {
@@ -18,6 +18,17 @@
             7 => "Ж",
             8 => "З",
             _ => number.ToString()
+        };
+    }
+
+    public static string NumToOperation(int operationType)
+    {
+        return operationType switch
+        {
+            1 => "Приёмка",
+            2 => "Выдача",
+            3 => "Инвентаризация",
+            _ => operationType.ToString()
         };
     }
 }

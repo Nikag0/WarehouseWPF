@@ -48,8 +48,8 @@
                     <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="200*"/>
                     <DataGridTextColumn Header="Тип операции" Binding="{Binding OperationType}" Width="100*"/>
                     <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="100*"/>
-                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding ComponentName}" Width="100*"/>
-                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding ComponentName}" Width="100*"/>
+                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="100*"/>
+                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="100*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

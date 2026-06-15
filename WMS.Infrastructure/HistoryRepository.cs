@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WMS.Application.Abstractions;
+using WMS.Application.Services;
 using WMS.Domain;
 
 namespace WMS.Infrastructure
 {
-    public class OperationRepository : IOperationRepository
+    public class HistoryRepository : IOperationRepository
     {
         private readonly IDbContextFactory<WmsDbContext> _factory;
 
-        public OperationRepository(IDbContextFactory<WmsDbContext> factory)
+        public HistoryRepository(IDbContextFactory<WmsDbContext> factory)
         {
             _factory = factory;
         }
@@ -32,10 +33,8 @@ namespace WMS.Infrastructure
                 var searchPattern = $"%{searchText}%";
 
                 query = query.Where(x =>
-                    // Фильтр по имени оператора
                     EF.Functions.ILike(x.o.Operator, searchPattern) ||
 
-                    // Фильтр по имени компонента (ищем имя в таблице Components по совпадению ID)
                     db.Components.Any(c => c.Id == x.item.ComponentId && EF.Functions.ILike(c.Name, searchPattern))
                 );
             }
@@ -49,7 +48,7 @@ namespace WMS.Infrastructure
                     OperationId = x.o.Id,
                     OccurredAt = x.o.OccurredAt,
                     Operator = x.o.Operator,
-                    OperationType = x.o.Type.ToString(),
+                    OperationType = LocationFormatter.NumToOperation(((int)x.o.Type)),
                     Comment = x.o.Comment,
                     QuantityBefore = x.item.QuantityBefore,
                     QuantityAfter = x.item.QuantityAfter,

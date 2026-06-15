@@ -14,57 +14,38 @@ using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WMS.Desktop.ViewModels
 {
-    public partial class IssueViewModel : INotifyPropertyChanged
+    public partial class IssueViewModel : ObservableObject
     {
+        private readonly IssueService _issueService;
+        private readonly StockService _stockService;
+        private readonly DialogService _dialogService;
+        private readonly OperatorService _operatorService;
+        private readonly CellService _cellService;
+        private readonly RackService _rackService;
+
+        private CancellationTokenSource? _cts;
+
+        [ObservableProperty] private string _commentText = string.Empty;
+        [ObservableProperty] private Operator? _operatorName;
+        [ObservableProperty] private bool _isIssue;
+        [ObservableProperty] private bool _isIssuePopupOpen;
+        [ObservableProperty] private string _searchText = string.Empty;
+
+        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
+
+        //Изменения кончлились
+
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
-        public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
         public ObservableCollection<RackViewModel> Racks { get; } = new();
         public List<Cell> _cells { get; } = new();
         public ObservableCollection<CellViewModel> Cells{ get; } = new();
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
         public ObservableCollection<Operator> Operators { get; } = new();
-    
-        public string SearchText
-        {
-            get => _searchText;
-            set
-            {
-                _searchText = value;
-                OnPropertyChanged();
-                StocksFilter();
-            }
-        }
-        public string CommentText
-        {
-            get => _commentText;
-            set
-            {
-                _commentText = value;
-                OnPropertyChanged();
-            }
-        }
-        public Operator OperatorName
-        {
-            get => _operatorName;
-            set
-            {
-                _operatorName = value;
-                OnPropertyChanged();
-            }
-        }
-        public bool IsIssue
-        {
-            get => _isIssue;
-            set
-            {
-                _isIssue = value;
-                OnPropertyChanged();
-            }
-        }
-        
+
         public RackViewModel SelectedRack 
         {
             get => _selectedRack;
@@ -82,34 +63,7 @@ namespace WMS.Desktop.ViewModels
         private RackViewModel _selectedRack;
 
         private readonly List<ViewItemDTO> _stocks = new();
-        private string _searchText;
-        private string _commentText;
-        private Operator _operatorName;
         private bool _isLoading;
-        private bool _isIssue;
-
-        private bool _isIssuePopupOpen;
-        public bool IsIssuePopupOpen
-        {
-            get => _isIssuePopupOpen;
-            set
-            {
-                _isIssuePopupOpen = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand IssueCommand { get; }
-        public ICommand AddIssueItemCommand { get; }
-        public ICommand RemoveIssueItemCommand { get; }
-        public ICommand ClearIssueItemsCommand { get; }
-
-        private readonly IssueService _issueService;
-        private readonly StockService _stockService;
-        private readonly DialogService _dialogService;
-        private readonly OperatorService _operatorService;
-        private readonly CellService _cellService;
-        private readonly RackService _rackService;
 
         public IssueViewModel(
             StockService stockService,
@@ -125,13 +79,9 @@ namespace WMS.Desktop.ViewModels
             _operatorService = operatorService;
             _cellService = cellService;
             _rackService = rackService;
-
-            IssueCommand = new RelayCommand(IssueAsync);
-            AddIssueItemCommand = new RelayCommand(AddIssueItem);
-            RemoveIssueItemCommand = new RelayCommand(RemoveIssueItem);
-            ClearIssueItemsCommand = new RelayCommand(ClearIssueItems);
         }
 
+        [RelayCommand]
         public async Task IssueAsync()
         {
             var invalidItems = IssueItems
@@ -187,7 +137,6 @@ namespace WMS.Desktop.ViewModels
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
                 await LoadStocks();
-                StocksFilter();
                 CommentText = string.Empty;
                 IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
@@ -204,6 +153,55 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
+        }
+
+        [RelayCommand]
+        private async void SelectRack(RackViewModel rack)
+        {
+            if (rack == null)
+                return;
+
+            SelectedRack = rack;
+        }
+
+        [RelayCommand]
+        private void SelectCell(CellViewModel cell)
+        {
+            return;
+        }
+
+        [RelayCommand]
+        private void AddIssueItem(object obj)
+        {
+            if (obj is not ViewItemDTO item)
+                return;
+
+            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
+                return;
+
+            IssueItems.Add(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+        }
+
+        [RelayCommand]
+        private void RemoveIssueItem (object obj)
+        {
+            if (obj is not ViewItemDTO item)
+                return;
+
+            IssueItems.Remove(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+        }
+
+        [RelayCommand]
+        private void ClearIssueItems()
+        {
+            IssueItems.Clear();
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+            IsIssue = false; 
         }
 
         public async Task LoadWindow()
@@ -226,8 +224,6 @@ namespace WMS.Desktop.ViewModels
 
                 LoadCellLayouts();
                 UpdateCellHighlights();
-
-                StocksFilter();
 
                 if (SelectedRack != null)
                 {
@@ -334,21 +330,6 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async void SelectRack(RackViewModel rack)
-        {
-            if (rack == null)
-                return;
-
-            SelectedRack = rack;
-        }
-
-        [RelayCommand]
-        private void SelectCell(CellViewModel cell)
-        {
-            return;
-        }
-
         private async Task LoadCellsForSelectedRack()
         {
             if (SelectedRack == null)
@@ -373,63 +354,47 @@ namespace WMS.Desktop.ViewModels
             UpdateCellHighlights();
         }
 
-        private void StocksFilter()
+        partial void OnSearchTextChanged(string value)
         {
-            FilteredStocks.Clear();
+            _cts?.Cancel();
 
-            var query = _stocks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchText))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                var text = SearchText.ToLower();
-
-                query = query.Where(c =>
-                    c.Quantity > 0 && (
-                    (c.Article?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (c.ComponentName?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (c.CellCode?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false)
-                ));
+                FilteredStocks.Clear();
+                IsIssuePopupOpen = false;
+                return;
             }
 
-            foreach (var item in query)
-                FilteredStocks.Add(item);
-        }
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
 
-        private void AddIssueItem(object obj)
-        {
-            if (obj is not ViewItemDTO item)
-                return;
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(500, token);
 
-            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
-                return;
+                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15);
 
-            IssueItems.Add(item);
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-        }
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (!token.IsCancellationRequested)
+                        {
+                            FilteredStocks.Clear();
+                            foreach (var item in suggestions)
+                            {
+                                FilteredStocks.Add(item);
+                            }
 
-        private void RemoveIssueItem (object obj)
-        {
-            if (obj is not ViewItemDTO item)
-                return;
-
-            IssueItems.Remove(item);
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-        }
-
-        private void ClearIssueItems()
-        {
-            IssueItems.Clear();
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-            IsIssue = false; 
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                            IsIssuePopupOpen = FilteredStocks.Any();
+                        }
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // Задача отменена новым вводом текста — ничего не делаем
+                }
+            });
         }
     }
 }
