@@ -24,6 +24,15 @@ namespace WMS.Desktop.Views
         public ComponentsView()
         {
             InitializeComponent();
+            this.Loaded += ComponentViewLoaded;
+        }
+
+        private async void ComponentViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ComponentsViewModel viewModel)
+            {
+                await viewModel.LoadDataAsync();
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:WMS.Desktop.Views" 
+        xmlns:converters="clr-namespace:WMS.Desktop.Converters"
         xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels" 
         d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
@@ -13,6 +14,27 @@
         MinWidth="1500"
         WindowState="Maximized">
     <!-- Высота 1008, потому что 40 пикселей нижнее меню, 32 верхняя плашка-->
+
+    <Window.Resources>
+
+        <converters:EqualityConverter x:Key="EqualityConverter"/>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Style.Triggers>
+                <!-- Триггер: если параметр команды равен текущей View, красим в синий -->
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualityConverter}">
+                            <Binding Path="DataContext.CurrentView" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                            <Binding Path="CommandParameter" RelativeSource="{RelativeSource Self}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Background" Value="LightBlue"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
     <Grid Background="#36495b">
 
@@ -33,45 +55,53 @@
 
                 <StackPanel VerticalAlignment="Top">
 
-                    <Button Command="{Binding ShowNotificationCommand}">
+                    <Button Command="{Binding ShowNotificationCommand}" 
+                            CommandParameter="{Binding Notifications}"
+                            Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"/>
                             <TextBlock Text="Уведомления" FontSize="11" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding ShowComponentsCommand}">
+                    <Button Command="{Binding ShowComponentsCommand}" 
+                            CommandParameter="{Binding Components}"
+                            Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📑" FontSize="22" HorizontalAlignment="Center"/>
                             <TextBlock Text="Каталог" FontSize="11" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding ShowIssueCommand}">
+                    <Button Command="{Binding ShowIssueCommand}"
+                            CommandParameter="{Binding Issue}"
+                            Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📦" FontSize="22" HorizontalAlignment="Center"/>
                             <TextBlock Text="Выдача" FontSize="11" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding ShowReceiptCommand}" Cursor="Hand">
+                    <Button Command="{Binding ShowReceiptCommand}"
+                            CommandParameter="{Binding Receipt}"
+                            Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📥" FontSize="22" HorizontalAlignment="Center"/>
                             <TextBlock Text="Приёмка" FontSize="11" HorizontalAlignment="Center"/>
                         </StackPanel>
-                    </Button>       
-                    
-                    <Button Command="{Binding ShowHistoryCommand}" Cursor="Hand">
+                    </Button>
+
+                    <Button Command="{Binding ShowHistoryCommand}"
+                            CommandParameter="{Binding History}"
+                            Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📜" FontSize="22" HorizontalAlignment="Center"/>
                             <TextBlock Text="История" FontSize="11" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
-
             </DockPanel>
         </Border>
-
 
         <ContentControl Grid.Column="1"
                         Content="{Binding CurrentView}"/>

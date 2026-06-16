@@ -13,14 +13,34 @@ using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Xceed.Wpf.AvalonDock.Layout;
-using Component = WMS.Domain.Component;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WMS.Desktop.ViewModels
 {
-    public partial class ReceiptViewModel : INotifyPropertyChanged
+    public partial class ReceiptViewModel : ObservableObject
     {
+        private readonly StockService _stockService;
+        private readonly ReceiptService _receiptService;
+        private readonly CellService _cellService;
+        private readonly RackService _rackService;
+        private readonly DialogService _dialogService;
+        private readonly OperatorService _operatorrService;
+
+        [ObservableProperty] private StockViewModel _receiptItem = new();
+        [ObservableProperty] private bool _isReceiptPopupOpen;
+        [ObservableProperty] private bool _isRackPopupOpen;
+        [ObservableProperty] private bool _isCellPopupOpen;
+        [ObservableProperty] private Operator _operatorName;
+        [ObservableProperty] private string _commentText;
+
+        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
+
+        // Конец изменений
+
         private readonly List<ViewItemDTO> _components = new();
         private readonly List<ViewItemDTO> _stocks = new();
+
+        // ???
         public ObservableCollection<ViewItemDTO> FilteredItemsToReceipt { get; } = new();
         public string SearchtemsToReceipt
         {
@@ -33,32 +53,9 @@ namespace WMS.Desktop.ViewModels
             }
         }
         private string _searchtemsToIssue;
-        public bool IsReceiptPopupOpen
-        {
-            get => _isReceiptPopupOpen;
-            set
-            {
-                _isReceiptPopupOpen = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool _isReceiptPopupOpen;
 
-        // Отображение остатков. Средняя левая часть экрана ReceiptView.
         public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
 
-        // Объект приёмки.
-        public StockViewModel ReceiptItem
-        {
-            get => _receiptItem;
-            set
-            {
-                _receiptItem = value;
-            }
-        }
-        private StockViewModel _receiptItem = new();
-
-        // Объект выбранного стеллажа.
         public RackViewModel SelectedRack
         {
             get => _selectedRack;
@@ -92,18 +89,7 @@ namespace WMS.Desktop.ViewModels
         private string _searchRacks;
         public ObservableCollection<RackViewModel> Racks { get; } = new();
         public ObservableCollection<RackViewModel> FilteredRacks { get; } = new();
-        public bool IsRackPopupOpen
-        {
-            get => _isRackPopupOpen;
-            set
-            {
-                _isRackPopupOpen = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool _isRackPopupOpen;
 
-        // Объект ячеек выбранного стеллажа.
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
 
         public CellViewModel SelectedCell
@@ -141,53 +127,12 @@ namespace WMS.Desktop.ViewModels
         private List<Cell> _cells = new();
         public ObservableCollection<CellViewModel> Cells { get; } = new();
         public ObservableCollection<CellViewModel> FilteredCells { get; } = new();
-        public bool IsCellPopupOpen
-        {
-            get => _isCellPopupOpen;
-            set
-            {
-                _isCellPopupOpen = value;
-                OnPropertyChanged();
-            }
-        }
-        private bool _isCellPopupOpen;
 
         public ObservableCollection<Operator> Operators { get; } = new();
-        public Operator OperatorName
-        {
-            get => _operatorName;
-            set
-            {
-                _operatorName = value;
-                OnPropertyChanged();
-            }
-        }
-        private Operator _operatorName;
-        public string CommentText
-        {
-            get => _commentText;
-            set
-            {
-                _commentText = value;
-                OnPropertyChanged();
-            }
-        }
-        private string _commentText;
 
         public ObservableCollection<ViewItemDTO> FilteredItemsInRacks { get; } = new();
 
         private readonly SemaphoreSlim _lock = new(1, 1);
-
-        private readonly StockService _stockService;
-        private readonly ReceiptService _receiptService;
-        private readonly CellService _cellService;
-        private readonly RackService _rackService;
-        private readonly DialogService _dialogService;
-        private readonly OperatorService _operatorrService;
-
-        public ICommand SetCellFromListCommand { get; }
-        public ICommand RefreshCommand { get; }
-        public ICommand ReceiveCommand { get; }
 
         public ReceiptViewModel(
             StockService stockService,
@@ -203,13 +148,85 @@ namespace WMS.Desktop.ViewModels
             _rackService = rackService;
             _dialogService = dialogService;
             _operatorrService = operatorrService;
-
-            RefreshCommand = new RelayCommand(LoadWindow);
-            ReceiveCommand = new RelayCommand(ReceiveAsync);
-            SetCellFromListCommand = new RelayCommand(SetCellFromList);
         }
 
-        public async Task LoadWindow()
+        [RelayCommand]
+        public async Task ReceiveAsync()
+        {
+
+            if (ReceiptItem == null)
+            {
+                _dialogService.ShowWarning("Компонент не выбран.");
+                return;
+            }
+
+            if (SelectedRack == null || SelectedCell == null)
+            {
+                _dialogService.ShowWarning("Стеллаж или ячейка не выбраны.");
+                return;
+            }
+
+            if (ReceiptItem.OperationQuantity <= 0)
+            {
+                _dialogService.ShowWarning("Количество товаров для приёмки должно быть больше 0.");
+                return;
+            }
+
+            if (OperatorName == null)
+            {
+                _dialogService.ShowWarning("Оператор не указан.");
+                return;
+            }
+
+            if (!_dialogService.ShowConfirmation("Вы уверены, что хотите выполнить приёмку товара? \n" +
+                $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
+                $"Производитель: {ReceiptItem.Manufacturer}\n" +
+                $"Количество: {ReceiptItem.OperationQuantity}\n" +
+                $"Cтеллаж: {SearchRacks} Ячейка: {SearchCell}"))
+                return;
+
+            await _lock.WaitAsync();
+
+            try
+            {
+                var receiptDto = new ServiceItemDTO(
+                    ReceiptItem.ComponentId,
+                    SelectedRack.Id,
+                    SelectedCell.Id,
+                    ReceiptItem.OperationQuantity);
+
+
+                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
+                await LoadDataAsync();
+
+                SelectedRack.IsHighlighted = false;
+                SelectedRack = null;
+                SearchRacks = string.Empty;
+                SelectedCell.IsHighlighted = false;
+                SelectedCell = null;
+                SearchCell = string.Empty;
+                ReceiptItem.OperationQuantity = 0;
+                CommentText = string.Empty;
+            }
+            catch (WrongValueExeption ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        public async Task LoadDataAsync()
         {
             try
             {
@@ -290,81 +307,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public async Task ReceiveAsync()
-        {
-
-            if (ReceiptItem == null)
-            {
-                _dialogService.ShowWarning("Компонент не выбран.");
-                return;
-            }
-
-            if (SelectedRack == null || SelectedCell == null)
-            {
-                _dialogService.ShowWarning("Стеллаж или ячейка не выбраны.");
-                return;
-            }
-
-            if (ReceiptItem.OperationQuantity <= 0)
-            {
-                _dialogService.ShowWarning("Количество товаров для приёмки должно быть больше 0.");
-                return;
-            }
-
-            if (OperatorName == null)
-            {
-                _dialogService.ShowWarning("Оператор не указан.");
-                return;
-            }
-
-            if (!_dialogService.ShowConfirmation("Вы уверены, что хотите выполнить приёмку товара? \n" +
-                $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
-                $"Производитель: {ReceiptItem.Manufacturer}\n" +
-                $"Количество: {ReceiptItem.OperationQuantity}\n" +
-                $"Cтеллаж: {SearchRacks} Ячейка: {SearchCell}"))
-                return;
-
-            await _lock.WaitAsync();
-
-            try
-            {
-                var receiptDto = new ServiceItemDTO(
-                    ReceiptItem.ComponentId,
-                    SelectedRack.Id,
-                    SelectedCell.Id,
-                    ReceiptItem.OperationQuantity);
-
-
-                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
-                await LoadWindow();
-
-                SelectedRack.IsHighlighted = false;
-                SelectedRack = null;
-                SearchRacks = string.Empty;
-                SelectedCell.IsHighlighted = false;
-                SelectedCell = null;
-                SearchCell = string.Empty;
-                ReceiptItem.OperationQuantity = 0;
-                CommentText = string.Empty;
-            }
-            catch (WrongValueExeption ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
+        // ???
         private void FilterItemsToReceipt()
         {
             if (string.IsNullOrWhiteSpace(SearchtemsToReceipt))
@@ -485,7 +428,6 @@ namespace WMS.Desktop.ViewModels
             IsRackPopupOpen = false;
         }
 
-
         private void LoadCellLayouts()
         {
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CellDescription.json");
@@ -525,7 +467,6 @@ namespace WMS.Desktop.ViewModels
             UpdateCellState();
         }
 
-        [RelayCommand]
         private void SelectCell(CellViewModel cell)
         {
             SelectedCell = cell;
@@ -536,6 +477,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        [RelayCommand]
         private void SetCellFromList(object obj)
         {
             if (obj is not CellViewModel cell)
@@ -631,11 +573,5 @@ namespace WMS.Desktop.ViewModels
                 target.Add(item);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

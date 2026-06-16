@@ -125,7 +125,7 @@
         <Setter Property="FontSize" Value="30"/>
         <Setter Property="Foreground" Value="White"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
     </Style>
 
     <Style x:Key="InputFieldName" TargetType="TextBlock">

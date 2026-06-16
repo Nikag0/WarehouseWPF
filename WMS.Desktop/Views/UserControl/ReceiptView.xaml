@@ -18,7 +18,7 @@
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
     </UserControl.Resources>
 
-    <Grid Margin="10,0"
+    <Grid Margin="5,0,0,0"
           Background="#36495b">
 
         <Grid.ColumnDefinitions>
@@ -37,11 +37,10 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Приём товаров" 
-                       Style="{StaticResource WindowNames}"
-                       Margin="0,0,0,10"/>
+                       Style="{StaticResource WindowNames}"/>
 
             <TextBox Grid.Row="1"
-                     Margin="0,0,0,10" 
+                     Margin="0,5,0,5" 
                      Tag="Поиск:"
                      Style="{StaticResource SearchTextBox}"
                      Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
@@ -165,7 +164,6 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ReceiptItem.ComponentId}" Value="00000000-0000-0000-0000-000000000000">
                                     <Setter Property="IsEnabled" Value="False"/>
-                                    <Setter Property="Background" Value="Gray"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -350,7 +348,8 @@
                              VerticalScrollBarVisibility="Auto"
                              Style="{StaticResource InputTextBoxStyle}"
                              Margin="5,5,0,5"
-                             FontSize="15"/>
+                             FontSize="15"
+                             />
 
                 </Grid>
 

@@ -1,4 +1,5 @@
-﻿using MvvmHelpers;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using MvvmHelpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,21 +9,13 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using WMS.Application.Services;
 using WMS.Desktop.Views;
+using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 
 namespace WMS.Desktop.ViewModels
 {
-    public class MainViewModel : BaseViewModel
+    public partial class MainViewModel : ObservableObject
     {
-        private object _currentView;
-        public object CurrentView
-        {
-            get => _currentView;
-            set
-            {
-                _currentView = value;
-                OnPropertyChanged();
-            }
-        }
+        [ObservableProperty] private object _currentView;
 
         public NotificationViewModel Notifications { get; }
         public ComponentsViewModel Components { get; }

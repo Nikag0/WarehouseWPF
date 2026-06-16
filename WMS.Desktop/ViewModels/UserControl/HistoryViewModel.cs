@@ -9,18 +9,16 @@ namespace WMS.Desktop.ViewModels
     public partial class HistoryViewModel : ObservableObject
     {
         private readonly IOperationRepository _operationRepository;
+
         private CancellationTokenSource? _cts;
 
-        [ObservableProperty]
-        private string _searchText = string.Empty;
+        [ObservableProperty] private string _searchText = string.Empty;
 
         public ObservableCollection<OperationHistoryDto> HistoryItems { get; } = new();
 
         public HistoryViewModel(IOperationRepository operationRepository)
         {
             _operationRepository = operationRepository;
-
-            _ = LoadHistoryAsync();
         }
 
         partial void OnSearchTextChanged(string value)
@@ -57,7 +55,7 @@ namespace WMS.Desktop.ViewModels
             });
         }
 
-        private async Task LoadHistoryAsync()
+        public async Task LoadDataAsync()
         {
             var data = await _operationRepository.GetFilteredHistoryAsync(SearchText);
 

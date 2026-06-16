@@ -37,14 +37,13 @@ namespace WMS.Desktop.ViewModels
 
         [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
 
-        //Изменения кончлились
-
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
+        public ObservableCollection<Operator> Operators { get; } = new();
         public ObservableCollection<RackViewModel> Racks { get; } = new();
-        public List<Cell> _cells { get; } = new();
         public ObservableCollection<CellViewModel> Cells{ get; } = new();
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
-        public ObservableCollection<Operator> Operators { get; } = new();
+        private Dictionary<string, RackLayout>? _rackLayoutDict;
+        private List<Cell> _cells { get; } = new();
 
         public RackViewModel SelectedRack 
         {
@@ -61,9 +60,6 @@ namespace WMS.Desktop.ViewModels
             }
         }
         private RackViewModel _selectedRack;
-
-        private readonly List<ViewItemDTO> _stocks = new();
-        private bool _isLoading;
 
         public IssueViewModel(
             StockService stockService,
@@ -88,10 +84,10 @@ namespace WMS.Desktop.ViewModels
                               .Where(x => x.OperationQuantity <= 0)
                               .ToList();
 
-            var sb = new StringBuilder();
 
             if (invalidItems.Any())
             {
+                var sb = new StringBuilder();
                 sb.AppendLine("Количество товаров для выдачи должно быть больше 0:");
                 sb.AppendLine();
 
@@ -111,18 +107,30 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            sb.AppendLine("Вы уверены, что хотите выполнить выдачу?");
-            sb.AppendLine();
-            sb.AppendLine("Список товаров:");
+            var itemsToReview = IssueItems.ToList();
 
-            foreach (var item in IssueItems)
+            var itemsToRemove = new List<ViewItemDTO>();
+
+            foreach (var item in itemsToReview)
             {
-                sb.AppendLine($"• {item.ComponentName} Количество: {item.OperationQuantity}");
-                sb.AppendLine();
+                var question = $"Получилось найти товар?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+
+                if (!_dialogService.ShowConfirmation(question))
+                {
+                    itemsToRemove.Add(item);
+                }
             }
 
-            if (!_dialogService.ShowConfirmation(sb.ToString()))
+            foreach (var item in itemsToRemove)
+            {
+                IssueItems.Remove(item);
+            }
+
+            if (!IssueItems.Any())
+            {
+                _dialogService.ShowInfo("Выдача отменена, так как ни один товар не был найден.");
                 return;
+            }
 
             try
             {
@@ -136,7 +144,6 @@ namespace WMS.Desktop.ViewModels
 
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
-                await LoadStocks();
                 CommentText = string.Empty;
                 IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
@@ -204,26 +211,24 @@ namespace WMS.Desktop.ViewModels
             IsIssue = false; 
         }
 
-        public async Task LoadWindow()
+        public async Task LoadDataAsync()
         {
-            if (_isLoading) return;
-
-            _isLoading = true;
-
             try
             {
-                await LoadStocks();
+                await Task.WhenAll(
+                    LoadRacksAsync(),
+                    LoadCellAsync(),
+                    LoadOperators()
+                );
 
-                await LoadRacks();
                 UpdateRackHighlights();
+                UpdateCellHighlights();
 
                 _cells.Clear();
                 var cells = await _cellService.GetAllAsync();
                 foreach (var item in cells)
                     _cells.Add(item);
 
-                LoadCellLayouts();
-                UpdateCellHighlights();
 
                 if (SelectedRack != null)
                 {
@@ -238,26 +243,89 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-            finally
-            {
-                _isLoading = false;
-            }
         }
 
-        private async Task LoadStocks()
+        private async Task LoadRacksAsync()
         {
-            _stocks.Clear();
-            _stocks.AddRange(await _stockService.GetAllAsync());
+            try
+            {
+                if (_rackLayoutDict == null)
+                {
+                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RackDescription.json");
+
+                    var jsonText = await File.ReadAllTextAsync(path);
+                    var layouts = JsonSerializer.Deserialize<List<RackLayout>>(jsonText);
+
+                    _rackLayoutDict = layouts?.ToDictionary(l => l.Code) ?? new();
+                }
+
+                var data = await _rackService.GetAllAsync();
+
+                var freshRacks = new List<RackViewModel>();
+                foreach (var rack in data)
+                {
+                    if (_rackLayoutDict.TryGetValue(rack.RackCode, out var layout))
+                    {
+                        freshRacks.Add(new RackViewModel(rack, layout));
+                    }
+                }
+
+                Racks.Clear();
+                foreach (var rackViewModel in freshRacks)
+                {
+                    Racks.Add(rackViewModel);
+                }
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex) when (ex is IOException or JsonException)
+            {
+                _dialogService.ShowWarning($"Ошибка загрузки стеллажей: {ex.Message}");
+            }
+
+        }
+
+        private async Task LoadCellAsync()
+        {
+            if (_cellLayouts != null) return;
+
+            try
+            {
+                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CellDescription.json");
+
+                var jsonText = await File.ReadAllTextAsync(path);
+
+                var raw = JsonSerializer.Deserialize<List<CellLayoutRoot>>(jsonText);
+                if (raw == null) return;
+
+                var tempDict = new Dictionary<RackType, List<CellLayout>>();
+
+                foreach (var item in raw)
+                {
+                    if (Enum.TryParse<RackType>(item.Type, ignoreCase: true, out var rackType))
+                    {
+                        tempDict[rackType] = item.Cells;
+                    }
+                }
+
+                _cellLayouts = tempDict;
+            }
+            catch (Exception ex) when (ex is IOException or JsonException)
+            {
+                _dialogService.ShowWarning($"Ошибка загрузки  ячеек: {ex.Message}");
+            }
         }
 
         public async Task LoadOperators()
         {
             try
             {
+                var data = await _operatorService.GetAllAsync();
                 Operators.Clear();
-                var items = await _operatorService.GetAllAsync();
-                foreach (var item in items)
-                    Operators.Add(item);
+                foreach (var @operator in data)
+                    Operators.Add(@operator);
             }
             catch (OverallDomainException ex)
             {
@@ -267,43 +335,6 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-            finally
-            {
-                _isLoading = false;
-            }
-        }
-
-        private async Task LoadRacks()
-        {
-            Racks.Clear();
-
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RackDescription.json");
-
-            var layouts = JsonSerializer.Deserialize<List<RackLayout>>(
-                File.ReadAllText(path));
-
-            var layoutDict = layouts.ToDictionary(l => l.Code);
-
-            var racksDb = await _rackService.GetAllAsync();
-
-            foreach (var rack in racksDb)
-            {
-                if (!layoutDict.TryGetValue(rack.RackCode, out var layout))
-                    continue;
-
-                Racks.Add(new RackViewModel(rack, layout));
-            }
-        }
-
-        private void LoadCellLayouts()
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CellDescription.json");
-
-            var raw = JsonSerializer.Deserialize<List<CellLayoutRoot>>(File.ReadAllText(path));
-
-            _cellLayouts = raw.ToDictionary(
-                x => Enum.Parse<RackType>(x.Type),
-                x => x.Cells);
         }
 
         private void UpdateRackHighlights()
@@ -335,20 +366,29 @@ namespace WMS.Desktop.ViewModels
             if (SelectedRack == null)
                 return;
 
-            Cells.Clear();
-
-            if (!_cellLayouts.TryGetValue(SelectedRack.Type, out var layout))
+            if (_cellLayouts == null || !_cellLayouts.TryGetValue(SelectedRack.Type, out var layout))
+            {
+                Cells.Clear();
                 return;
+            }
+
+            var layoutDict = layout.ToDictionary(l => l.Code);
+            var freshCells = new List<CellViewModel>();
 
             var rackCells = _cells.Where(c => c.RackId == SelectedRack.Id);
 
             foreach (var cell in rackCells)
             {
-                var cellLayout = layout.FirstOrDefault(l => l.Code == cell.CellCode);
-                if (cellLayout == null)
-                    continue;
+                if (layoutDict.TryGetValue(cell.CellCode, out var cellLayout))
+                {
+                    freshCells.Add(new CellViewModel(cell, cellLayout));
+                }
+            }
 
-                Cells.Add(new CellViewModel(cell, cellLayout));
+            Cells.Clear();
+            foreach (var cellViewModel in freshCells)
+            {
+                Cells.Add(cellViewModel);
             }
 
             UpdateCellHighlights();

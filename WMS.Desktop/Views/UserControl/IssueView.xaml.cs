@@ -35,8 +35,7 @@ namespace WMS.Desktop.Views
         {
             if (DataContext is IssueViewModel viewModel)
             {
-                await viewModel.LoadWindow();
-                await viewModel.LoadOperators();
+                await viewModel.LoadDataAsync();
             }
         }
 

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
@@ -23,6 +24,15 @@ namespace WMS.Desktop.Views
         public HistoryView()
         {
             InitializeComponent();
+            this.Loaded += HistoryViewLoaded;
+        }
+
+        private async void HistoryViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is HistoryViewModel viewModel)
+            {
+                await viewModel.LoadDataAsync();
+            }
         }
     }
 }
