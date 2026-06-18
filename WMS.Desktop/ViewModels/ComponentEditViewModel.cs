@@ -81,7 +81,7 @@ namespace WMS.Desktop.ViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowErrror($"Критическая ошибка сохранения: {ex.Message}", "Ошибка системы");
+                _dialogService.ShowError($"Критическая ошибка сохранения: {ex.Message}", "Ошибка системы");
             }
         }
     }

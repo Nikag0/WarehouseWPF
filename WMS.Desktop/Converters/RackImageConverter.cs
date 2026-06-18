@@ -14,9 +14,9 @@ namespace WMS.Desktop.Converters
         {
             return value switch
             {
-                RackType.RackType1 => "/Images/RackType1.jpg",
-                RackType.RackType2 => "/Images/RackType2.jpg",
-                RackType.RackType3=> "/Images/RackType3.jpg",
+                RackType.R1 => "/Images/RackType1.jpg",
+                RackType.R2 => "/Images/RackType2.jpg",
+                RackType.R3=> "/Images/RackType3.jpg",
                 _ => null
             };
         }

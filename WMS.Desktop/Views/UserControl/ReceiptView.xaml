@@ -376,7 +376,7 @@
 
             <local:RacksGridControl x:Name="RacksGrid"
                                     Grid.Row="0"
-                                    Racks="{Binding Racks}" />
+                                    Racks="{Binding RacksGrid}" />
 
             <Grid Grid.Row="1">
 
@@ -386,7 +386,7 @@
                 </Grid.ColumnDefinitions>
 
                 <local:CellsGridControl Grid.Column="0"
-                                        Cells="{Binding Cells}"
+                                        Cells="{Binding CellsGrid}"
                                         RackType="{Binding SelectedRack.Type, Mode=OneWay, FallbackValue=RackType1, TargetNullValue=RackType1}"
                                         SelectedCell="{Binding SelectedCell}"
                                         Margin="0,0,10,10"/>

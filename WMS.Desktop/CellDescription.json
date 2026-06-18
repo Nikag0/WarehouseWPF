@@ -1,6 +1,6 @@
 [
   {
-    "Type": "RackType1",
+    "Type": "R1",
     "Cells": [
       {
         "Code": "1-1",
@@ -138,7 +138,7 @@
     ]
   },
   {
-    "Type": "RackType2",
+    "Type": "R2",
     "Cells": [
       {
         "Code": "1-1",
@@ -318,7 +318,7 @@
     ]
   },
   {
-    "Type": "RackType3",
+    "Type": "R3",
     "Cells": [
       {
         "Code": "1-1",

@@ -20,7 +20,7 @@ namespace WMS.Desktop
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-        public void ShowErrror(string message, string title = "Ошибка")
+        public void ShowError(string message, string title = "Ошибка")
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }

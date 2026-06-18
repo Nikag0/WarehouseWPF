@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using WMS.Application.WarehouseVisualization;
 using WMS.Domain;
 
 namespace WMS.Desktop.ViewModels

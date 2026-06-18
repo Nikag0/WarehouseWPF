@@ -58,7 +58,7 @@ namespace WMS.Desktop.Views
                 nameof(RackType),
                 typeof(RackType),
                 typeof(CellsGridControl),
-                new PropertyMetadata(RackType.RackType1));
+                new PropertyMetadata(RackType.R1));
 
         public static readonly DependencyProperty SelectedCellProperty =
             DependencyProperty.Register(

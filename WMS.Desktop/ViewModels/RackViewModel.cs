@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WMS.Domain;
+using WMS.Application.WarehouseVisualization;
 
 namespace WMS.Desktop.ViewModels
 {

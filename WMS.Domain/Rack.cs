@@ -11,6 +11,7 @@ namespace WMS.Domain
         public Guid Id { get; private set; }
         public int Column { get; private set; }
         public int Row { get; private set; }
+        public string Type { get; private set; }
 
         private readonly List<Cell> _cells = new();
         public IReadOnlyCollection<Cell> Cells => _cells;

@@ -41,7 +41,7 @@ namespace WMS.Desktop.ViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowErrror($"Критический сбой при загрузке данных: {ex.Message}");
+                _dialogService.ShowError($"Критический сбой при загрузке данных: {ex.Message}");
             }
         }
 

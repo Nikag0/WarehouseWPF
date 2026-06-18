@@ -23,6 +23,9 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.Row)
                 .IsRequired();
 
+            builder.Property(x => x.Type)
+               .IsRequired();
+
             builder.HasIndex(x => new { x.Column, x.Row })
                 .IsUnique();
 

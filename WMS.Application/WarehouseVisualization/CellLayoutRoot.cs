@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WMS.Desktop
+namespace WMS.Application.WarehouseVisualization
 {
     public class CellLayoutRoot
     {

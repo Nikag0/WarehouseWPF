@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using WMS.Application.Abstractions;
+using WMS.Application.WarehouseVisualization;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
@@ -39,7 +39,7 @@ namespace WMS.Desktop.ViewModels
 
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
-        public ObservableCollection<RackViewModel> Racks { get; } = new();
+        public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
         public ObservableCollection<CellViewModel> Cells{ get; } = new();
         private Dictionary<RackType, List<CellLayout>> _cellLayouts;
         private Dictionary<string, RackLayout>? _rackLayoutDict;
@@ -53,7 +53,7 @@ namespace WMS.Desktop.ViewModels
                 _selectedRack = value;
                 OnPropertyChanged();
 
-                foreach (var rack in Racks)
+                foreach (var rack in RacksGrid)
                     rack.IsSelected = rack == value;
 
                 _ = LoadCellsForSelectedRack(); 
@@ -216,8 +216,8 @@ namespace WMS.Desktop.ViewModels
             try
             {
                 await Task.WhenAll(
-                    LoadRacksAsync(),
-                    LoadCellAsync(),
+                    CreateRacksGridAsync(),
+                    CreateCellGridAsync(),
                     LoadOperators()
                 );
 
@@ -232,7 +232,7 @@ namespace WMS.Desktop.ViewModels
 
                 if (SelectedRack != null)
                 {
-                    SelectedRack = Racks.FirstOrDefault(r => r.Id == SelectedRack.Id);
+                    SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == SelectedRack.Id);
                 }
             }
             catch (OverallDomainException ex)
@@ -245,49 +245,26 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private async Task LoadRacksAsync()
+        private async Task CreateRacksGridAsync()
         {
             try
             {
-                if (_rackLayoutDict == null)
+                var racksData = await _rackService.GetRacksWithLayoutsAsync();
+
+                RacksGrid.Clear();
+
+                foreach (var item in racksData)
                 {
-                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RackDescription.json");
-
-                    var jsonText = await File.ReadAllTextAsync(path);
-                    var layouts = JsonSerializer.Deserialize<List<RackLayout>>(jsonText);
-
-                    _rackLayoutDict = layouts?.ToDictionary(l => l.Code) ?? new();
-                }
-
-                var data = await _rackService.GetAllAsync();
-
-                var freshRacks = new List<RackViewModel>();
-                foreach (var rack in data)
-                {
-                    if (_rackLayoutDict.TryGetValue(rack.RackCode, out var layout))
-                    {
-                        freshRacks.Add(new RackViewModel(rack, layout));
-                    }
-                }
-
-                Racks.Clear();
-                foreach (var rackViewModel in freshRacks)
-                {
-                    Racks.Add(rackViewModel);
+                    RacksGrid.Add(new RackViewModel(item.Rack, item.Layout));
                 }
             }
-            catch (OverallDomainException ex)
+            catch (FileNotFoundException ex)
             {
-                _dialogService.ShowWarning(ex.Message);
+                _dialogService.ShowError($"{ex.Message}");
             }
-            catch (Exception ex) when (ex is IOException or JsonException)
-            {
-                _dialogService.ShowWarning($"Ошибка загрузки стеллажей: {ex.Message}");
-            }
-
         }
 
-        private async Task LoadCellAsync()
+        private async Task CreateCellGridAsync()
         {
             if (_cellLayouts != null) return;
 
@@ -343,7 +320,7 @@ namespace WMS.Desktop.ViewModels
                 .Select(x => x.RackId)
                 .ToHashSet();
 
-            foreach (var rack in Racks)
+            foreach (var rack in RacksGrid)
             {
                 rack.IsHighlighted = rackIds.Contains(rack.Id);
             }
