@@ -216,7 +216,7 @@
                                             <StackPanel Orientation="Horizontal" Margin="5">
                                                 <TextBlock Text="{Binding CodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
-                                                        Command="{Binding DataContext.SetRackFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                        Command="{Binding DataContext.SelectRackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}">
                                                 </Button>
                                             </StackPanel>
@@ -265,7 +265,7 @@
                                             <StackPanel Orientation="Horizontal" Margin="5">
                                                 <TextBlock Text="{Binding CodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
-                                                    Command="{Binding DataContext.SetCellFromListCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                    Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
@@ -387,7 +387,7 @@
 
                 <local:CellsGridControl Grid.Column="0"
                                         Cells="{Binding CellsGrid}"
-                                        RackType="{Binding SelectedRack.Type, Mode=OneWay, FallbackValue=RackType1, TargetNullValue=RackType1}"
+                                        RackType="{Binding SelectedRack.Type, Mode=OneWay, FallbackValue=R1, TargetNullValue=R1}"
                                         SelectedCell="{Binding SelectedCell}"
                                         Margin="0,0,10,10"/>
 

@@ -14,7 +14,6 @@ using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Xceed.Wpf.AvalonDock.Layout;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace WMS.Desktop.ViewModels
 {
@@ -34,17 +33,125 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private Operator _operatorName;
         [ObservableProperty] private string _commentText;
 
-        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
+        public ObservableCollection<Operator> Operators { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new(); // отвечает за ui отображение сетки стеллажей
         public ObservableCollection<CellViewModel> CellsGrid { get; } = new(); // отвечает за ui отображение сетки ячеек
 
-        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new();
+        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
+        public ObservableCollection<RackViewModel> FilteredRacks { get; } = new(); // выпадающий список при вводе стеллажа
+        public ObservableCollection<CellViewModel> FilteredCells { get; } = new(); // выпадающий список при вводе ячейки
 
-        // Конец изменений
-        private readonly List<ViewItemDTO> _components = new();
+        // отвечает за ручной поиск стеллажа
+        public string? SearchRacks
+        {
+            get => _searchRacks;
+            set
+            {
+                if (SetProperty(ref _searchRacks, value))
+                {
+                    FilterRacks(value);
+
+                    var autoSelected = RacksGrid.FirstOrDefault(x => x.CodeDisplay == value);
+                    if (autoSelected != null)
+                    {
+                        SelectedRack = autoSelected;
+                    }
+                    else
+                    {
+                        SelectedRack = null;
+                    }
+                }
+            }
+        }
+        private string _searchRacks;
+
+        public RackViewModel SelectedRack
+        {
+            get => _selectedRack;
+            set
+            {
+                var previousRack = _selectedRack;
+
+                if (SetProperty(ref _selectedRack, value))
+                {
+                    // Подсветка самого стеллажа
+                    if (previousRack != null)
+                        previousRack.IsHighlighted = false;
+
+                    if (value != null)
+                        value.IsHighlighted = true;
+
+                    // Синхронизируем текст
+                    if (value != null || string.IsNullOrEmpty(_searchRacks))
+                    {
+                        _searchRacks = value?.CodeDisplay ?? string.Empty;
+                        OnPropertyChanged(nameof(SearchRacks));
+                        FilterRacks(_searchRacks);
+                    }
+
+                    SelectCellsForRack();   // Загрузили ячейки в CellsGrid
+                    FilterItemInRacks();    // Отфильтровали остатки товаров в FilteredItemsInRacks
+                    UpdateCellState();      // Подсветили ячейки с товаром
+                }
+            }
+        }
+        private RackViewModel _selectedRack;
+
+        // отвечает за ручной поиск ячейки
+        public string SearchCell
+        {
+            get => _searchCell;
+            set
+            {
+                if (SetProperty(ref _searchCell, value))
+                {
+                    FilterCells(value);
+
+                    var autoSelected = CellsGrid.FirstOrDefault(x => x.CodeDisplay == value);
+                    if (autoSelected != null)
+                    {
+                        SelectedCell = autoSelected;
+                    }
+                    else
+                    {
+                        SelectedCell = null;
+                    }
+                }
+            }
+        }
+        private string _searchCell;
+
+        public CellViewModel SelectedCell
+        {
+            get => _selectedCell;
+            set
+            {
+                var previousCell = _selectedCell;
+
+                if (SetProperty(ref _selectedCell, value))
+                {
+                    if (previousCell != null)
+                        previousCell.IsHighlighted = false;
+
+                    if (value != null)
+                        value.IsHighlighted = true;
+
+                    if (value != null || string.IsNullOrEmpty(_searchCell))
+                    {
+                        _searchCell = value?.CodeDisplay ?? string.Empty;
+                        OnPropertyChanged(nameof(SearchCell));
+                        FilterCells(_searchCell);
+                    }
+                }
+            }
+        }
+        private CellViewModel _selectedCell;
+
+        // Ниже не переработанные свойства
+        private readonly List<ViewItemDTO> _components = new(); 
         private readonly List<ViewItemDTO> _stocks = new();
 
-        // ???
+        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
         public ObservableCollection<ViewItemDTO> FilteredItemsToReceipt { get; } = new();
         public string SearchtemsToReceipt
         {
@@ -59,75 +166,6 @@ namespace WMS.Desktop.ViewModels
         private string _searchtemsToIssue;
 
         public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
-
-        public RackViewModel SelectedRack
-        {
-            get => _selectedRack;
-            set
-            {
-                _selectedRack = value;
-                OnPropertyChanged();
-
-                if (value != null)
-                    ReceiptItem.RackId = value.Id;
-
-                foreach (var r in RacksGrid)
-                    r.IsHighlighted = r == value;
-
-                _ = SelectCellsForRack();
-            }
-        }
-        private RackViewModel _selectedRack;
-        public string? SearchRacks
-        {
-            get => _searchRacks;
-            set
-            {
-                _searchRacks = value;
-                OnPropertyChanged();
-                FilterRacks();
-                FilterItemInRacks();
-                AutomaticRackSelection();
-            }
-        }
-        private string _searchRacks;
-        public ObservableCollection<RackViewModel> FilteredRacks { get; } = new();
-
-        public CellViewModel SelectedCell
-        {
-            get => _selectedCell;
-            set
-            {
-                _selectedCell = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CellsGrid));
-
-                if (value != null)
-                    ReceiptItem.CellId = value.Id;
-
-                foreach (var cell in CellsGrid)
-                {
-                    cell.IsHighlighted = _selectedCell != null && cell.Id == _selectedCell.Id;
-                }
-            }
-        }
-        private CellViewModel _selectedCell;
-        public string SearchCell
-        {
-            get => _searchCell;
-            set
-            {
-                _searchCell = value;
-                OnPropertyChanged();
-                FilterCells();
-                AutomaticCellSelection();
-            }
-        }
-        private string _searchCell;
-
-        public ObservableCollection<CellViewModel> FilteredCells { get; } = new();
-
-        public ObservableCollection<Operator> Operators { get; } = new();
 
         public ObservableCollection<ViewItemDTO> FilteredItemsInRacks { get; } = new();
 
@@ -232,7 +270,7 @@ namespace WMS.Desktop.ViewModels
                 _components.Clear();
                 _components.AddRange(await _receiptService.GetAllComponentsAsync());
 
-                await LoadStocks();
+                await LoadStocksAsync();
                 ReplaceCollection(Stocks, _stocks);
 
                 await CreateRacksGridAsync();
@@ -240,10 +278,9 @@ namespace WMS.Desktop.ViewModels
 
                 await LoadCellsLookupAsync();
 
-                await LoadOperators();
+                await LoadOperatorsAsync();
 
                 FilterItemsToReceipt();
-                FilterCells();
                 UpdateHighlights();
             }
             catch (OverallDomainException ex)
@@ -256,13 +293,13 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private async Task LoadStocks()
+        private async Task LoadStocksAsync()
         {
             _stocks.Clear();
             _stocks.AddRange(await _stockService.GetAllAsync());
         }
 
-        public async Task LoadOperators()
+        public async Task LoadOperatorsAsync()
         {
             try
             {
@@ -318,7 +355,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private async Task SelectCellsForRack()
+        private void SelectCellsForRack()
         {
             if (SelectedRack == null)
                 return;
@@ -332,11 +369,142 @@ namespace WMS.Desktop.ViewModels
                     CellsGrid.Add(cellVm);
                 }
             }
-
-            UpdateCellState();
         }
 
-        // ???
+        private void FilterRacks(string? searchText)
+        {
+            var query = RacksGrid.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var text = searchText.ToLower();
+                query = query.Where(c => c.CodeDisplay != null && c.CodeDisplay.ToLower().Contains(text));
+            }
+
+            var sortedQuery = query
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
+
+            ReplaceCollection(FilteredRacks, sortedQuery);
+        }
+
+        [RelayCommand]
+        private void SelectRack(RackViewModel? rack)
+        {
+            SelectedRack = rack;
+            IsRackPopupOpen = false;
+        }
+
+        private void FilterItemInRacks()
+        {
+            var query = _stocks.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(SearchRacks))
+            {
+                var text = SearchRacks.ToLower();
+
+                query = query.Where(c =>
+                        c.RackCodeDisplay != null
+                        && c.RackCodeDisplay.ToLower().Contains(text));
+
+                var sortedQuery = query
+                                 .OrderByDescending(r => r.ComponentName);
+
+                ReplaceCollection(FilteredItemsInRacks, sortedQuery);
+            }
+            else
+                FilteredItemsInRacks.Clear();
+        }
+
+        private void UpdateCellState()
+        {
+            var occupiedCellIds = FilteredItemsInRacks
+                .Select(x => x.CellId)
+                .Distinct()
+                .ToHashSet();
+
+            foreach (var cell in CellsGrid)
+            {
+                cell.HasItemsInCell = occupiedCellIds.Contains(cell.Id);
+            }
+        }
+
+        private void FilterCells(string? searchText)
+        {
+            if (SelectedRack == null)
+            {
+                FilteredCells.Clear();
+                return;
+            }
+
+            var query = CellsGrid.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var text = searchText.ToLower();
+                query = query.Where(c => c.CodeDisplay != null && c.CodeDisplay.ToLower().Contains(text));
+            }
+
+            var sortedQuery = query
+                             .OrderByDescending(r => r.Column)
+                             .ThenByDescending(r => r.Row);
+
+            ReplaceCollection(FilteredCells, sortedQuery);
+        }
+
+        [RelayCommand]
+        private void SelectCell(CellViewModel cell)
+        {
+            SelectedCell = cell;
+            IsCellPopupOpen = false;
+        }
+
+        [RelayCommand] // можно подумать над оптимизацией
+        private void AddItemToReceipt(object obj)
+        {
+            try
+            {
+                if (obj is not ViewItemDTO stock)
+                    return;
+
+                ReceiptItem.ComponentId = stock.ComponentId;
+                ReceiptItem.Article = stock.Article;
+                ReceiptItem.ComponentName = stock.ComponentName;
+                ReceiptItem.Manufacturer = stock.Manufacturer;
+
+                if (stock.RackId != Guid.Empty)
+                {
+                    SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == stock.RackId);
+                }
+                else
+                {
+                    SelectedRack = null;
+                    SearchRacks = string.Empty;
+                    SelectedCell = null;
+                    SearchCell = string.Empty;
+                    return;
+                }
+
+                SelectCellsForRack();
+
+                if (stock.CellId != Guid.Empty)
+                {
+                    SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == stock.CellId);
+                    SearchCell = SelectedCell?.CodeDisplay ?? string.Empty;
+                }
+
+            }
+            catch (OverallDomainException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Ошибка при выборе элемента к выдаче: {ex.Message}");
+            }
+        }
+
+        // ниже не переработанные методы
         private void FilterItemsToReceipt()
         {
             if (string.IsNullOrWhiteSpace(SearchtemsToReceipt))
@@ -368,193 +536,6 @@ namespace WMS.Desktop.ViewModels
                 (c.ComponentName?.Contains(SearchtemsToReceipt, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (c.Manufacturer?.Contains(SearchtemsToReceipt, StringComparison.OrdinalIgnoreCase) ?? false);
         }
-
-        [RelayCommand]
-        private async void SelectRack(RackViewModel rack)
-        {
-            if (ReceiptItem.Article == null) return;
-
-            SelectedRack = rack;
-            SearchRacks = rack.CodeDisplay;
-        }
-
-        private void FilterRacks()
-        {
-            var query = RacksGrid.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchRacks))
-            {
-                var text = SearchRacks.ToLower();
-
-                query = query.Where(c =>
-                        c.CodeDisplay != null
-                        && c.CodeDisplay.ToLower().Contains(text));
-            }
-
-            var sortedQuery = query
-                             .OrderByDescending(r => r.Column)
-                             .ThenByDescending(r => r.Row);
-
-            ReplaceCollection(FilteredRacks, sortedQuery);
-        }  
-        
-        private void FilterItemInRacks()
-        {
-            var query = _stocks.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchRacks))
-            {
-                var text = SearchRacks.ToLower();
-
-                query = query.Where(c =>
-                        c.RackCodeDisplay != null
-                        && c.RackCodeDisplay.ToLower().Contains(text));
-
-                var sortedQuery = query
-                                 .OrderByDescending(r => r.ComponentName);
-
-                ReplaceCollection(FilteredItemsInRacks, sortedQuery);
-            }
-            else
-                FilteredItemsInRacks.Clear();
-
-            UpdateCellState();
-        }
-
-        private void UpdateCellState()
-        {
-            foreach (var cell in CellsGrid)
-            {
-                cell.HasItemsInCell = false;
-            }
-
-            var occupiedCellIds = FilteredItemsInRacks
-                .Select(x => x.CellId)
-                .Distinct()
-                .ToHashSet();
-
-            foreach (var cell in CellsGrid)
-            {
-                cell.HasItemsInCell = occupiedCellIds.Contains(cell.Id);
-            }
-        }
-
-        private void AutomaticRackSelection()
-        {
-            var rack = RacksGrid.FirstOrDefault(x => x.CodeDisplay == SearchRacks);
-
-            SelectedRack = rack;
-        }
-
-        [RelayCommand]
-        private void SetRackFromList(object obj)
-        {
-            if (obj is not RackViewModel rack)
-                return;
-
-            SelectedRack = rack;
-            SearchRacks = rack.Code;
-            IsRackPopupOpen = false;
-        }
-
-        [RelayCommand]
-        private void SelectCell(CellViewModel cell)
-        {
-            SelectedCell = cell;
-
-            if (cell != null)
-            {
-                SearchCell = cell.CodeDisplay;
-            }
-        }
-
-        [RelayCommand]
-        private void SetCellFromList(object obj)
-        {
-            if (obj is not CellViewModel cell)
-                return;
-
-            SelectedCell = cell;
-            SearchCell = cell.CodeDisplay;
-            IsCellPopupOpen = false;
-        }
-
-        private void FilterCells()
-        {
-            if (SelectedRack == null) return;
-
-            var query = CellsGrid.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchCell))
-            {
-                var text = SearchCell.ToLower();
-
-                query = query.Where(c =>
-                        c.CodeDisplay != null
-                        && c.CodeDisplay.ToLower().Contains(text));
-            }
-
-            var sortedQuery = query
-                             .OrderByDescending(r => r.Column)
-                             .ThenByDescending(r => r.Row);
-
-            ReplaceCollection(FilteredCells, sortedQuery);
-        }
-
-        private void AutomaticCellSelection()
-        {
-            var cell = CellsGrid.FirstOrDefault(x => x.CodeDisplay == SearchCell);
-
-            SelectedCell = cell;
-        }
-
-        [RelayCommand]
-        private void AddItemToReceipt(object obj)
-        {
-            try
-            {
-                if (obj is not ViewItemDTO stock)
-                    return;
-
-                ReceiptItem.ComponentId = stock.ComponentId;
-                ReceiptItem.Article = stock.Article;
-                ReceiptItem.ComponentName = stock.ComponentName;
-                ReceiptItem.Manufacturer = stock.Manufacturer;
-
-                if (stock.RackId != Guid.Empty)
-                {
-                    SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == stock.RackId);
-                    SearchRacks = SelectedRack?.CodeDisplay ?? string.Empty;
-                }
-                else
-                {
-                    SelectedRack = null;
-                    SearchRacks = string.Empty;
-                    SelectedCell = null;
-                    SearchCell = string.Empty;
-                    return;
-                }
-
-                SelectCellsForRack();
-
-                if (stock.CellId != Guid.Empty)
-                {
-                    SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == stock.CellId);
-                    SearchCell = SelectedCell?.CodeDisplay ?? string.Empty;
-                }
-
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // Для непредвиденных системных ошибок лучше использовать ShowError
-                _dialogService.ShowError($"Ошибка при выборе элемента к выдаче: {ex.Message}");
-            }
-        }
-
 
         private void UpdateHighlights()
         {

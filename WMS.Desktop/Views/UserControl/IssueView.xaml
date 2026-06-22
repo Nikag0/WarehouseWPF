@@ -295,7 +295,7 @@
                                     SelectedRack="{Binding SelectedRack}"/>
 
             <local:CellsGridControl Grid.Row="1"
-                                    Cells="{Binding Cells}"
+                                    Cells="{Binding CellsGrid}"
                                     RackType="{Binding SelectedRack.Type}" />
 
         </Grid>

@@ -69,10 +69,8 @@ namespace WMS.Application.Services
                 PropertyNameCaseInsensitive = true
             };
 
-            // Десериализуем иерархическую структуру (свойства Type и Cells)
             var layouts = JsonSerializer.Deserialize<List<CellLayoutRoot>>(jsonText, options) ?? new();
 
-            // Ключ = "RackType1", Значение = Список макетов для этого типа
             var layoutDict = layouts.ToDictionary(
                 x => x.Type,
                 x => x.Cells);
@@ -83,23 +81,26 @@ namespace WMS.Application.Services
             foreach (var cell in cellsDb)
             {
                 if (cell.Rack == null)
+                {
                     continue;
+                }
 
-                // 1. Извлекаем тип стеллажа (например, "RackType1")
-                var rackType = cell.Rack.RackCode;
+                var rackType = cell.Rack.Type;
 
-                // 2. Ищем массив макетов ячеек для "RackType1"
                 if (!layoutDict.TryGetValue(rackType, out var cellLayoutsForType))
+                {
                     continue;
+                }
 
-                // 3. Ищем конкретный макет по коду ячейки (например, "1-1")
-                // cell.CellCode в вашей БД должен содержать строки вида "1-1", "1-2"
                 var targetLayout = cellLayoutsForType.FirstOrDefault(l => l.Code == cell.CellCode);
                 if (targetLayout == null)
+                {
                     continue;
+                }
 
                 result.Add((cell, targetLayout));
             }
+
 
             return result;
         }

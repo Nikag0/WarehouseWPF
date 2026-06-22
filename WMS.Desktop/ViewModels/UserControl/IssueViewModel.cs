@@ -40,10 +40,8 @@ namespace WMS.Desktop.ViewModels
         public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
-        public ObservableCollection<CellViewModel> Cells{ get; } = new();
-        private Dictionary<RackType, List<CellLayout>> _cellLayouts;
-        private Dictionary<string, RackLayout>? _rackLayoutDict;
-        private List<Cell> _cells { get; } = new();
+        public ObservableCollection<CellViewModel> CellsGrid{ get; } = new();
+        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
 
         public RackViewModel SelectedRack 
         {
@@ -56,7 +54,7 @@ namespace WMS.Desktop.ViewModels
                 foreach (var rack in RacksGrid)
                     rack.IsSelected = rack == value;
 
-                _ = LoadCellsForSelectedRack(); 
+                _ = SelectCellsForRack(); 
             }
         }
         private RackViewModel _selectedRack;
@@ -217,18 +215,12 @@ namespace WMS.Desktop.ViewModels
             {
                 await Task.WhenAll(
                     CreateRacksGridAsync(),
-                    CreateCellGridAsync(),
+                    LoadCellsLookupAsync(),
                     LoadOperators()
                 );
 
                 UpdateRackHighlights();
                 UpdateCellHighlights();
-
-                _cells.Clear();
-                var cells = await _cellService.GetAllAsync();
-                foreach (var item in cells)
-                    _cells.Add(item);
-
 
                 if (SelectedRack != null)
                 {
@@ -264,35 +256,40 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private async Task CreateCellGridAsync()
+        private async Task LoadCellsLookupAsync()
         {
-            if (_cellLayouts != null) return;
-
             try
             {
-                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CellDescription.json");
+                var allCellsWithLayouts = await _cellService.GetCellsWithLayoutsAsync();
 
-                var jsonText = await File.ReadAllTextAsync(path);
-
-                var raw = JsonSerializer.Deserialize<List<CellLayoutRoot>>(jsonText);
-                if (raw == null) return;
-
-                var tempDict = new Dictionary<RackType, List<CellLayout>>();
-
-                foreach (var item in raw)
-                {
-                    if (Enum.TryParse<RackType>(item.Type, ignoreCase: true, out var rackType))
-                    {
-                        tempDict[rackType] = item.Cells;
-                    }
-                }
-
-                _cellLayouts = tempDict;
+                _groupedCellsCache = allCellsWithLayouts.GroupBy(pair => pair.cell.RackId)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.Select(pair => new CellViewModel(pair.cell, pair.layout)).ToList()
+                    );
             }
-            catch (Exception ex) when (ex is IOException or JsonException)
+            catch (FileNotFoundException ex)
             {
-                _dialogService.ShowWarning($"Ошибка загрузки  ячеек: {ex.Message}");
+                _dialogService.ShowError($"{ex.Message}");
             }
+        }
+
+        private async Task SelectCellsForRack()
+        {
+            if (SelectedRack == null)
+                return;
+
+            CellsGrid.Clear();
+
+            if (_groupedCellsCache.TryGetValue(SelectedRack.Id, out var cachedCells))
+            {
+                foreach (var cellVm in cachedCells)
+                {
+                    CellsGrid.Add(cellVm);
+                }
+            }
+
+            UpdateCellHighlights();
         }
 
         public async Task LoadOperators()
@@ -332,43 +329,10 @@ namespace WMS.Desktop.ViewModels
                 .Select(x => x.CellId)
                 .ToHashSet();
 
-            foreach (var cell in Cells)
+            foreach (var cell in CellsGrid)
             {
                 cell.IsHighlighted = cellIds.Contains(cell.Id);
             }
-        }
-
-        private async Task LoadCellsForSelectedRack()
-        {
-            if (SelectedRack == null)
-                return;
-
-            if (_cellLayouts == null || !_cellLayouts.TryGetValue(SelectedRack.Type, out var layout))
-            {
-                Cells.Clear();
-                return;
-            }
-
-            var layoutDict = layout.ToDictionary(l => l.Code);
-            var freshCells = new List<CellViewModel>();
-
-            var rackCells = _cells.Where(c => c.RackId == SelectedRack.Id);
-
-            foreach (var cell in rackCells)
-            {
-                if (layoutDict.TryGetValue(cell.CellCode, out var cellLayout))
-                {
-                    freshCells.Add(new CellViewModel(cell, cellLayout));
-                }
-            }
-
-            Cells.Clear();
-            foreach (var cellViewModel in freshCells)
-            {
-                Cells.Add(cellViewModel);
-            }
-
-            UpdateCellHighlights();
         }
 
         partial void OnSearchTextChanged(string value)

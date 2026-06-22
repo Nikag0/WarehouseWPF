@@ -53,6 +53,7 @@ namespace WMS.Application.Services
                 if (!layoutDict.TryGetValue(rack.RackCode, out var layout))
                     continue; // Можно выбрасывать предупреждение, если не удалось найти макет для какого-то стеллажа.
 
+                var cell = rack.Cells.Count();
                 result.Add((rack, layout));
             }
 
