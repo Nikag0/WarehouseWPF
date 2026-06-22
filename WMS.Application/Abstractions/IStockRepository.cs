@@ -17,5 +17,6 @@ namespace WMS.Application.Abstractions
         Task RemoveAsync(Stock stock);
         Task<bool> HasStockWithQuantityAsync(Guid componentId);
         Task<List<Stock>> GetFilteredStockAsync(string searchText, int maxCount);
+        Task<IEnumerable<Stock>> GetStocksInRackAsync(Guid rackId);
     }
 }

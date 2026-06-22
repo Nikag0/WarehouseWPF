@@ -49,7 +49,7 @@
                          PreviewKeyDown="SearchToIssue_PreviewKeyDown"
                          Grid.Column="0"
                          Tag="Поиск:"
-                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding SearchStock, UpdateSourceTrigger=PropertyChanged}"
                          IsTabStop="False">
 
                     <TextBox.Style>

@@ -40,6 +40,16 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Stock>> GetStocksInRackAsync(Guid rackId)
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Stocks
+                .AsNoTracking()
+                .Where(s => s.RackId == rackId)
+                .ToListAsync();
+        }
+
         public async Task<Stock?> GetAsync(Guid rackId, Guid componentId, Guid cellId)
         {
             using var db = _factory.CreateDbContext();

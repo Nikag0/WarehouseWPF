@@ -51,5 +51,30 @@ namespace WMS.Infrastructure
             db.Entry(component).Property(c => c.IsDeleted).IsModified = true;
             await db.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Component>> GetFilteredComponentAsync(string searchText, int maxCount)
+        {
+            using var db = _factory.CreateDbContext();
+
+            IQueryable<Component> query = db.Components;
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var text = searchText.Trim();
+
+                query = query.Where(s =>
+                    (s.Article != null && s.Article.ToLower().Contains(text)) ||
+                    (s.Name != null && s.Name.ToLower().Contains(text)) ||
+                    (s.Manufacturer != null && s.Manufacturer.ToLower().Contains(text))
+                );
+            }
+
+            var result = await query
+                .OrderBy(s => s.Name)
+                .Take(maxCount)
+                .ToListAsync();
+
+            return result;
+        }
     }
 }

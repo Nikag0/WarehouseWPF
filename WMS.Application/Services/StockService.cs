@@ -31,14 +31,21 @@ namespace WMS.Application.Services
         {
             List<Stock> stocks = await _stockRepo.GetRawStockDataAsync();
 
-            return stocks.Select(MapToViewItemDto).ToList();
+            return stocks.Select(MappingExtensions.ToViewItemDto).ToList();
         }
 
         public async Task<List<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount)
         {
             List<Stock> stocks = await _stockRepo.GetFilteredStockAsync(searchText, maxCount);
 
-            return stocks.Select(MapToViewItemDto).ToList();
+            return stocks.Select(MappingExtensions.ToViewItemDto).ToList();
+        }
+
+        public async Task<IEnumerable<ViewItemDTO>> GetStocksInRackAsync(Guid rackId)
+        {
+            var stocks = await _stockRepo.GetStocksInRackAsync(rackId);
+
+            return EnumerateItems(stocks);
         }
 
         public async Task<Stock?> GetAsync(Guid  rackId, Guid componentId, Guid cellId)
@@ -60,22 +67,12 @@ namespace WMS.Application.Services
             await _stockRepo.UpdateAsync(stock);
         }
 
-        private ViewItemDTO MapToViewItemDto(Stock s)
+        private IEnumerable<ViewItemDTO> EnumerateItems(IEnumerable<Stock> stocks)
         {
-            return new ViewItemDTO(
-                s.ComponentId,
-                s.Component.Article,
-                s.Component.Name,
-                s.Component.Manufacturer,
-                s.RackId,
-                s.Rack.RackCode,
-                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
-                s.CellId,
-                s.Cell.CellCode,
-                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
-                s.Quantity,
-                0
-            );
+            foreach (var stock in stocks)
+            {
+                yield return MappingExtensions.ToViewItemDto(stock);
+            }
         }
     }
 }

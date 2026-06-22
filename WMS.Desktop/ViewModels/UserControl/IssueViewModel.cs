@@ -20,29 +20,11 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class IssueViewModel : ObservableObject
     {
-        private readonly IssueService _issueService;
-        private readonly StockService _stockService;
-        private readonly DialogService _dialogService;
-        private readonly OperatorService _operatorService;
-        private readonly CellService _cellService;
-        private readonly RackService _rackService;
-
-        private CancellationTokenSource? _cts;
-
-        [ObservableProperty] private string _commentText = string.Empty;
-        [ObservableProperty] private Operator? _operatorName;
-        [ObservableProperty] private bool _isIssue;
-        [ObservableProperty] private bool _isIssuePopupOpen;
-        [ObservableProperty] private string _searchText = string.Empty;
-
-        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
-
-        public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
-        public ObservableCollection<Operator> Operators { get; } = new();
+        public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
-        public ObservableCollection<CellViewModel> CellsGrid{ get; } = new();
-        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
-
+        public ObservableCollection<CellViewModel> CellsGrid { get; } = new();
+        public ObservableCollection<Operator> Operators { get; } = new();
+        public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
         public RackViewModel SelectedRack 
         {
             get => _selectedRack;
@@ -54,13 +36,30 @@ namespace WMS.Desktop.ViewModels
                 foreach (var rack in RacksGrid)
                     rack.IsSelected = rack == value;
 
-                _ = SelectCellsForRack(); 
+                SelectCellsForRack();
+                UpdateCellHighlights();
             }
         }
-        private RackViewModel _selectedRack;
 
+        private readonly CellService _cellService;
+        private readonly DialogService _dialogService;
+        private readonly IssueService _issueService;
+        private readonly OperatorService _operatorService;
+        private readonly RackService _rackService;
+        private readonly StockService _stockService;
+
+        private CancellationTokenSource? _cts;
+        
+        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
+        [ObservableProperty] private string _commentText = string.Empty;
+        [ObservableProperty] private bool _isIssue;
+        [ObservableProperty] private bool _isIssuePopupOpen;
+        [ObservableProperty] private Operator? _operatorName;
+        [ObservableProperty] private string _searchStock = string.Empty;
+
+        private RackViewModel _selectedRack;
         public IssueViewModel(
-            StockService stockService,
+                    StockService stockService,
             IssueService issueService,
             DialogService dialogService,
             OperatorService operatorService,
@@ -75,13 +74,22 @@ namespace WMS.Desktop.ViewModels
             _rackService = rackService;
         }
 
+
+        [RelayCommand]
+        public void ClearIssueItems()
+        {
+            IssueItems.Clear();
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+            IsIssue = false;
+        }
+
         [RelayCommand]
         public async Task IssueAsync()
         {
             var invalidItems = IssueItems
                               .Where(x => x.OperationQuantity <= 0)
                               .ToList();
-
 
             if (invalidItems.Any())
             {
@@ -160,55 +168,6 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async void SelectRack(RackViewModel rack)
-        {
-            if (rack == null)
-                return;
-
-            SelectedRack = rack;
-        }
-
-        [RelayCommand]
-        private void SelectCell(CellViewModel cell)
-        {
-            return;
-        }
-
-        [RelayCommand]
-        private void AddIssueItem(object obj)
-        {
-            if (obj is not ViewItemDTO item)
-                return;
-
-            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
-                return;
-
-            IssueItems.Add(item);
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-        }
-
-        [RelayCommand]
-        private void RemoveIssueItem (object obj)
-        {
-            if (obj is not ViewItemDTO item)
-                return;
-
-            IssueItems.Remove(item);
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-        }
-
-        [RelayCommand]
-        private void ClearIssueItems()
-        {
-            IssueItems.Clear();
-            UpdateRackHighlights();
-            UpdateCellHighlights();
-            IsIssue = false; 
-        }
-
         public async Task LoadDataAsync()
         {
             try
@@ -237,6 +196,45 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        [RelayCommand]
+        public void RemoveIssueItem(object obj)
+        {
+            if (obj is not ViewItemDTO item)
+                return;
+
+            IssueItems.Remove(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+        }
+
+        [RelayCommand]
+        public void SelectCell(CellViewModel cell)
+        {
+            return;
+        }
+
+        [RelayCommand]
+        public async void SelectRack(RackViewModel rack)
+        {
+            if (rack == null)
+                return;
+
+            SelectedRack = rack;
+        }
+
+        [RelayCommand]
+        private void AddIssueItem(object obj)
+        {
+            if (obj is not ViewItemDTO item)
+                return;
+
+            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
+                return;
+
+            IssueItems.Add(item);
+            UpdateRackHighlights();
+            UpdateCellHighlights();
+        }
         private async Task CreateRacksGridAsync()
         {
             try
@@ -274,25 +272,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private async Task SelectCellsForRack()
-        {
-            if (SelectedRack == null)
-                return;
-
-            CellsGrid.Clear();
-
-            if (_groupedCellsCache.TryGetValue(SelectedRack.Id, out var cachedCells))
-            {
-                foreach (var cellVm in cachedCells)
-                {
-                    CellsGrid.Add(cellVm);
-                }
-            }
-
-            UpdateCellHighlights();
-        }
-
-        public async Task LoadOperators()
+        private async Task LoadOperators()
         {
             try
             {
@@ -311,31 +291,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private void UpdateRackHighlights()
-        {
-            var rackIds = IssueItems
-                .Select(x => x.RackId)
-                .ToHashSet();
-
-            foreach (var rack in RacksGrid)
-            {
-                rack.IsHighlighted = rackIds.Contains(rack.Id);
-            }
-        }
-
-        private void UpdateCellHighlights()
-        {
-            var cellIds = IssueItems
-                .Select(x => x.CellId)
-                .ToHashSet();
-
-            foreach (var cell in CellsGrid)
-            {
-                cell.IsHighlighted = cellIds.Contains(cell.Id);
-            }
-        }
-
-        partial void OnSearchTextChanged(string value)
+        partial void OnSearchStockChanged(string value)
         {
             _cts?.Cancel();
 
@@ -376,6 +332,46 @@ namespace WMS.Desktop.ViewModels
                     // Задача отменена новым вводом текста — ничего не делаем
                 }
             });
+        }
+
+        private void SelectCellsForRack()
+        {
+            if (SelectedRack == null)
+                return;
+
+            CellsGrid.Clear();
+
+            if (_groupedCellsCache.TryGetValue(SelectedRack.Id, out var cachedCells))
+            {
+                foreach (var cellVm in cachedCells)
+                {
+                    CellsGrid.Add(cellVm);
+                }
+            }
+        }
+
+        private void UpdateCellHighlights()
+        {
+            var cellIds = IssueItems
+                .Select(x => x.CellId)
+                .ToHashSet();
+
+            foreach (var cell in CellsGrid)
+            {
+                cell.IsHighlighted = cellIds.Contains(cell.Id);
+            }
+        }
+
+        private void UpdateRackHighlights()
+        {
+            var rackIds = IssueItems
+                .Select(x => x.RackId)
+                .ToHashSet();
+
+            foreach (var rack in RacksGrid)
+            {
+                rack.IsHighlighted = rackIds.Contains(rack.Id);
+            }
         }
     }
 }

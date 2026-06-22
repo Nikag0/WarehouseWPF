@@ -43,7 +43,7 @@
                      Margin="0,5,0,5" 
                      Tag="Поиск:"
                      Style="{StaticResource SearchTextBox}"
-                     Text="{Binding SearchtemsToReceipt, UpdateSourceTrigger=PropertyChanged}"/>
+                     Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
 
             <Grid Grid.Row="2">
                 
@@ -52,7 +52,7 @@
                     <ColumnDefinition Width="44*"/>
                 </Grid.ColumnDefinitions>
 
-                <DataGrid ItemsSource="{Binding FilteredItemsToReceipt}" 
+                <DataGrid ItemsSource="{Binding FilteredStocksOrComponents}" 
                           Grid.ColumnSpan="2"
                           AutoGenerateColumns="False" 
                           FontSize="15" 

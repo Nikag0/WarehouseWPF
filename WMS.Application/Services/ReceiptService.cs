@@ -87,5 +87,29 @@ namespace WMS.Application.Services
 
             await _operationRepo.AddAsync(operation);
         }
+
+        public async Task<IEnumerable<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount)
+        {
+            var stocks = await _stockRepo.GetFilteredStockAsync(searchText, maxCount);
+            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount);
+
+            var result = new List<ViewItemDTO>();
+
+            foreach (var stock in stocks)
+            {
+                result.Add(MappingExtensions.ToViewItemDto(stock));
+            }
+            var existingComponentIds = result.Select(x => x.ComponentId).ToHashSet();
+
+            foreach (var component in components)
+            {
+                if (existingComponentIds.Contains(component.Id))
+                    continue; // Пропускаем, так как Stock для этого компонента уже добавлен
+
+                result.Add(MappingExtensions.ToViewItemDto(component));
+            }
+
+            return result.Take(maxCount);
+        }
     }
 }

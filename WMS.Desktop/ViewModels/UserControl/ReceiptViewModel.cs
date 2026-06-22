@@ -19,29 +19,18 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class ReceiptViewModel : ObservableObject
     {
-        private readonly StockService _stockService;
-        private readonly ReceiptService _receiptService;
-        private readonly CellService _cellService;
-        private readonly RackService _rackService;
-        private readonly DialogService _dialogService;
-        private readonly OperatorService _operatorrService;
-
-        [ObservableProperty] private StockViewModel _receiptItem = new();
-        [ObservableProperty] private bool _isReceiptPopupOpen;
-        [ObservableProperty] private bool _isRackPopupOpen;
-        [ObservableProperty] private bool _isCellPopupOpen;
-        [ObservableProperty] private Operator _operatorName;
-        [ObservableProperty] private string _commentText;
-
+        // Список при поиске отсатков или компонентов.
+        public ObservableCollection<ViewItemDTO> FilteredStocksOrComponents { get; } = new();
+        // Выпадающий список при вводе стеллажа.
+        public ObservableCollection<RackViewModel> FilteredRacks { get; } = new();
+        // Выпадающий список при вводе ячейки.
+        public ObservableCollection<CellViewModel> FilteredCells { get; } = new(); 
         public ObservableCollection<Operator> Operators { get; } = new();
-        public ObservableCollection<RackViewModel> RacksGrid { get; } = new(); // отвечает за ui отображение сетки стеллажей
-        public ObservableCollection<CellViewModel> CellsGrid { get; } = new(); // отвечает за ui отображение сетки ячеек
-
-        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
-        public ObservableCollection<RackViewModel> FilteredRacks { get; } = new(); // выпадающий список при вводе стеллажа
-        public ObservableCollection<CellViewModel> FilteredCells { get; } = new(); // выпадающий список при вводе ячейки
-
-        // отвечает за ручной поиск стеллажа
+        // Отвечает за ui отображение сетки стеллажей.
+        public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
+        // Отвечает за ui отображение сетки ячеек.
+        public ObservableCollection<CellViewModel> CellsGrid { get; } = new();
+        // Отвечает за ручной поиск стеллажа.
         public string? SearchRacks
         {
             get => _searchRacks;
@@ -63,8 +52,6 @@ namespace WMS.Desktop.ViewModels
                 }
             }
         }
-        private string _searchRacks;
-
         public RackViewModel SelectedRack
         {
             get => _selectedRack;
@@ -95,9 +82,7 @@ namespace WMS.Desktop.ViewModels
                 }
             }
         }
-        private RackViewModel _selectedRack;
-
-        // отвечает за ручной поиск ячейки
+        // Отвечает за ручной поиск ячейки.
         public string SearchCell
         {
             get => _searchCell;
@@ -119,8 +104,6 @@ namespace WMS.Desktop.ViewModels
                 }
             }
         }
-        private string _searchCell;
-
         public CellViewModel SelectedCell
         {
             get => _selectedCell;
@@ -145,31 +128,40 @@ namespace WMS.Desktop.ViewModels
                 }
             }
         }
+
+        [ObservableProperty] private StockViewModel _receiptItem = new();
+        [ObservableProperty] private bool _isReceiptPopupOpen;
+        [ObservableProperty] private bool _isRackPopupOpen;
+        [ObservableProperty] private bool _isCellPopupOpen;
+        [ObservableProperty] private Operator _operatorName;
+        [ObservableProperty] private string _commentText;
+        [ObservableProperty] private string _searchStockOrComponent;
+
+        // Словарь всех ячеек, привязанных к RackId.
+        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new();        
+        private string _searchRacks;
+        private string _searchCell;
+        private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
-
+        private CancellationTokenSource? _cts;
         // Ниже не переработанные свойства
-        private readonly List<ViewItemDTO> _components = new(); 
-        private readonly List<ViewItemDTO> _stocks = new();
 
-        [ObservableProperty] private ObservableCollection<ViewItemDTO> _filteredStocks = new();
+        private readonly List<ViewItemDTO> _components = new(); 
+
         public ObservableCollection<ViewItemDTO> FilteredItemsToReceipt { get; } = new();
-        public string SearchtemsToReceipt
-        {
-            get => _searchtemsToIssue;
-            set
-            {
-                _searchtemsToIssue = value;
-                OnPropertyChanged();
-                FilterItemsToReceipt();
-            }
-        }
-        private string _searchtemsToIssue;
 
         public ObservableCollection<ViewItemDTO> Stocks { get; } = new();
 
         public ObservableCollection<ViewItemDTO> FilteredItemsInRacks { get; } = new();
 
         private readonly SemaphoreSlim _lock = new(1, 1);
+
+        private readonly StockService _stockService;
+        private readonly ReceiptService _receiptService;
+        private readonly CellService _cellService;
+        private readonly RackService _rackService;
+        private readonly DialogService _dialogService;
+        private readonly OperatorService _operatorrService;
 
         public ReceiptViewModel(
             StockService stockService,
@@ -270,9 +262,6 @@ namespace WMS.Desktop.ViewModels
                 _components.Clear();
                 _components.AddRange(await _receiptService.GetAllComponentsAsync());
 
-                await LoadStocksAsync();
-                ReplaceCollection(Stocks, _stocks);
-
                 await CreateRacksGridAsync();
                 ReplaceCollection(FilteredRacks, RacksGrid);
 
@@ -280,7 +269,6 @@ namespace WMS.Desktop.ViewModels
 
                 await LoadOperatorsAsync();
 
-                FilterItemsToReceipt();
                 UpdateHighlights();
             }
             catch (OverallDomainException ex)
@@ -291,12 +279,6 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-        }
-
-        private async Task LoadStocksAsync()
-        {
-            _stocks.Clear();
-            _stocks.AddRange(await _stockService.GetAllAsync());
         }
 
         public async Task LoadOperatorsAsync()
@@ -397,23 +379,42 @@ namespace WMS.Desktop.ViewModels
 
         private void FilterItemInRacks()
         {
-            var query = _stocks.AsEnumerable();
+            _cts?.Cancel();
 
-            if (!string.IsNullOrWhiteSpace(SearchRacks))
+            if (SelectedRack == null)
             {
-                var text = SearchRacks.ToLower();
-
-                query = query.Where(c =>
-                        c.RackCodeDisplay != null
-                        && c.RackCodeDisplay.ToLower().Contains(text));
-
-                var sortedQuery = query
-                                 .OrderByDescending(r => r.ComponentName);
-
-                ReplaceCollection(FilteredItemsInRacks, sortedQuery);
-            }
-            else
                 FilteredItemsInRacks.Clear();
+                return;
+            }
+
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(500, token);
+
+                    var stocks = await _stockService.GetStocksInRackAsync(SelectedRack.Id);
+
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (!token.IsCancellationRequested)
+                        {
+                            FilteredItemsInRacks.Clear();
+                            foreach (var item in stocks)
+                            {
+                                FilteredItemsInRacks.Add(item);
+                            }
+                        }
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // Задача отменена новым вводом текста — ничего не делаем
+                }
+            });
         }
 
         private void UpdateCellState()
@@ -504,38 +505,47 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        // ниже не переработанные методы
-        private void FilterItemsToReceipt()
+        partial void OnSearchStockOrComponentChanged(string value)
         {
-            if (string.IsNullOrWhiteSpace(SearchtemsToReceipt))
+            _cts?.Cancel();
+
+            if (string.IsNullOrWhiteSpace(value))
             {
-                ReplaceCollection(FilteredItemsToReceipt,
-                    _stocks.OrderByDescending(x => x.ComponentName));
+                FilteredStocksOrComponents.Clear();
                 return;
             }
 
-            var filteredStocks = _stocks.Where(FilterPredicate);
-            var filteredStockIds = filteredStocks.Select(x => x.ComponentId).ToHashSet();
-            var filteredComponents = _components.Where(FilterPredicate);
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
 
-            var stockIds = _stocks
-                .Select(x => x.ComponentId)
-                .ToHashSet();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(500, token);
 
-            var result = filteredStocks
-                .Concat(filteredComponents.Where(c => !filteredStockIds.Contains(c.ComponentId)));
+                    var suggestions = await _receiptService.GetFilteredStockOrComponentsAsync(value, maxCount: 15);
 
-            ReplaceCollection(FilteredItemsToReceipt,
-                result.OrderByDescending(x => x.ComponentName));
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (!token.IsCancellationRequested)
+                        {
+                            FilteredStocksOrComponents.Clear();
+                            foreach (var item in suggestions)
+                            {
+                                FilteredStocksOrComponents.Add(item);
+                            }
+                        }
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    // Задача отменена новым вводом текста — ничего не делаем
+                }
+            });
         }
 
-        private bool FilterPredicate(ViewItemDTO c)
-        {
-            return
-                (c.Article?.Contains(SearchtemsToReceipt, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (c.ComponentName?.Contains(SearchtemsToReceipt, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (c.Manufacturer?.Contains(SearchtemsToReceipt, StringComparison.OrdinalIgnoreCase) ?? false);
-        }
+        // ниже не переработанные методы
 
         private void UpdateHighlights()
         {

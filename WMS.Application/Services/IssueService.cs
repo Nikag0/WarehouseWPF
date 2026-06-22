@@ -69,5 +69,6 @@ namespace WMS.Application.Services
             operation.Validate();
             await _operationRepo.AddAsync(operation);
         }
+
     }
 }
