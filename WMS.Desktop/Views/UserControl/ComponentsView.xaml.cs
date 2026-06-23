@@ -16,9 +16,6 @@ using WMS.Desktop.ViewModels;
 
 namespace WMS.Desktop.Views
 {
-    /// <summary>
-    /// Interaction logic for ComponentsView.xaml
-    /// </summary>
     public partial class ComponentsView : UserControl
     {
         public ComponentsView()

@@ -235,17 +235,27 @@ namespace WMS.Desktop.ViewModels
             UpdateRackHighlights();
             UpdateCellHighlights();
         }
+
         private async Task CreateRacksGridAsync()
         {
             try
             {
                 var racksData = await _rackService.GetRacksWithLayoutsAsync();
 
-                RacksGrid.Clear();
-
-                foreach (var item in racksData)
+                var preparedViewModels = await Task.Run(() =>
                 {
-                    RacksGrid.Add(new RackViewModel(item.Rack, item.Layout));
+                    var list = new List<RackViewModel>();
+                    foreach (var item in racksData)
+                    {
+                        list.Add(new RackViewModel(item.Rack, item.Layout));
+                    }
+                    return list;
+                });
+
+                RacksGrid.Clear();
+                foreach (var vm in preparedViewModels)
+                {
+                    RacksGrid.Add(vm);
                 }
             }
             catch (FileNotFoundException ex)
