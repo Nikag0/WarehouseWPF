@@ -63,10 +63,10 @@ namespace WMS.Desktop.ViewModels
                 {
                     // Подсветка самого стеллажа
                     if (previousRack != null)
-                        previousRack.IsHighlighted = false;
+                        previousRack.IsSelected = false;
 
                     if (value != null)
-                        value.IsHighlighted = true;
+                        value.IsSelected = true;
 
                     // Синхронизируем текст
                     if (value != null || string.IsNullOrEmpty(_searchRacks))
@@ -114,10 +114,10 @@ namespace WMS.Desktop.ViewModels
                 if (SetProperty(ref _selectedCell, value))
                 {
                     if (previousCell != null)
-                        previousCell.IsHighlighted = false;
+                        previousCell.IsSelected = false;
 
                     if (value != null)
-                        value.IsHighlighted = true;
+                        value.IsSelected = true;
 
                     if (value != null || string.IsNullOrEmpty(_searchCell))
                     {
@@ -220,6 +220,7 @@ namespace WMS.Desktop.ViewModels
             {
                 var receiptDto = new ServiceItemDTO(
                     ReceiptItem.ComponentId,
+                    ReceiptItem.Id,
                     SelectedRack.Id,
                     SelectedCell.Id,
                     ReceiptItem.OperationQuantity);
@@ -228,24 +229,16 @@ namespace WMS.Desktop.ViewModels
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
                 await LoadDataAsync();
 
-                SelectedRack.IsHighlighted = false;
+                SelectedRack.IsSelected = false;
                 SelectedRack = null;
                 SearchRacks = string.Empty;
-                SelectedCell.IsHighlighted = false;
+                SelectedCell.IsSelected = false;
                 SelectedCell = null;
                 SearchCell = string.Empty;
                 ReceiptItem.OperationQuantity = 0;
                 CommentText = string.Empty;
             }
-            catch (WrongValueExeption ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -269,9 +262,9 @@ namespace WMS.Desktop.ViewModels
 
                 await LoadOperatorsAsync();
 
-                UpdateHighlights();
+                //UpdateHighlights();
             }
-            catch (OverallDomainException ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -290,7 +283,7 @@ namespace WMS.Desktop.ViewModels
                 foreach (var item in items)
                     Operators.Add(item);
             }
-            catch (OverallDomainException ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -426,7 +419,7 @@ namespace WMS.Desktop.ViewModels
 
             foreach (var cell in CellsGrid)
             {
-                cell.HasItemsInCell = occupiedCellIds.Contains(cell.Id);
+                cell.ItemInCell = occupiedCellIds.Contains(cell.Id);
             }
         }
 
@@ -495,7 +488,7 @@ namespace WMS.Desktop.ViewModels
                 }
 
             }
-            catch (OverallDomainException ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -550,10 +543,10 @@ namespace WMS.Desktop.ViewModels
         private void UpdateHighlights()
         {
             foreach (var rack in RacksGrid)
-                rack.IsHighlighted = rack.Id == ReceiptItem.RackId;
+                rack.ItemInCell = rack.Id == ReceiptItem.RackId;
 
             foreach (var cell in CellsGrid)
-                cell.IsHighlighted = cell.Id == ReceiptItem.CellId;
+                cell.ItemInCell = cell.Id == ReceiptItem.CellId;
         }
 
         private void ReplaceCollection<T>(

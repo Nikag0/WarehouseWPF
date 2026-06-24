@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Application.Services
 {
@@ -48,9 +49,14 @@ namespace WMS.Application.Services
             return EnumerateItems(stocks);
         }
 
-        public async Task<Stock?> GetAsync(Guid  rackId, Guid componentId, Guid cellId)
+        public async Task<ViewItemDTO> GetStockAsync(Guid stockId)
         {
-            return await _stockRepo.GetAsync(rackId, componentId, cellId);
+            var item = await _stockRepo.GetStockAsync(stockId);
+
+            if (item == null)
+                throw new BusinessException($"Остаток {stockId} не найден");
+
+            return MappingExtensions.ToViewItemDto(item);
         }
 
         public async Task AddAsync(Stock stock)

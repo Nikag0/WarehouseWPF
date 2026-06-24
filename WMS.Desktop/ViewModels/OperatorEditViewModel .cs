@@ -62,7 +62,7 @@ namespace WMS.Desktop.ViewModels
                     window.Close();
                 }
             }
-            catch (OverallDomainException domainEx)
+            catch (BusinessException domainEx)
             {
                 MessageBox.Show(domainEx.Message, "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Warning);
             }

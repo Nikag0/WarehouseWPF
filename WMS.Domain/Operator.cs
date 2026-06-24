@@ -37,13 +37,13 @@ namespace WMS.Domain
             string patronymic)
         {
             if (surname == string.Empty)
-                throw new OverallDomainException("Surname не задан");
+                throw new BusinessException("Фамилия не задана");
 
             if (name == string.Empty)
-                throw new OverallDomainException("Name не задан");
+                throw new BusinessException("Имя не задано");
 
             if (patronymic == string.Empty)
-                throw new OverallDomainException("Patronymic не задан");
+                throw new BusinessException("Отчество не задано");
 
 
             return new Operator(
@@ -56,13 +56,14 @@ namespace WMS.Domain
         public void Update(string surname, string name, string patronymic)
         {
             if (string.IsNullOrWhiteSpace(surname))
-                throw new OverallDomainException("Surname не задан");
+                throw new BusinessException("Фамилия не задана");
 
             if (string.IsNullOrWhiteSpace(name))
-                throw new OverallDomainException("Name не задан");
+                throw new BusinessException("Имя не задано");
 
             if (string.IsNullOrWhiteSpace(patronymic))
-                throw new OverallDomainException("Patronymic не задан");
+                throw new BusinessException("Отчество не задано");
+
 
             Surname = surname.Trim();
             Name = name.Trim();

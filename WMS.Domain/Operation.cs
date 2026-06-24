@@ -30,7 +30,7 @@ public class Operation
     public static Operation Create(OperationType type, string operatorName, string? comment = null)
     {
         if (operatorName == string.Empty || operatorName == null)
-            throw new OverallDomainException("Имя оператора не указано");
+            throw new BusinessException("Имя оператора не указано");
 
         return new Operation(type, operatorName, comment);
     }
@@ -48,7 +48,7 @@ public class Operation
                 i.ComponentId == componentId &&
                 i.CellId == cellId))
         {
-            throw new OverallDomainException("Операция уже содержит позицию для этого товара и ячейки");
+            throw new BusinessException("Операция уже содержит позицию для этого товара и ячейки");
         }
 
         _items.Add(new OperationItem(
@@ -62,7 +62,7 @@ public class Operation
     public void Validate()
     {
         if (_items.Count == 0)
-            throw new OverallDomainException("Операция не может быть пустой");
+            throw new BusinessException("Операция не может быть пустой");
     }
 
 }

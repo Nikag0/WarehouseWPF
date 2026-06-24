@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace WMS.Domain.ExceptionControl
 {
-    public class WrongValueExeption : DomainException
+    public class BusinessException : DomainException
     {
-        public WrongValueExeption(string message) : base(message) { }
+        public BusinessException(string message) : base(message) { }
     }
 }

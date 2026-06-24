@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Application.Services
 {
@@ -36,18 +37,16 @@ namespace WMS.Application.Services
             string? comment = null)
         {
             if (items.Count == 0)
-                throw new Exception("Список выдачи пуст");
+                throw new BusinessException("Список выдачи пуст");
 
             var operation = Operation.Create(OperationType.Issue, operatorName, comment);
 
             foreach (var item in items)
             {
-                var stock = await _stockRepo
-                    .GetAsync(item.RackId, item.ComponentId, item.CellId);
+                var stock = await _stockRepo.GetStockAsync(item.Stockid);
 
                 if (stock is null)
-                    throw new Exception(
-                        "Товар в указанной ячейке не найден");
+                    throw new BusinessException("Товар в указанной ячейке не найден");
 
                 var before = stock.Quantity;
 

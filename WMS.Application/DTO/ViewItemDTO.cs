@@ -4,6 +4,8 @@
         string ComponentName,
         string Manufacturer,
 
+        Guid StockId,
+
         Guid RackId,
         string RackCode,
         string RackCodeDisplay,

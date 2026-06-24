@@ -24,16 +24,16 @@ public class OperationItem
         int quantityAfter)
     {
         if (componentId == Guid.Empty)
-            throw new OverallDomainException("ComponentId не задан");
+            throw new BusinessException("ComponentId не задан");
 
         if (cellId == Guid.Empty)
-            throw new OverallDomainException("RackId не задан");
+            throw new BusinessException("RackId не задан");
         
         if (cellId == Guid.Empty)
-            throw new OverallDomainException("CellId не задан");
+            throw new BusinessException("CellId не задан");
 
         if (quantityBefore < 0 || quantityAfter < 0)
-            throw new OverallDomainException("Количество не может быть отрицательным");
+            throw new BusinessException("Количество не может быть отрицательным");
 
         Id = Guid.NewGuid();
         ComponentId = componentId;

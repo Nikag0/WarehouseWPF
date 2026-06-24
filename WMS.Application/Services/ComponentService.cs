@@ -51,7 +51,7 @@ namespace WMS.Application.Services
 
                 return Result.Success();
             }
-            catch (OverallDomainException domainEx)
+            catch (BusinessException domainEx)
             {
                 return Result.Failure(domainEx.Message);
             }

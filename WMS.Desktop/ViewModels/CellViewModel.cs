@@ -38,25 +38,14 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        private bool _isHighlighted;
-        public bool IsHighlighted
+        private bool _itemInCell;
+        public bool ItemInCell
         {
-            get => _isHighlighted;
+            get => _itemInCell;
             set
             {
-                _isHighlighted = value;
-                OnPropertyChanged(nameof(IsHighlighted));
-            }
-        }
-
-        private bool _hasItemsInCell;
-        public bool HasItemsInCell
-        {
-            get => _hasItemsInCell;
-            set
-            {
-                _hasItemsInCell = value;
-                OnPropertyChanged(nameof(HasItemsInCell));
+                _itemInCell = value;
+                OnPropertyChanged(nameof(ItemInCell));
             }
         }
 

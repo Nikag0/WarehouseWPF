@@ -46,20 +46,23 @@ namespace WMS.Infrastructure
 
             return await db.Stocks
                 .AsNoTracking()
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
                 .Where(s => s.RackId == rackId)
                 .ToListAsync();
         }
 
-        public async Task<Stock?> GetAsync(Guid rackId, Guid componentId, Guid cellId)
+        public async Task<Stock?> GetStockAsync(Guid stockId)
         {
             using var db = _factory.CreateDbContext();
 
             return await db.Stocks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x =>
-                    x.ComponentId == componentId &&
-                    x.RackId == rackId &&
-                    x.CellId == cellId);
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .FirstOrDefaultAsync(x =>x.Id == stockId);
         }
 
         public async Task AddAsync(Stock stock)

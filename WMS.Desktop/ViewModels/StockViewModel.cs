@@ -10,6 +10,17 @@ namespace WMS.Desktop.ViewModels
 {
     public class StockViewModel : INotifyPropertyChanged
     {
+        public Guid Id
+        {
+            get => _id;
+            set
+            {
+                _id = value;
+                OnPropertyChanged();
+            }
+        }
+        private Guid _id;
+
         public Guid ComponentId
         {
             get => _componentId;

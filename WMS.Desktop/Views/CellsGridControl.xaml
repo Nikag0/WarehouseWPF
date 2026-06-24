@@ -35,7 +35,7 @@
         <Grid Grid.Column="1" Grid.Row="0"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType1}">
+                                   ConverterParameter=R1}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
@@ -51,7 +51,7 @@
         <Grid Grid.Column="1" Grid.Row="0"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType2}">
+                                   ConverterParameter=R2}">
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -59,6 +59,7 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
+            
             <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="А"/>
             <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="Б"/>
             <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="В"/>
@@ -68,7 +69,7 @@
         <Grid Grid.Column="1" Grid.Row="0"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType3}">
+                                   ConverterParameter=R3}">
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
@@ -79,7 +80,7 @@
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType1}">
+                                   ConverterParameter=R1}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -125,7 +126,7 @@
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType2}">
+                                   ConverterParameter=R2}">
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -170,7 +171,7 @@
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=RackType3}">
+                                   ConverterParameter=R3}">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -250,18 +251,14 @@
                                         <Setter Property="Background" Value="Transparent"/>
 
                                         <Style.Triggers>
-                                            
-                                            <DataTrigger Binding="{Binding HasItemsInCell}" Value="True">
-                                                <Setter Property="Background" Value="LightGreen"/>
-                                            </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                            <DataTrigger Binding="{Binding ItemInCell}" Value="True">
                                                 <Setter Property="Background" Value="Yellow"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="BorderBrush" Value="DarkOrange"/>
-                                                <Setter Property="BorderThickness" Value="6"/>
+                                                <Setter Property="BorderBrush" Value="LightBlue"/>
+                                                <Setter Property="BorderThickness" Value="15"/>
                                             </DataTrigger>
 
                                         </Style.Triggers>

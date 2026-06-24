@@ -34,13 +34,13 @@ public class Stock
         int initialQuantity)
     {
         if (componentId == Guid.Empty)
-            throw new OverallDomainException("ComponentId не задан");
+            throw new BusinessException("ComponentId не задан");
 
         if (rackId == Guid.Empty)
-            throw new OverallDomainException("RackId не задан");
+            throw new BusinessException("RackId не задан");
 
         if (cellId == Guid.Empty)
-            throw new OverallDomainException("CellId не задан");
+            throw new BusinessException("CellId не задан");
         
 
         return new Stock(
@@ -64,7 +64,7 @@ public class Stock
         ValidatePositiveQuantity(quantity);
 
         if (quantity > Quantity)
-            throw new WrongValueExeption("Недостаточно товара в ячейке");
+            throw new BusinessException("Недостаточно товара в ячейке");
 
         Quantity -= quantity;
     }
@@ -72,7 +72,7 @@ public class Stock
     public void Inventory(int actualQuantity)
     {
         if (actualQuantity < 0)
-            throw new WrongValueExeption("Фактическое количество не может быть отрицательным");
+            throw new BusinessException("Фактическое количество не может быть отрицательным");
 
         Quantity = actualQuantity;
     }
@@ -82,7 +82,7 @@ public class Stock
     private void SetInitialQuantity(int quantity)
     {
         if (quantity < 0)
-            throw new WrongValueExeption("Начальное количество не может быть отрицательным");
+            throw new BusinessException("Начальное количество не может быть отрицательным");
 
         Quantity = quantity;
     }
@@ -90,6 +90,6 @@ public class Stock
     private static void ValidatePositiveQuantity(int quantity)
     {
         if (quantity <= 0)
-            throw new WrongValueExeption("Количество должно быть больше нуля");
+            throw new BusinessException("Количество должно быть больше нуля");
     }
 }

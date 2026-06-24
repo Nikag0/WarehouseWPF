@@ -30,20 +30,7 @@ namespace WMS.Application.Services
             var components = await _componentRepo.GetAllAsync();
 
             return components
-                .Select(c => new ViewItemDTO(
-                    c.Id,
-                    c.Article,
-                    c.Name,
-                    c.Manufacturer,
-                    Guid.Empty,
-                    "-",
-                    "-",
-                    Guid.Empty,
-                    "-",
-                    "-",
-                    0,
-                    0
-            )).ToList();
+                .Select(MappingExtensions.ToViewItemDto).ToList(); ;
         }
 
         public async Task ReceiveAsync(ServiceItemDTO item, string operatorName, string? comment = null)
@@ -58,7 +45,7 @@ namespace WMS.Application.Services
             if (component is null)
                     throw new Exception($"Компонент {item.ComponentId} не найден");
 
-            Stock? stock = await _stockRepo.GetAsync(item.RackId, item.ComponentId, item.CellId);
+            Stock? stock = await _stockRepo.GetStockAsync(item.RackId);
 
             int before;
 

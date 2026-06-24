@@ -58,6 +58,8 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private string _searchStock = string.Empty;
 
         private RackViewModel _selectedRack;
+        private CellViewModel _selectedCell;
+
         public IssueViewModel(
                     StockService stockService,
             IssueService issueService,
@@ -115,26 +117,30 @@ namespace WMS.Desktop.ViewModels
 
             var itemsToReview = IssueItems.ToList();
 
-            var itemsToRemove = new List<ViewItemDTO>();
+            RacksGrid.All(r => r.ItemInCell = false);
+            CellsGrid.All(r => r.ItemInCell = false);
 
             foreach (var item in itemsToReview)
             {
+                SelectedRack = RacksGrid.First(r => r.Id == item.RackId);
+
+                _selectedCell = CellsGrid.First(c => c.Id == item.CellId);
+                _selectedCell.ItemInCell = true;
+
                 var question = $"Получилось найти товар?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
 
                 if (!_dialogService.ShowConfirmation(question))
                 {
-                    itemsToRemove.Add(item);
+                    SelectedRack.ItemInCell = false;
+                    _selectedCell.ItemInCell = false;
+                    IssueItems.Remove(item);
                 }
-            }
-
-            foreach (var item in itemsToRemove)
-            {
-                IssueItems.Remove(item);
             }
 
             if (!IssueItems.Any())
             {
                 _dialogService.ShowInfo("Выдача отменена, так как ни один товар не был найден.");
+                ClearIssueItems();
                 return;
             }
 
@@ -143,6 +149,7 @@ namespace WMS.Desktop.ViewModels
                 var issueOperation = IssueItems
                     .Select(item => new ServiceItemDTO(
                         item.ComponentId,
+                        item.StockId,
                         item.RackId,
                         item.CellId,
                         item.OperationQuantity))
@@ -151,18 +158,11 @@ namespace WMS.Desktop.ViewModels
                 await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
                 CommentText = string.Empty;
+                SearchStock = string.Empty;
                 IsIssue = true;
                 _dialogService.ShowInfo("Выдача успешно выполнена.");
             }
-            catch (WrongValueExeption ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -186,7 +186,7 @@ namespace WMS.Desktop.ViewModels
                     SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == SelectedRack.Id);
                 }
             }
-            catch (OverallDomainException ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -214,7 +214,7 @@ namespace WMS.Desktop.ViewModels
         }
 
         [RelayCommand]
-        public async void SelectRack(RackViewModel rack)
+        public async Task SelectRack(RackViewModel rack)
         {
             if (rack == null)
                 return;
@@ -223,17 +223,26 @@ namespace WMS.Desktop.ViewModels
         }
 
         [RelayCommand]
-        private void AddIssueItem(object obj)
+        private async Task AddIssueItem(object obj)
         {
             if (obj is not ViewItemDTO item)
                 return;
 
-            if (IssueItems.Any(x => x.ComponentId == item.ComponentId && x.CellId == item.CellId))
+            if (IssueItems.Any(x => x.RackId == item.RackId))
                 return;
 
-            IssueItems.Add(item);
-            UpdateRackHighlights();
-            UpdateCellHighlights();
+            try
+            {
+                var stock = await _stockService.GetStockAsync(item.StockId);
+                IssueItems.Add(stock);
+                UpdateRackHighlights();
+                UpdateCellHighlights();
+            }
+            catch (BusinessException ex)
+            {
+                _dialogService.ShowWarning(ex.Message);
+            }
+
         }
 
         private async Task CreateRacksGridAsync()
@@ -291,11 +300,7 @@ namespace WMS.Desktop.ViewModels
                 foreach (var @operator in data)
                     Operators.Add(@operator);
             }
-            catch (OverallDomainException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
+            catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
@@ -368,7 +373,7 @@ namespace WMS.Desktop.ViewModels
 
             foreach (var cell in CellsGrid)
             {
-                cell.IsHighlighted = cellIds.Contains(cell.Id);
+                cell.ItemInCell = cellIds.Contains(cell.Id);
             }
         }
 
@@ -380,7 +385,7 @@ namespace WMS.Desktop.ViewModels
 
             foreach (var rack in RacksGrid)
             {
-                rack.IsHighlighted = rackIds.Contains(rack.Id);
+                rack.ItemInCell = rackIds.Contains(rack.Id);
             }
         }
     }

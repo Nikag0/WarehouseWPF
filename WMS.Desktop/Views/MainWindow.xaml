@@ -30,7 +30,6 @@
                         </MultiBinding>
                     </DataTrigger.Binding>
                     <Setter Property="Background" Value="LightBlue"/>
-                    <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>

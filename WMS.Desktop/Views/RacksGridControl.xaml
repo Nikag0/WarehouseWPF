@@ -120,12 +120,12 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
 
-                                                <Setter Property="BorderBrush" Value="DarkOrange"/>
-                                                <Setter Property="BorderThickness" Value="6"/>
+                                                <Setter Property="BorderBrush" Value="LightBlue"/>
+                                                <Setter Property="BorderThickness" Value="15"/>
 
                                             </DataTrigger>
 
-                                            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                            <DataTrigger Binding="{Binding ItemInCell}" Value="True">
                                                 <Setter Property="Background" Value="Yellow"/>
                                             </DataTrigger>
                                         </Style.Triggers>

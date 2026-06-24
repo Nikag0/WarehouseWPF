@@ -21,50 +21,50 @@ namespace WMS.Application.Services
             _operationRepo = operationRepo;
         }
 
-        public async Task InventoryAsync(
-            IReadOnlyCollection<ServiceItemDTO> items,
-            string? comment = null)
-        {
-            if (items.Count == 0)
-                throw new Exception("Список инвентаризации пуст");
+        //public async Task InventoryAsync(
+        //    IReadOnlyCollection<ServiceItemDTO> items,
+        //    string? comment = null)
+        //{
+        //    if (items.Count == 0)
+        //        throw new Exception("Список инвентаризации пуст");
 
-            var operation = Operation.Create(OperationType.Inventory, comment);
+        //    var operation = Operation.Create(OperationType.Inventory, comment);
 
-            foreach (var item in items)
-            {
-                var stock = await _stockRepo
-                    .GetAsync(item.RackId, item.ComponentId, item.CellId);
+        //    foreach (var item in items)
+        //    {
+        //        var stock = await _stockRepo
+        //            .GetAsync(item.RackId, item.ComponentId, item.CellId);
 
-                int before;
+        //        int before;
 
-                if (stock is null)
-                {
-                    stock = Stock.Create(
-                        item.ComponentId,
-                        item.CellId,
-                        item.RackId,
-                        item.Quantity);
+        //        if (stock is null)
+        //        {
+        //            stock = Stock.Create(
+        //                item.ComponentId,
+        //                item.CellId,
+        //                item.RackId,
+        //                item.Quantity);
 
-                    before = 0;
-                    await _stockRepo.AddAsync(stock);
-                }
-                else
-                {
-                    before = stock.Quantity;
-                    stock.Inventory(item.Quantity);
-                    await _stockRepo.UpdateAsync(stock);
-                }
+        //            before = 0;
+        //            await _stockRepo.AddAsync(stock);
+        //        }
+        //        else
+        //        {
+        //            before = stock.Quantity;
+        //            stock.Inventory(item.Quantity);
+        //            await _stockRepo.UpdateAsync(stock);
+        //        }
 
-                operation.AddItem(
-                    item.ComponentId,
-                    item.RackId,
-                    item.CellId,
-                    before,
-                    stock.Quantity);
-            }
+        //        operation.AddItem(
+        //            item.ComponentId,
+        //            item.RackId,
+        //            item.CellId,
+        //            before,
+        //            stock.Quantity);
+        //    }
 
-            operation.Validate();
-            await _operationRepo.AddAsync(operation);
-        }
+        //    operation.Validate();
+        //    await _operationRepo.AddAsync(operation);
+        //}
     }
 }

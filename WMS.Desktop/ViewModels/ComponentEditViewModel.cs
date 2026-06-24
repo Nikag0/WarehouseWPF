@@ -75,7 +75,7 @@ namespace WMS.Desktop.ViewModels
                     _dialogService.ShowWarning(result.Error, "Предупреждение");
                 }
             }
-            catch (OverallDomainException domainEx)
+            catch (BusinessException domainEx)
             {
                 _dialogService.ShowWarning(domainEx.Message, "Ошибка заполнения полей");
             }

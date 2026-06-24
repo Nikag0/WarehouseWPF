@@ -13,15 +13,16 @@ namespace WMS.Application
         {
             return new ViewItemDTO(
                 s.ComponentId,
-                s.Component?.Article ?? string.Empty,
-                s.Component?.Name ?? string.Empty,
-                s.Component?.Manufacturer ?? string.Empty,
+                s.Component.Article,
+                s.Component.Name,
+                s.Component.Manufacturer,
+                s.Id,
                 s.RackId,
-                s.Rack?.RackCode ?? string.Empty,
-                s.Rack != null ? LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row) : string.Empty,
+                s.Rack.RackCode,
+                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
                 s.CellId,
-                s.Cell?.CellCode ?? string.Empty,
-                s.Cell != null ? LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row) : string.Empty,
+                s.Cell.CellCode,
+                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity,
                 0
             );
@@ -31,9 +32,10 @@ namespace WMS.Application
         {
             return new ViewItemDTO(
                 c.Id,
-                c.Article ?? string.Empty,
-                c.Name ?? string.Empty,
-                c.Manufacturer ?? string.Empty,
+                c.Article,
+                c.Name,
+                c.Manufacturer,
+                Guid.Empty,
                 Guid.Empty,
                 string.Empty,
                 string.Empty,

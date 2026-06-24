@@ -11,7 +11,7 @@ namespace WMS.Application.Abstractions
     {
         Task<IReadOnlyList<Stock>> GetAllAsync();
         Task<List<Stock>> GetRawStockDataAsync();
-        Task<Stock?> GetAsync(Guid rackId, Guid componentId, Guid cellId);
+        Task<Stock?> GetStockAsync(Guid stockId);
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
         Task RemoveAsync(Stock stock);
