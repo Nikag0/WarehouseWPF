@@ -9,7 +9,7 @@ namespace WMS.Application.Abstractions
 {
     public interface IRackRepository
     {
-        Task<List<Rack>> GetAllAsync();
-        Task<Rack> GetRackAsync(Guid id);
+        Task<IReadOnlyList<Rack>> GetAllAsync();
+        Task<Rack?> GetByIdAsync(Guid id);
     }
 }

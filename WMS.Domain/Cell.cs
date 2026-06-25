@@ -11,23 +11,18 @@ namespace WMS.Domain
         public Guid Id { get; private set; }
 
         public Guid RackId { get; private set; }
-        public Rack Rack { get; private set; }
 
         public int Column { get; private set; }
         public int Row { get; private set; }
 
         private Cell() { }
 
-        internal Cell(Rack rack, Guid rackId, int column, int row)
+        internal Cell(Guid rackId, int column, int row)
         {
             Id = Guid.NewGuid();
             RackId = rackId;
-            Rack = rack;
             Column = column;
             Row = row;
         }
-
-        public string CellCode => $"{Column}-{Row}";
-        public string FullCode => $"{Rack.Column}-{Rack.Row}-{Column}-{Row}";
     }
 }

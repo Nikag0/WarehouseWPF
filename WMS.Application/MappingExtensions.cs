@@ -18,10 +18,10 @@ namespace WMS.Application
                 s.Component.Manufacturer,
                 s.Id,
                 s.RackId,
-                s.Rack.RackCode,
+                $"{s.Rack.Column}-{s.Rack.Row}",
                 LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
                 s.CellId,
-                s.Cell.CellCode,
+                $"{s.Cell.Column}-{s.Cell.Row}",
                 LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity,
                 0

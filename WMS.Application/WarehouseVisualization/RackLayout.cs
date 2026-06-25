@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using WMS.Domain;
 
 namespace WMS.Application.WarehouseVisualization
 {
@@ -13,7 +14,6 @@ namespace WMS.Application.WarehouseVisualization
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public RackType Type { get; set; }
-        public List<CellLayout> Cells { get; set; }
 
         public double X { get; set; }
         public double Y { get; set; }

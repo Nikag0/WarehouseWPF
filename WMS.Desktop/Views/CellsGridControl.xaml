@@ -122,7 +122,6 @@
 
         </Grid>
 
-        <!-- левый столбец номеров для RackType2 -->
         <Grid Grid.Column="0" Grid.Row="1"
               Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
                                    Converter={StaticResource RackTypeToVisibilityConverter},
@@ -219,7 +218,8 @@
                  Grid.Row="1"
                  Stretch="Fill">
             
-            <Grid>
+            <Grid Grid.Column="1"
+                  Grid.Row="1">
 
                 <Image Source="{Binding SelectedRack.Type, Converter={StaticResource RackImageConverter}}"
                        Stretch="Fill"/>
@@ -227,7 +227,7 @@
                 <ItemsControl ItemsSource="{Binding Cells, RelativeSource={RelativeSource AncestorType=UserControl}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <Canvas />
+                            <Canvas/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
@@ -241,26 +241,21 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Width="{Binding Width}"
-                                    Height="{Binding Height}"
-                                    BorderBrush="Black"
-                                    BorderThickness="1"
-                                    Opacity="0.5">
+                                    Height="{Binding Height}">
                                 
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="Transparent"/>
 
                                         <Style.Triggers>
-
-                                            <DataTrigger Binding="{Binding ItemInCell}" Value="True">
-                                                <Setter Property="Background" Value="Yellow"/>
-                                            </DataTrigger>
-
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="BorderBrush" Value="LightBlue"/>
-                                                <Setter Property="BorderThickness" Value="15"/>
+                                                <Setter Property="BorderThickness" Value="10"/>  
                                             </DataTrigger>
 
+                                            <DataTrigger Binding="{Binding ItemInCell}" Value="True">
+                                                <Setter Property="Background" Value="#CDA434"/>
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>

@@ -13,19 +13,13 @@ namespace WMS.Application.Services
     {
         private readonly IStockRepository _stockRepo;
         private readonly IComponentRepository _componentRepo;
-        private readonly IRackRepository _rackRepo;
-        private readonly ICellRepository _cellRepo;
 
         public StockService(
             IStockRepository stockRepo,
-            IComponentRepository componentRepo,
-            IRackRepository rackRepo,
-            ICellRepository cellRepo)
+            IComponentRepository componentRepo)
         {
             _stockRepo = stockRepo;
             _componentRepo = componentRepo;
-            _rackRepo = rackRepo;
-            _cellRepo = cellRepo;
         }
 
         public async Task<List<ViewItemDTO>> GetAllAsync()

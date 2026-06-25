@@ -38,7 +38,6 @@ namespace WMS.Desktop
             services.AddScoped<IStockRepository, StockRepository>();
             services.AddScoped<IComponentRepository, ComponentRepository>();
             services.AddScoped<IOperationRepository, HistoryRepository>();
-            services.AddScoped<ICellRepository, CellRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IOperatorRepository, OperatorRepository>();
 
@@ -48,10 +47,10 @@ namespace WMS.Desktop
             services.AddScoped<InventoryService>();
             services.AddScoped<ReceiptService>();
             services.AddScoped<StockService>();
-            services.AddScoped<CellService>();
             services.AddScoped<RackService>();
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
+            services.AddScoped<WarehouseService>();
 
             // view models
             services.AddSingleton<MainViewModel>();

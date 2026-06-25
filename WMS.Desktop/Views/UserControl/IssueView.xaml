@@ -292,12 +292,13 @@
             <local:RacksGridControl x:Name="RacksGrid"
                                     Grid.Row="0"
                                     Racks="{Binding RacksGrid}" 
-                                    SelectedRack="{Binding SelectedRack}"/>
+                                    SelectedRack="{Binding SelectedRack}"
+                                    Margin="0,0,0,5"/>
 
             <local:CellsGridControl Grid.Row="1"
                                     Cells="{Binding CellsGrid}"
-                                    RackType="{Binding SelectedRack.Type}" />
-
+                                    RackType="{Binding SelectedRack.Type}"
+                                    Margin="0,5,0,10"/>
         </Grid>
 
     </Grid>

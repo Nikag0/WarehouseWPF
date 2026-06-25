@@ -36,21 +36,19 @@ namespace WMS.Desktop.ViewModels
                 foreach (var rack in RacksGrid)
                     rack.IsSelected = rack == value;
 
-                SelectCellsForRack();
+                LoadCells();
                 UpdateCellHighlights();
             }
         }
 
-        private readonly CellService _cellService;
         private readonly DialogService _dialogService;
         private readonly IssueService _issueService;
         private readonly OperatorService _operatorService;
-        private readonly RackService _rackService;
         private readonly StockService _stockService;
+        private readonly WarehouseService _warehouseService;
 
         private CancellationTokenSource? _cts;
         
-        private Dictionary<Guid, List<CellViewModel>> _groupedCellsCache = new(); // словарь всех ячеек, привязанных к RackId
         [ObservableProperty] private string _commentText = string.Empty;
         [ObservableProperty] private bool _isIssue;
         [ObservableProperty] private bool _isIssuePopupOpen;
@@ -65,15 +63,13 @@ namespace WMS.Desktop.ViewModels
             IssueService issueService,
             DialogService dialogService,
             OperatorService operatorService,
-            CellService cellService,
-            RackService rackService)
+            WarehouseService warehouseService)
         {
             _issueService = issueService;
             _stockService = stockService;
             _dialogService = dialogService;
             _operatorService = operatorService;
-            _cellService = cellService;
-            _rackService = rackService;
+            _warehouseService = warehouseService;
         }
 
 
@@ -173,18 +169,12 @@ namespace WMS.Desktop.ViewModels
             try
             {
                 await Task.WhenAll(
-                    CreateRacksGridAsync(),
-                    LoadCellsLookupAsync(),
+                    LoadWarehouseAsync(),
                     LoadOperators()
                 );
 
                 UpdateRackHighlights();
                 UpdateCellHighlights();
-
-                if (SelectedRack != null)
-                {
-                    SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == SelectedRack.Id);
-                }
             }
             catch (BusinessException ex)
             {
@@ -228,7 +218,7 @@ namespace WMS.Desktop.ViewModels
             if (obj is not ViewItemDTO item)
                 return;
 
-            if (IssueItems.Any(x => x.RackId == item.RackId))
+            if (IssueItems.Any(x => x.StockId == item.StockId))
                 return;
 
             try
@@ -242,52 +232,29 @@ namespace WMS.Desktop.ViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
-
         }
 
-        private async Task CreateRacksGridAsync()
+        private async Task LoadWarehouseAsync()
         {
-            try
-            {
-                var racksData = await _rackService.GetRacksWithLayoutsAsync();
+            var racks = await _warehouseService.GetWarehouseAsync();
 
-                var preparedViewModels = await Task.Run(() =>
-                {
-                    var list = new List<RackViewModel>();
-                    foreach (var item in racksData)
-                    {
-                        list.Add(new RackViewModel(item.Rack, item.Layout));
-                    }
-                    return list;
-                });
+            RacksGrid.Clear();
 
-                RacksGrid.Clear();
-                foreach (var vm in preparedViewModels)
-                {
-                    RacksGrid.Add(vm);
-                }
-            }
-            catch (FileNotFoundException ex)
+            foreach (var rackDTO in racks)
             {
-                _dialogService.ShowError($"{ex.Message}");
+                RacksGrid.Add(new RackViewModel(rackDTO));
             }
         }
-
-        private async Task LoadCellsLookupAsync()
+        private void LoadCells()
         {
-            try
-            {
-                var allCellsWithLayouts = await _cellService.GetCellsWithLayoutsAsync();
+            CellsGrid.Clear();
 
-                _groupedCellsCache = allCellsWithLayouts.GroupBy(pair => pair.cell.RackId)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Select(pair => new CellViewModel(pair.cell, pair.layout)).ToList()
-                    );
-            }
-            catch (FileNotFoundException ex)
+            if (SelectedRack is null)
+                return;
+
+            foreach (var cell in SelectedRack.Cells)
             {
-                _dialogService.ShowError($"{ex.Message}");
+                CellsGrid.Add(cell);
             }
         }
 
@@ -347,22 +314,6 @@ namespace WMS.Desktop.ViewModels
                     // Задача отменена новым вводом текста — ничего не делаем
                 }
             });
-        }
-
-        private void SelectCellsForRack()
-        {
-            if (SelectedRack == null)
-                return;
-
-            CellsGrid.Clear();
-
-            if (_groupedCellsCache.TryGetValue(SelectedRack.Id, out var cachedCells))
-            {
-                foreach (var cellVm in cachedCells)
-                {
-                    CellsGrid.Add(cellVm);
-                }
-            }
         }
 
         private void UpdateCellHighlights()

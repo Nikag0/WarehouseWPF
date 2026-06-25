@@ -113,20 +113,16 @@
                                     
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="BorderBrush" Value="Black"/>
-                                        <Setter Property="BorderThickness" Value="1"/>
-                                        <Setter Property="Opacity" Value="0.5"/>
-                                        
+                                        <Setter Property="Opacity" Value="5"/>
+
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-
                                                 <Setter Property="BorderBrush" Value="LightBlue"/>
-                                                <Setter Property="BorderThickness" Value="15"/>
-
+                                                <Setter Property="BorderThickness" Value="10"/>
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding ItemInCell}" Value="True">
-                                                <Setter Property="Background" Value="Yellow"/>
+                                                <Setter Property="Background" Value="#CDA434"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>

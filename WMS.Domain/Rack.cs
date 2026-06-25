@@ -11,20 +11,19 @@ namespace WMS.Domain
         public Guid Id { get; private set; }
         public int Column { get; private set; }
         public int Row { get; private set; }
-        public string Type { get; private set; }
+        public RackType Type { get; private set; }
 
         private readonly List<Cell> _cells = new();
         public IReadOnlyCollection<Cell> Cells => _cells;
 
-        private Rack() { } // EF
+        private Rack() { }
 
-        public Rack(int column, int row)
+        public Rack(int column, int row, RackType type)
         {
             Id = Guid.NewGuid();
             Column = column;
             Row = row;
+            Type = type;
         }
-
-        public string RackCode => $"{Column}-{Row}";
     }
 }

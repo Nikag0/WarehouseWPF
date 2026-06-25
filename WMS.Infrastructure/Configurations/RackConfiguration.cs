@@ -20,8 +20,8 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.Column)
                 .IsRequired();
 
-            builder.Property(x => x.Row)
-                .IsRequired();
+            builder.Property(x => x.Type)
+                .HasConversion<string>();
 
             builder.Property(x => x.Type)
                .IsRequired();
@@ -29,10 +29,7 @@ namespace WMS.Infrastructure.Configurations
             builder.HasIndex(x => new { x.Column, x.Row })
                 .IsUnique();
 
-            // Связь (опционально, но полезно явно задать)
-            builder.HasMany(x => x.Cells)
-                .WithOne(c => c.Rack)
-                .HasForeignKey(c => c.RackId);
+            builder.HasMany(x => x.Cells);
         }
     }
 }

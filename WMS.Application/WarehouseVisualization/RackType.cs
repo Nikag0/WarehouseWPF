@@ -1,6 +1,0 @@
-﻿public enum RackType
-{
-    R1,
-    R2,
-    R3
-}

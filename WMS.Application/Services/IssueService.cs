@@ -12,22 +12,15 @@ namespace WMS.Application.Services
     public class IssueService
     {
         private readonly IStockRepository _stockRepo;
-        private readonly IComponentRepository _componentRepo;
-        private readonly ICellRepository _cellRepo;
-        private readonly IRackRepository _rackRepo;
         private readonly IOperationRepository _operationRepo;
 
         public IssueService(
             IStockRepository stockRepo,
             IComponentRepository componentRepo,
             IRackRepository rackRepo,
-            ICellRepository cellRepo,
             IOperationRepository operationRepo)
         {
             _stockRepo = stockRepo;
-            _componentRepo = componentRepo;
-            _rackRepo = rackRepo;
-            _cellRepo = cellRepo;
             _operationRepo = operationRepo;
         }
 

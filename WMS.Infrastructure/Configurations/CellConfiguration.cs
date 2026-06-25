@@ -26,12 +26,6 @@ namespace WMS.Infrastructure.Configurations
             builder.Property(x => x.Row)
                 .IsRequired();
 
-            // Связь: один Rack -> много Cell
-            builder.HasOne(x => x.Rack)
-                .WithMany(r => r.Cells)
-                .HasForeignKey(x => x.RackId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             // Уникальность внутри одного Rack
             builder.HasIndex(x => new { x.RackId, x.Column, x.Row })
                 .IsUnique();
