@@ -21,7 +21,7 @@ namespace WMS.Application.DTO
         public double Width { get; init; }
         public double Height { get; init; }
 
-        public IReadOnlyList<CellDTO> Cells { get; init; }
-       = Array.Empty<CellDTO>();
+        public IReadOnlyList<CellDto> Cells { get; init; }
+       = Array.Empty<CellDto>();
     }
 }

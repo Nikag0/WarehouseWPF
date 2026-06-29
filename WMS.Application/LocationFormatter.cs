@@ -1,8 +1,11 @@
-﻿public static class LocationFormatter
+﻿using System.Reflection.Emit;
+using WMS.Domain;
+
+public static class LocationFormatter
 {
     public static string CodeToDisplay(int column, int row)
     {
-        return $"{NumToLetter(column)}-{row}";
+        return $"{column}-{NumToLetter(row)}";
     }
 
     public static string NumToLetter(int number)
@@ -21,13 +24,12 @@
         };
     }
 
-    public static string NumToOperation(int operationType)
+    public static string NumToOperation(OperationType operationType)
     {
         return operationType switch
         {
-            1 => "Приёмка",
-            2 => "Выдача",
-            3 => "Инвентаризация",
+            OperationType.Receipt => "Приёмка",
+            OperationType.Issue => "Выдача",
             _ => operationType.ToString()
         };
     }

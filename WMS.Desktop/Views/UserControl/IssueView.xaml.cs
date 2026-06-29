@@ -74,6 +74,17 @@ namespace WMS.Desktop.Views
                     vm.IsIssuePopupOpen = false;
                     Keyboard.ClearFocus();
                 });
+
+            PopupHelper.HandleOutsideClick(
+                sender,
+                e,
+                IssuePopup,
+                SearchToIssue,
+                () =>
+                {
+                    vm.IsIssuePopupOpen = false;
+                    Keyboard.ClearFocus();
+                });
         }
     }
 }

@@ -7,28 +7,19 @@ namespace WMS.Application.Services
     {
         private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepo;
-        private readonly IOperationRepository _operationRepo;
+        private readonly IHistoryRepository _historyRepo;
 
         public ReceiptService(
             IComponentRepository componentRepo,
             IStockRepository stockRepo, 
-            IRackRepository rackRepo,
-            IOperationRepository operationRepo)
+            IHistoryRepository operationRepo)
         {
             _componentRepo = componentRepo;
             _stockRepo = stockRepo;
-            _operationRepo = operationRepo;
+            _historyRepo = operationRepo;
         }
 
-        public async Task<List<ViewItemDTO>> GetAllComponentsAsync()
-        {
-            var components = await _componentRepo.GetAllAsync();
-
-            return components
-                .Select(MappingExtensions.ToViewItemDto).ToList(); ;
-        }
-
-        public async Task ReceiveAsync(ServiceItemDTO item, string operatorName, string? comment = null)
+        public async Task ReceiveAsync(ReceiptItemDto item, string operatorName, string? comment = null)
         {
             if (item == null)
                 return;
@@ -40,7 +31,7 @@ namespace WMS.Application.Services
             if (component is null)
                     throw new Exception($"Компонент {item.ComponentId} не найден");
 
-            Stock? stock = await _stockRepo.GetStockAsync(item.RackId);
+            Stock? stock = await _stockRepo.GetByLocationAsync(item.ComponentId, item.RackId, item.CellId);
 
             int before;
 
@@ -67,13 +58,13 @@ namespace WMS.Application.Services
 
             operation.Validate();
 
-            await _operationRepo.AddAsync(operation);
+            await _historyRepo.AddAsync(operation);
         }
 
-        public async Task<IEnumerable<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
         {
-            var stocks = await _stockRepo.GetFilteredStockAsync(searchText, maxCount);
-            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount);
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
+            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount, token);
 
             var result = new List<ViewItemDTO>();
 
@@ -91,7 +82,14 @@ namespace WMS.Application.Services
                 result.Add(MappingExtensions.ToViewItemDto(component));
             }
 
-            return result.Take(maxCount);
+            return result.Take(maxCount).ToList();
+        }
+
+        public async Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId)
+        {
+            var result = await _stockRepo.GetByRackAsync(rackId);
+
+            return result.Select(MappingExtensions.ToViewItemDto).ToList();
         }
     }
 }

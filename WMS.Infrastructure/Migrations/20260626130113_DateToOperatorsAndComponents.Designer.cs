@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WMS.Infrastructure;
@@ -11,9 +12,11 @@ using WMS.Infrastructure;
 namespace WMS.Infrastructure.Migrations
 {
     [DbContext(typeof(WmsDbContext))]
-    partial class WmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260626130113_DateToOperatorsAndComponents")]
+    partial class DateToOperatorsAndComponents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,7 +129,7 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<Guid>("ComponentId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("OperationId")
+                    b.Property<Guid?>("OperationId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("QuantityAfter")
@@ -139,8 +142,6 @@ namespace WMS.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ComponentId");
 
                     b.HasIndex("OperationId");
 
@@ -247,21 +248,10 @@ namespace WMS.Infrastructure.Migrations
 
             modelBuilder.Entity("WMS.Domain.OperationItem", b =>
                 {
-                    b.HasOne("WMS.Domain.Component", "Component")
-                        .WithMany()
-                        .HasForeignKey("ComponentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WMS.Domain.Operation", "Operation")
+                    b.HasOne("WMS.Domain.Operation", null)
                         .WithMany("Items")
                         .HasForeignKey("OperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Component");
-
-                    b.Navigation("Operation");
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("WMS.Domain.Stock", b =>

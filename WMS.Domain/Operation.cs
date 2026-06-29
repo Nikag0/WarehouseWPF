@@ -32,6 +32,8 @@ public class Operation
         if (operatorName == string.Empty || operatorName == null)
             throw new BusinessException("Имя оператора не указано");
 
+        if (comment == null) comment = string.Empty;
+
         return new Operation(type, operatorName, comment);
     }
 
@@ -64,5 +66,4 @@ public class Operation
         if (_items.Count == 0)
             throw new BusinessException("Операция не может быть пустой");
     }
-
 }

@@ -46,5 +46,39 @@ namespace WMS.Application
                 0
             );
         }
+        public static ComponentDTO ToComponentDTO(this Component c)
+        {
+            return new ComponentDTO(
+                c.Id,
+                c.Article,
+                c.Name,
+                c.Manufacturer,
+                c.ExpirationDate,
+                c.MinQuantity
+            );
+        }
+
+        public static OperatorDTO ToOperatorDTO(this Operator o)
+        {
+            return new OperatorDTO(
+                o.Id,
+                o.Surname,
+                o.Name,
+                o.Patronymic,
+                o.FullName
+            );
+        }
+
+        public static HistoryDto ToHistoryDTO(this OperationItem o)
+        {
+            return new HistoryDto(
+                o.Operation.OccurredAt,
+                o.Operation.Operator,
+                LocationFormatter.NumToOperation(o.Operation.Type),
+                o.Component.Name,
+                o.QuantityBefore,
+                o.QuantityAfter
+            );
+        }
     }
 }

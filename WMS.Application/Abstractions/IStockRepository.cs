@@ -10,13 +10,16 @@ namespace WMS.Application.Abstractions
     public interface IStockRepository
     {
         Task<IReadOnlyList<Stock>> GetAllAsync();
-        Task<List<Stock>> GetRawStockDataAsync();
-        Task<Stock?> GetStockAsync(Guid stockId);
+        Task<Stock?> GetByIdAsync(Guid stockId);
+        Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId);
+        Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId);
+        Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount);
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
-        Task RemoveAsync(Stock stock);
+        Task DeletAsync(Stock stock);
+
+        //Можно подумать над реалзацией.
+        Task<List<Stock>> GetRawStockDataAsync();
         Task<bool> HasStockWithQuantityAsync(Guid componentId);
-        Task<List<Stock>> GetFilteredStockAsync(string searchText, int maxCount);
-        Task<IEnumerable<Stock>> GetStocksInRackAsync(Guid rackId);
     }
 }

@@ -17,13 +17,16 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class SettingsViewModel : ObservableObject
     {
+        [ObservableProperty] private ObservableCollection<ComponentDTO> _filteredComponents = new();
+        [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
+        [ObservableProperty] private string _searchComponent = string.Empty;
+
+        private CancellationTokenSource? _cts;
+
+
         private readonly ComponentService _componentService;
         private readonly OperatorService _operatorService;
         private readonly DialogService _dialogService;
-
-        [ObservableProperty] private ObservableCollection<ComponentDTO> _filteredComponents = new();
-        [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
-
         public SettingsViewModel(
             ComponentService componentService,
             OperatorService operatorService,
@@ -32,25 +35,14 @@ namespace WMS.Desktop.ViewModels
             _componentService = componentService;
             _operatorService = operatorService;
             _dialogService = dialogService;
-
-            _ = LoadDataAsync();
         }
 
-        private async Task LoadDataAsync()
+        public async Task LoadDataAsync()
         {
             try
             {
-                var componentsResult = await _componentService.GetAllAsync();
+                OnSearchComponentChanged(_searchComponent);
                 var operatorsList = await _operatorService.GetAllAsync();
-
-                if (componentsResult.IsSuccess)
-                {
-                    FilteredComponents = new ObservableCollection<ComponentDTO>(componentsResult.Value);
-                }
-                else
-                {
-                    _dialogService.ShowWarning(componentsResult.Error, "Ошибка загрузки каталога");
-                }
 
                 FilteredOperators = new ObservableCollection<Operator>(operatorsList);
             }
@@ -152,6 +144,35 @@ namespace WMS.Desktop.ViewModels
                     _dialogService.ShowWarning(result.Error, "Предупреждение");
                 }
             }
+        }
+
+        partial void OnSearchComponentChanged(string value)
+        {
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(500, _cts.Token);
+
+                    var result = await _componentService.GetFilteredAsync(searchText: value, maxCount: 100, _cts.Token);
+
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (!_cts.Token.IsCancellationRequested)
+                        {
+                            FilteredComponents.Clear();
+                            foreach (var component in result)
+                            {
+                                FilteredComponents.Add(component);
+                            }
+                        }
+                    });
+                }
+                catch (OperationCanceledException) { }
+            });
         }
     }
 }

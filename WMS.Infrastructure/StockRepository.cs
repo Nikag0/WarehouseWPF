@@ -28,19 +28,33 @@ namespace WMS.Infrastructure
             return await db.Stocks.ToListAsync();
         }
 
-        public async Task<List<Stock>> GetRawStockDataAsync()
+        public async Task<Stock?> GetByIdAsync(Guid stockId)
         {
             using var db = _factory.CreateDbContext();
 
             return await db.Stocks
-                .AsNoTracking() // Отключаем кэш отслеживания для скорости чтения
-                .Include(s => s.Component) // SQL INNER JOIN к таблице Components
-                .Include(s => s.Rack)      // SQL INNER JOIN к таблице Racks
-                .Include(s => s.Cell)      // SQL INNER JOIN к таблице Cells
-                .ToListAsync();
+                .AsNoTracking()
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .FirstOrDefaultAsync(x => x.Id == stockId);
         }
 
-        public async Task<IEnumerable<Stock>> GetStocksInRackAsync(Guid rackId)
+        public async Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId)
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Stocks
+                .AsNoTracking()
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
+                                          s.RackId == rackId &&
+                                          s.CellId == cellId);
+        }
+
+        public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId)
         {
             using var db = _factory.CreateDbContext();
 
@@ -53,31 +67,11 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
-        public async Task<Stock?> GetStockAsync(Guid stockId)
-        {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Stocks
-                .AsNoTracking()
-                .Include(s => s.Component)
-                .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .FirstOrDefaultAsync(x =>x.Id == stockId);
-        }
-
         public async Task AddAsync(Stock stock)
         {
             using var db = _factory.CreateDbContext();
 
             db.Stocks.Add(stock);
-            await db.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(Stock stock)
-        {
-            using var db = _factory.CreateDbContext();
-
-            db.Stocks.Remove(stock);
             await db.SaveChangesAsync();
         }
 
@@ -89,18 +83,20 @@ namespace WMS.Infrastructure
             await db.SaveChangesAsync();
         }
 
-        public async Task<bool> HasStockWithQuantityAsync(Guid componentId)
+        public async Task DeletAsync(Stock stock)
         {
-            using var context = _factory.CreateDbContext();
-            return await context.Stocks
-                .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
+            using var db = _factory.CreateDbContext();
+
+            db.Stocks.Remove(stock);
+            await db.SaveChangesAsync();
         }
 
-        public async Task<List<Stock>> GetFilteredStockAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount)
         {
             using var db = _factory.CreateDbContext();
 
             var query = db.Stocks
+                .AsNoTracking()
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
                 .Include(s => s.Cell)
@@ -117,12 +113,30 @@ namespace WMS.Infrastructure
                 );
             }
 
-            var result = await query
+            return await query
                 .OrderBy(s => s.Component.Name)
                 .Take(maxCount)
                 .ToListAsync();
-
-            return result;
         }
+        //Можно подумать над реалзацией.
+        public async Task<List<Stock>> GetRawStockDataAsync()
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Stocks
+                .AsNoTracking() // Отключаем кэш отслеживания для скорости чтения
+                .Include(s => s.Component) // SQL INNER JOIN к таблице Components
+                .Include(s => s.Rack)      // SQL INNER JOIN к таблице Racks
+                .Include(s => s.Cell)      // SQL INNER JOIN к таблице Cells
+                .ToListAsync();
+        }
+
+        public async Task<bool> HasStockWithQuantityAsync(Guid componentId)
+        {
+            using var context = _factory.CreateDbContext();
+            return await context.Stocks
+                .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
+        }
+
     }
 }

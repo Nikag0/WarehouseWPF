@@ -5,10 +5,15 @@ namespace WMS.Domain;
 public class OperationItem
 {
     public Guid Id { get; private set; }
-
+    public Guid OperationId { get; private set; }
+    // Навигационное свойство.
+    public Operation Operation { get; private set; } = null!;
     public Guid ComponentId { get; private set; }
+    // Навигационное свойство.
+    public Component Component { get; private set; } = null!;
     public Guid CellId { get; private set; }
     public Guid RackId { get; private set; }
+
 
     public int QuantityBefore { get; private set; }
     public int QuantityAfter { get; private set; }

@@ -16,25 +16,31 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="110"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="{Binding WindowTitle}" Style="{StaticResource WindowNames}" Margin="0,0,0,20" FontSize="18"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Артикул:" VerticalAlignment="Center" Foreground="White" Margin="0,5" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Article, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Артикул:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Article, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Название:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Название:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Производитель:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Производитель:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Срок годности:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
+        <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding ExpirationDate, Mode=TwoWay}" Margin="0,5"/>
 
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Мин. остаток:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button Content="Применить" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="100" Height="30" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>
             <Button Content="Отменить" IsCancel="True" Width="100" Height="30" Style="{StaticResource ButtonStyle}"/>
         </StackPanel>

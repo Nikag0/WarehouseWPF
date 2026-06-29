@@ -3,6 +3,5 @@
 public enum OperationType
 {
     Receipt = 1,        // Приёмка
-    Issue = 2,          // Выдача
-    Inventory = 3       // Инвентаризация
+    Issue = 2          // Выдача
 }

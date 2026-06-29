@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS.Desktop.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="1008" d:DesignWidth="1920">
 
     <Grid Margin="5,0,0,0"
        Background="#36495b">
@@ -19,11 +19,73 @@
         <TextBlock Text="История операций"
                    Style="{StaticResource WindowNames}"/>
 
-        <TextBox Grid.Row="1"
-                 Margin="0,5,0,5" 
-                 Tag="Поиск:"
-                 Style="{StaticResource SearchTextBox}"
-                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+        <Grid Grid.Row="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="49*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="15*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox 
+                Grid.Column="0"
+                Margin="0,5,0,5" 
+                Tag="Поиск:"
+                Style="{StaticResource SearchTextBox}"
+                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+            </TextBox>
+
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                Text="От:"
+                Foreground="White"
+                FontSize="20"/>
+
+            <DatePicker
+                Grid.Column="2"
+                Margin="5,0,10,0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Stretch"
+                SelectedDate="{Binding DateFrom}">
+            </DatePicker>
+
+            <TextBlock
+                Grid.Column="3"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                Text="До:"
+                Foreground="White"
+                FontSize="20"/>
+
+            <DatePicker
+                Grid.Column="4"
+                Margin="5,0,10,0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Stretch"
+                SelectedDate="{Binding DateTo}" />
+
+            <TextBlock
+                Grid.Column="5"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                Text="Тип:"
+                Foreground="White"
+                FontSize="20"/>
+
+            <ComboBox
+                Grid.Column="6"
+                ItemsSource="{Binding Type}"
+                SelectedItem="{Binding SelectedOperationType}"
+                Margin="5,5,5,5" />
+
+        </Grid>
+        
 
         <Grid Grid.Row="2"
               Width="300"
@@ -33,8 +95,8 @@
 
         <Grid Grid.Row="3"
               Margin="0,5,0,5">
-
-            <DataGrid ItemsSource="{Binding HistoryItems}" 
+            
+            <DataGrid ItemsSource="{Binding History}" 
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
                       FontSize="15"
@@ -43,9 +105,9 @@
                       ScrollViewer.CanContentScroll="True">
                 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt}" Width="100*"/>
+                    <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*"/>
                     <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="200*"/>
-                    <DataGridTextColumn Header="Тип операции" Binding="{Binding OperationType}" Width="100*"/>
+                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="100*"/>
                     <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="100*"/>
                     <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="100*"/>
                     <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="100*"/>

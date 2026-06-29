@@ -29,7 +29,7 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
-        public async Task<Rack?> GetByIdAsync(Guid id)
+        public async Task<Rack?> GetRackAsync(Guid id)
         {
             using var db = _factory.CreateDbContext();
 

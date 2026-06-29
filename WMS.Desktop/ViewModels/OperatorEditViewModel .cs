@@ -47,13 +47,22 @@ namespace WMS.Desktop.ViewModels
             {
                 if (_isEditMode)
                 {
-                    _currentOperator.Update(Surname, Name, Patronymic);
-                    await _operatorService.UpdateAsync(_currentOperator);
+                    await _operatorService.UpdateAsync(
+                        new OperatorDTO(
+                            _currentOperator.Id,
+                            Surname,
+                            Name,
+                            Patronymic,
+                            $"{Surname} {Name[0]}. {Patronymic[0]}."
+                        ));
                 }
                 else
                 {
-                    var newOperator = Operator.Create(Surname, Name, Patronymic);
-                    await _operatorService.AddAsync(newOperator);
+                    await _operatorService.AddAsync(
+                        Surname,
+                        Name,
+                        Patronymic
+                    );
                 }
 
                 if (window != null)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,21 +16,21 @@ namespace WMS.Domain
         public string Surname { get; private set; }
         public string Name { get; private set; }
         public string Patronymic { get; private set; }
-        public bool IsDeleted { get; private set; }
-
-        public void Delete()
-        {
-            IsDeleted = true;
-        }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
+        public bool IsDeleted { get; private set; } 
 
         private Operator() { } // для EF
 
-        private Operator(Guid id, string surname, string name, string patronymic)
+        private Operator(Guid id, string surname, string name, string patronymic, DateTime createdAt, DateTime updatedAt)
         {
             Id = id;
             Surname = surname;
             Name = name;
             Patronymic = patronymic;
+
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
         }
 
         public static Operator Create(
@@ -36,24 +38,34 @@ namespace WMS.Domain
             string name,
             string patronymic)
         {
-            if (surname == string.Empty)
-                throw new BusinessException("Фамилия не задана");
+            Validate(surname, name, patronymic);
 
-            if (name == string.Empty)
-                throw new BusinessException("Имя не задано");
-
-            if (patronymic == string.Empty)
-                throw new BusinessException("Отчество не задано");
-
+            var now = DateTime.UtcNow;
 
             return new Operator(
                 Guid.NewGuid(),
                 surname,
                 name,
-                patronymic);
+                patronymic,
+                now,
+                now);
         }
 
         public void Update(string surname, string name, string patronymic)
+        {
+            Validate(surname, name, patronymic);
+
+            UpdatedAt = DateTime.UtcNow;
+
+            Surname = surname.Trim();
+            Name = name.Trim();
+            Patronymic = patronymic.Trim();
+        }
+
+        private static void Validate(
+            string surname,
+            string name,
+            string patronymic)
         {
             if (string.IsNullOrWhiteSpace(surname))
                 throw new BusinessException("Фамилия не задана");
@@ -63,14 +75,16 @@ namespace WMS.Domain
 
             if (string.IsNullOrWhiteSpace(patronymic))
                 throw new BusinessException("Отчество не задано");
-
-
-            Surname = surname.Trim();
-            Name = name.Trim();
-            Patronymic = patronymic.Trim();
         }
 
+        public void Delete()
+        {
+            if (IsDeleted)
+                return;
 
-        public string FullName => $"{Surname} {Name?.FirstOrDefault()}. {Patronymic?.FirstOrDefault()}.";
+            IsDeleted = true;
+        }
+
+        public string FullName =>$"{Surname} {Name[0]}. {Patronymic[0]}.";
     }
 }

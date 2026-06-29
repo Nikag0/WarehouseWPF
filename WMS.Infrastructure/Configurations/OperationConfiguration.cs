@@ -28,10 +28,10 @@ namespace WMS.Infrastructure.Configurations
                 .HasMaxLength(500);
 
             builder
-                .HasMany(x => x.Items)
-                .WithOne()
-                .HasForeignKey("OperationId")
-                .OnDelete(DeleteBehavior.Cascade);
+                 .HasMany(x => x.Items)
+                 .WithOne(x => x.Operation)
+                 .HasForeignKey(x => x.OperationId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
                 .Navigation(x => x.Items)

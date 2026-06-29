@@ -9,11 +9,11 @@ namespace WMS.Application.Abstractions
 {
     public interface IComponentRepository
     {
-        Task<List<Component>> GetAllAsync();
+        Task<IReadOnlyList<Component>> GetAllAsync();
         Task AddAsync(Component component);
         Task UpdateAsync(Component component);
         Task RemoveAsync(Component component);
         Task<Component?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Component>> GetFilteredComponentAsync(string searchText, int maxCount);
+        Task<IReadOnlyList<Component>> GetFilteredComponentAsync(string searchText, int maxCount, CancellationToken token);
     }
 }

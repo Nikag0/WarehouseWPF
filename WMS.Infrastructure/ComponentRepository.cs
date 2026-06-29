@@ -18,7 +18,7 @@ namespace WMS.Infrastructure
             _factory = factory;
         }
 
-        public async Task<List<Component>> GetAllAsync()
+        public async Task<IReadOnlyList<Component>> GetAllAsync()
         {
             using var db = _factory.CreateDbContext();
             return await db.Components.ToListAsync();
@@ -52,27 +52,29 @@ namespace WMS.Infrastructure
             await db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Component>> GetFilteredComponentAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<Component>> GetFilteredComponentAsync(
+            string searchText, 
+            int maxCount, 
+            CancellationToken token)
         {
             using var db = _factory.CreateDbContext();
 
-            IQueryable<Component> query = db.Components;
+            IQueryable<Component> query = db.Components.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 var text = searchText.Trim();
 
-                query = query.Where(s =>
-                    (s.Article != null && s.Article.ToLower().Contains(text)) ||
-                    (s.Name != null && s.Name.ToLower().Contains(text)) ||
-                    (s.Manufacturer != null && s.Manufacturer.ToLower().Contains(text))
-                );
+                query = query.Where(x =>
+                   EF.Functions.ILike(x.Name, $"%{text}%") ||
+                   EF.Functions.ILike(x.Article, $"%{text}%") ||
+                   EF.Functions.ILike(x.Manufacturer, $"%{text}%"));
             }
 
             var result = await query
-                .OrderBy(s => s.Name)
+                .OrderByDescending(s => s.CreatedAt)
                 .Take(maxCount)
-                .ToListAsync();
+                .ToListAsync(token);
 
             return result;
         }

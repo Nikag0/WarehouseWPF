@@ -13,7 +13,7 @@
                 <ResourceDictionary Source="Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Components -->
+            <!-- Notifications -->
             <DataTemplate DataType="{x:Type viewmodels:NotificationViewModel}">
                 <views:NotificationView/>
             </DataTemplate>
@@ -37,7 +37,7 @@
             <DataTemplate DataType="{x:Type viewmodels:HistoryViewModel}">
                 <views:HistoryView/>
             </DataTemplate>
-
+            
         </ResourceDictionary>
 
     </Application.Resources>

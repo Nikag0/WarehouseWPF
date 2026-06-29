@@ -23,7 +23,16 @@ namespace WMS.Desktop.Views
         public SettingsView(SettingsViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = viewModel; // Привязываем контекст данных
+            DataContext = viewModel;
+            this.Loaded += SettingsViewLoaded;
+        }
+
+        private async void SettingsViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is SettingsViewModel viewModel)
+            {
+                await viewModel.LoadDataAsync();
+            }
         }
     }
 }

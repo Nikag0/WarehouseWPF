@@ -5,33 +5,100 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS.Desktop.Views"
         mc:Ignorable="d"
-        Title="SettingsView" Height="450" Width="800"
-        WindowStartupLocation="CenterScreen">
+        Title="SettingsView" Height="900" Width="1600"
+        WindowStartupLocation="CenterScreen"
+        DataContext="">
 
     <Grid Background="#36495b">
 
         <TabControl Margin="10" Background="Transparent" BorderThickness="0">
 
-            <!-- Вкладка Каталог -->
+            <TabControl.Resources>
+                <!-- Стиль для всех вкладок внутри этого TabControl -->
+                <Style TargetType="TabItem">
+                    <Setter Property="FontSize" Value="16"/>
+                    <Setter Property="Padding" Value="10,6"/>
+                    <!-- Дефолтный классический серый цвет -->
+                    <Setter Property="Background" Value="#F0F0F0"/>
+                    <Setter Property="BorderBrush" Value="#CCC"/>
+
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <!-- Контейнер самой вкладки -->
+                                <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1,1,1,0"
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="0,0,2,0">
+
+                                    <!-- Текст вкладки -->
+                                    <ContentPresenter x:Name="ContentSite"
+                                              ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- ТРИГГЕРЫ ДЛЯ СМЕНЫ ЦВЕТА -->
+                                <ControlTemplate.Triggers>
+                                    <!-- Когда вкладка выбрана -->
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="LightBlue"/>
+                                        <Setter TargetName="Border" Property="BorderBrush" Value="#79A0C1"/>
+                                        <Setter Property="Panel.ZIndex" Value="100"/>
+                                    </Trigger>
+
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
             <TabItem Header="Каталог" FontSize="16">
+                
                 <Grid Margin="0,10,0,0">
+                    
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6*"/>
+                        <RowDefinition Height="94*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Каталог" Style="{StaticResource WindowNames}" Margin="0,0,0,10"/>
+                    <Grid Grid.Row="0"
+                          Margin="0,0,0,5">
+                        
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="8*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Button Grid.Row="1" Content="Добавить запись" 
-                    Command="{Binding AddComponentCommand}" 
-                    HorizontalAlignment="Left" Width="150" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                        <TextBox Grid.Row="1"
+                            Margin="0,0,5,0" 
+                            Tag="Поиск:"
+                            Style="{StaticResource SearchTextBox}"
+                            Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredComponents}" AutoGenerateColumns="False" IsReadOnly="True" FontSize="15" RowHeight="40">
+                        <Button Grid.Column="1" 
+                                Content="Добавить запись" 
+                                Margin="5,0,0,0" 
+                                Command="{Binding AddComponentCommand}" 
+                                Style="{StaticResource ButtonStyle}">
+                        </Button>
+                        
+                    </Grid>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredComponents}" 
+                              Margin="0,5,0,0" 
+                              AutoGenerateColumns="False" IsReadOnly="True" FontSize="15" RowHeight="40">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>
                             <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*"/>
+                            <DataGridTextColumn Header="Минимальны остаток" Binding="{Binding MinQuantity}" Width="300*"/>
+                            
                             <DataGridTemplateColumn Width="150" IsReadOnly="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -42,6 +109,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+                            
                             <DataGridTemplateColumn Width="150" IsReadOnly="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -66,11 +134,9 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Список операторов" Style="{StaticResource WindowNames}" Margin="0,0,0,10"/>
-
                     <Button Grid.Row="1" Content="Добавить запись" 
                     Command="{Binding AddOperatorCommand}" 
-                    HorizontalAlignment="Left" Width="150" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                    HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
 
                     <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredOperators}" AutoGenerateColumns="False" FontSize="15" IsReadOnly="True" RowHeight="40">
                         <DataGrid.Columns>

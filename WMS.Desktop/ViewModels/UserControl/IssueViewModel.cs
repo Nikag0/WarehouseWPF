@@ -15,6 +15,7 @@ using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WMS.Application.DTO;
 
 namespace WMS.Desktop.ViewModels
 {
@@ -41,13 +42,28 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
+        public CellViewModel SelectedCell
+        {
+            get => _selectedCell;
+            set
+            {
+                _selectedCell = value;
+                OnPropertyChanged();
+
+                if (SelectedRack != null)
+                {
+                    foreach (var cell in CellsGrid)
+                        cell.IsSelected = cell == value;
+                }
+            }
+        }
+
         private readonly DialogService _dialogService;
         private readonly IssueService _issueService;
         private readonly OperatorService _operatorService;
-        private readonly StockService _stockService;
         private readonly WarehouseService _warehouseService;
 
-        private CancellationTokenSource? _cts;
+        private CancellationTokenSource? token;
         
         [ObservableProperty] private string _commentText = string.Empty;
         [ObservableProperty] private bool _isIssue;
@@ -59,19 +75,16 @@ namespace WMS.Desktop.ViewModels
         private CellViewModel _selectedCell;
 
         public IssueViewModel(
-                    StockService stockService,
             IssueService issueService,
             DialogService dialogService,
             OperatorService operatorService,
             WarehouseService warehouseService)
         {
             _issueService = issueService;
-            _stockService = stockService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _warehouseService = warehouseService;
         }
-
 
         [RelayCommand]
         public void ClearIssueItems()
@@ -127,9 +140,10 @@ namespace WMS.Desktop.ViewModels
 
                 if (!_dialogService.ShowConfirmation(question))
                 {
-                    SelectedRack.ItemInCell = false;
-                    _selectedCell.ItemInCell = false;
                     IssueItems.Remove(item);
+                    if (!IssueItems.Any(i => i.RackId == SelectedRack.Id))
+                        SelectedRack.ItemInCell = false;
+                    _selectedCell.ItemInCell = false;
                 }
             }
 
@@ -143,11 +157,8 @@ namespace WMS.Desktop.ViewModels
             try
             {
                 var issueOperation = IssueItems
-                    .Select(item => new ServiceItemDTO(
-                        item.ComponentId,
+                    .Select(item => new IssueItemDto(
                         item.StockId,
-                        item.RackId,
-                        item.CellId,
                         item.OperationQuantity))
                     .ToList();
 
@@ -223,7 +234,7 @@ namespace WMS.Desktop.ViewModels
 
             try
             {
-                var stock = await _stockService.GetStockAsync(item.StockId);
+                var stock = await _issueService.GetStockByIdAsync(item.StockId);
                 IssueItems.Add(stock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
@@ -275,7 +286,7 @@ namespace WMS.Desktop.ViewModels
 
         partial void OnSearchStockChanged(string value)
         {
-            _cts?.Cancel();
+            this.token?.Cancel();
 
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -284,8 +295,8 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
+            this.token = new CancellationTokenSource();
+            var token = this.token.Token;
 
             Task.Run(async () =>
             {
@@ -293,7 +304,7 @@ namespace WMS.Desktop.ViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15);
+                    var suggestions = await _issueService.GetFilteredStockAsync(value, maxCount: 15);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {

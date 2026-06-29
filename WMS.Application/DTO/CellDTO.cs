@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WMS.Application.DTO
 {
-    public sealed class CellDTO
+    public sealed class CellDto
     {
         public Guid Id { get; init; }
 

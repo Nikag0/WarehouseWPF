@@ -22,16 +22,16 @@ namespace WMS.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<List<ComponentDTO>>> GetAllAsync()
+        public async Task<Result<IReadOnlyList<ComponentDTO>>> GetAllAsync()
         {
             try
             {
                 var components = await _componentRepo.GetAllAsync();
                 var dtos = components.Select(c => new ComponentDTO(
-                    c.Id, c.Article, c.Name, c.Manufacturer, c.MinQuantity
+                    c.Id, c.Article, c.Name, c.Manufacturer,c.ExpirationDate, c.MinQuantity
                 )).ToList();
 
-                return Result<List<ComponentDTO>>.Success(dtos);
+                return Result<IReadOnlyList<ComponentDTO>>.Success(dtos);
             }
             catch (Exception ex)
             {
@@ -40,11 +40,18 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<Result> AddAsync(string article, string name, string manufacturer)
+        public async Task<ComponentDTO?> GetByIdAsync(Guid id)
+        {
+            var result = await _componentRepo.GetByIdAsync(id);
+
+            return MappingExtensions.ToComponentDTO(result);
+        }
+
+        public async Task<Result> AddAsync(string article, string name, string manufacturer, DateOnly expirationDate, int minQuantity)
         {
             try
             {
-                var component = Domain.Component.Create(article, name, manufacturer, null, 10);
+                var component = Domain.Component.Create(article, name, manufacturer, expirationDate, minQuantity);
                 await _componentRepo.AddAsync(component);
 
                 _logger.LogInformation($"Успешно добавлен компонент: {name}");
@@ -58,6 +65,33 @@ namespace WMS.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Критическая ошибка при добавлении компонента в БД");
+                throw;
+            }
+        }
+
+        public async Task<Result> UpdateAsync(ComponentDTO dto)
+        {
+            try
+            {
+                var component = await _componentRepo.GetByIdAsync(dto.Id);
+
+                if (component is null)
+                    return Result.Failure("Компонент не найден.");
+
+                component.Update(
+                    dto.Article,
+                    dto.Name,
+                    dto.Manufacturer,
+                    dto.ExpirationDate,
+                    dto.MinQuantity);
+
+                await _componentRepo.UpdateAsync(component);
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {dto.Id} в БД");
                 throw;
             }
         }
@@ -91,26 +125,11 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<Result> UpdateAsync(Domain.Component component)
+        public async Task<IReadOnlyList<ComponentDTO>> GetFilteredAsync (string searchText,int maxCount, CancellationToken token)
         {
-            try
-            {
-                await _componentRepo.UpdateAsync(component);
+            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount, token);
 
-                _logger.LogInformation($"Данные компонента с ID {component.Id} успешно обновлены.");
-
-                return Result.Success();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {component.Id} в БД");
-                throw;
-            }
-        }
-
-        public async Task<Domain.Component?> GetByIdAsync(Guid id)
-        {
-            return await _componentRepo.GetByIdAsync(id);
+            return components.Select(MappingExtensions.ToComponentDTO).ToList();
         }
     }
 }

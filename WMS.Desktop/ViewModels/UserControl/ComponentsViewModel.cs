@@ -7,13 +7,12 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class ComponentsViewModel : ObservableObject
     {
-        private readonly ComponentService _componentService;
-        private readonly DialogService _dialogService;
-        private List<ComponentDTO> _allComponents = new();
-
+        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
         [ObservableProperty] private string _searchComponent = string.Empty;
 
-        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
+        private readonly ComponentService _componentService;
+        private readonly DialogService _dialogService;
+        private CancellationTokenSource? _cts;
 
         public ComponentsViewModel(
             ComponentService componentService, 
@@ -27,17 +26,7 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                var componentsResult = await _componentService.GetAllAsync();
-
-                if (componentsResult.IsSuccess)
-                {
-                    _allComponents = componentsResult.Value.ToList();
-                    FilterComponents();
-                }
-                else
-                {
-                    _dialogService.ShowWarning(componentsResult.Error, "Ошибка загрузки каталога");
-                }
+                OnSearchComponentChanged(_searchComponent);
             }
             catch (Exception ex)
             {
@@ -47,29 +36,31 @@ namespace WMS.Desktop.ViewModels
 
         partial void OnSearchComponentChanged(string value)
         {
-            FilterComponents();
-        }
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
 
-        private void FilterComponents()
-        {
-            FilteredComponents.Clear();
-
-            var query = _allComponents.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(SearchComponent))
+            Task.Run(async () =>
             {
-                var text = SearchComponent.ToLower().Trim();
+                try
+                {
+                    await Task.Delay(500, _cts.Token);
 
-                query = query.Where(c =>
-                        (c.Article != null && c.Article.ToLower().Contains(text)) ||
-                        (c.Name != null && c.Name.ToLower().Contains(text)) ||
-                        (c.Manufacturer != null && c.Manufacturer.ToLower().Contains(text)));
-            }
+                    var result = await _componentService.GetFilteredAsync(searchText: value, maxCount: 100, _cts.Token);
 
-            foreach (var item in query)
-            {
-                FilteredComponents.Add(item);
-            }
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (!_cts.Token.IsCancellationRequested)
+                        {
+                            FilteredComponents.Clear();
+                            foreach (var component in result)
+                            {
+                                FilteredComponents.Add(component);
+                            }
+                        }
+                    });
+                }
+                catch (OperationCanceledException) {}
+            });
         }
     }
 }

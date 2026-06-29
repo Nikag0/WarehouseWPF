@@ -11,11 +11,11 @@ namespace WMS.Application.Services
     public class InventoryService
     {
         private readonly IStockRepository _stockRepo;
-        private readonly IOperationRepository _operationRepo;
+        private readonly IHistoryRepository _operationRepo;
 
         public InventoryService(
             IStockRepository stockRepo,
-            IOperationRepository operationRepo)
+            IHistoryRepository operationRepo)
         {
             _stockRepo = stockRepo;
             _operationRepo = operationRepo;

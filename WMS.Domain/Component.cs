@@ -10,19 +10,11 @@ public class Component : ISoftDeletable
     public string Article { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public string Manufacturer { get; private set; } = null!;
-    public DateOnly? ExpirationDate { get; private set; }
+    public DateOnly ExpirationDate { get; private set; }
     public int MinQuantity { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
     public bool IsDeleted { get; private set; }
-
-    public void Delete()
-    {
-        if (IsDeleted) return; 
-
-        // Здесь можно прописать дополнительные бизнес-правила перед удалением, например:
-        // if (CurrentQuantity > 0) throw new OverallDomainException("Нельзя удалить компонент, пока он есть на складе");
-
-        IsDeleted = true;
-    }
 
     // Для EF Core
     private Component() { }
@@ -32,10 +24,16 @@ public class Component : ISoftDeletable
         string article,
         string name,
         string manufacturer,
-        DateOnly? expirationDate,
-        int minQuantity)
+        DateOnly expirationDate,
+        int minQuantity,
+        DateTime createdAt,
+        DateTime updatedAt)
     {
         Id = id;
+
+        CreatedAt = createdAt;
+        UpdatedAt = updatedAt;
+
         SetArticle(article);
         SetName(name);
         SetManufacturer(manufacturer);
@@ -48,60 +46,83 @@ public class Component : ISoftDeletable
         string article,
         string name,
         string manufacturer,
-        DateOnly? expirationDate,
+        DateOnly expirationDate,
         int minQuantity)
     {
+        var now = DateTime.UtcNow;
+
         return new Component(
             Guid.NewGuid(),
             article,
             name,
             manufacturer,
             expirationDate,
-            minQuantity);
+            minQuantity,
+            now,
+            now);
+    }
+
+    public void Update(
+       string article,
+       string name,
+       string manufacturer,
+       DateOnly expirationDate,
+       int minQuantity)
+    {
+        UpdatedAt = DateTime.UtcNow;
+
+        SetArticle(article);
+        SetName(name);
+        SetManufacturer(manufacturer);  
+        SetExpirationDate(expirationDate);
+        SetMinQuantity(minQuantity);
+
     }
 
     // -------- Business rules --------
 
-    public void SetArticle(string article)
+    private void SetArticle(string article)
     {
         if (string.IsNullOrWhiteSpace(article))
             throw new BusinessException("Артикул не может быть пустым");
 
         Article = article.Trim();
     }
-
-    public void SetName(string name)
+    private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new BusinessException("Название не может быть пустым");
 
         Name = name.Trim();
     }
-
-    public void SetManufacturer(string manufacturer)
+    private void SetManufacturer(string manufacturer)
     {
         if (string.IsNullOrWhiteSpace(manufacturer))
             throw new BusinessException("Производитель не может быть пустым");
 
         Manufacturer = manufacturer.Trim();
     }
-
-    public void SetExpirationDate(DateOnly? expirationDate)
+    private void SetExpirationDate(DateOnly expirationDate)
     {
-        if (expirationDate.HasValue &&
-            expirationDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+        if (expirationDate < DateOnly.FromDateTime(DateTime.UtcNow))
         {
             throw new BusinessException("Срок годности не может быть в прошлом");
         }
 
         ExpirationDate = expirationDate;
     }
-
-    public void SetMinQuantity(int minQuantity)
+    private void SetMinQuantity(int minQuantity)
     {
         if (minQuantity < 0)
             throw new BusinessException("Минимальный остаток не может быть отрицательным");
 
         MinQuantity = minQuantity;
+    }
+
+    public void Delete()
+    {
+        if (IsDeleted) return;
+
+        IsDeleted = true;
     }
 }

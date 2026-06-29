@@ -147,11 +147,10 @@
     <Style TargetType="ComboBox">
         <Setter Property="Padding" Value="5"/>
         <Setter Property="FontSize" Value="20"/>
-        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Background" Value="White"/>
         <Setter Property="BorderBrush" Value="#CCC"/>
         <Setter Property="BorderThickness" Value="1"/>
+        
 
         <Setter Property="Template">
             <Setter.Value>
@@ -242,6 +241,11 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
     <Style x:Key="ButtonStyle" TargetType="Button">

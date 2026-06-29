@@ -71,7 +71,7 @@ namespace WMS.Application.Services
                                     $"Не найден CellLayout {cellCode} для типа {rackLayout.Type}");
                             }
 
-                            return new CellDTO
+                            return new CellDto
                             {
                                 Id = cell.Id,
 

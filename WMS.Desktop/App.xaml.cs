@@ -37,20 +37,20 @@ namespace WMS.Desktop
             // репозитории
             services.AddScoped<IStockRepository, StockRepository>();
             services.AddScoped<IComponentRepository, ComponentRepository>();
-            services.AddScoped<IOperationRepository, HistoryRepository>();
-            services.AddScoped<IRackRepository, RackRepository>();
+            services.AddScoped<IHistoryRepository, HistoryRepository>();
             services.AddScoped<IOperatorRepository, OperatorRepository>();
+            services.AddScoped<IRackRepository, RackRepository>();
+            services.AddScoped<IHistoryRepository, HistoryRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
             services.AddScoped<IssueService>();
             services.AddScoped<InventoryService>();
             services.AddScoped<ReceiptService>();
-            services.AddScoped<StockService>();
-            services.AddScoped<RackService>();
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
             services.AddScoped<WarehouseService>();
+            services.AddScoped<HistoryService>();
 
             // view models
             services.AddSingleton<MainViewModel>();

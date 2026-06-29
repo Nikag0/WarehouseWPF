@@ -46,7 +46,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public CellViewModel(CellDTO dto)
+        public CellViewModel(CellDto dto)
         {
             Id = dto.Id;
 

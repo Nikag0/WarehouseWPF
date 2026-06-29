@@ -3,22 +3,34 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
+using WMS.Application.Services;
+using WMS.Domain;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WMS.Desktop.ViewModels
 {
     public partial class HistoryViewModel : ObservableObject
     {
-        private readonly IOperationRepository _operationRepository;
+        private HistoryService _historyService;
 
         private CancellationTokenSource? _cts;
 
         [ObservableProperty] private string _searchText = string.Empty;
+        [ObservableProperty] private DateTime? dateFrom;
+        [ObservableProperty] private DateTime? dateTo;
+        [ObservableProperty] private OperationType? selectedOperationType;
+        public ObservableCollection<HistoryDto> History { get; } = [];
+        public ObservableCollection<OperationType> Type { get; } = [];
 
-        public ObservableCollection<OperationHistoryDto> HistoryItems { get; } = new();
-
-        public HistoryViewModel(IOperationRepository operationRepository)
+        public HistoryViewModel(HistoryService historyService)
         {
-            _operationRepository = operationRepository;
+            _historyService = historyService;
+        }
+
+        public async Task LoadDataAsync()
+        {
+            LoadType();
+            OnSearchTextChanged(SearchText);
         }
 
         partial void OnSearchTextChanged(string value)
@@ -34,16 +46,22 @@ namespace WMS.Desktop.ViewModels
                 {
                     await Task.Delay(1000, token);
 
-                    var data = await _operationRepository.GetFilteredHistoryAsync(value);
+                    var data = await _historyService.GetFilteredAsync(
+                        SearchText,
+                        DateFrom,
+                        DateTo,
+                        SelectedOperationType,
+                        100,
+                        _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
                         if (!token.IsCancellationRequested)
                         {
-                            HistoryItems.Clear();
+                            History.Clear();
                             foreach (var item in data)
                             {
-                                HistoryItems.Add(item);
+                                History.Add(item);
                             }
                         }
                     });
@@ -55,15 +73,10 @@ namespace WMS.Desktop.ViewModels
             });
         }
 
-        public async Task LoadDataAsync()
+        private void LoadType()
         {
-            var data = await _operationRepository.GetFilteredHistoryAsync(SearchText);
-
-            HistoryItems.Clear();
-            foreach (var item in data)
-            {
-                HistoryItems.Add(item);
-            }
+            Type.Add(OperationType.Issue);
+            Type.Add(OperationType.Receipt);
         }
     }
 }

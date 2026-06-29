@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using WMS.Application.DTO;
 using WMS.Application.Services;
 using WMS.Application.WarehouseVisualization;
 using WMS.Domain;
@@ -147,12 +148,7 @@ namespace WMS.Desktop.ViewModels
         private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
         private CancellationTokenSource? _cts;
-        // Ниже не переработанные свойства
-
-
         private readonly SemaphoreSlim _lock = new(1, 1);
-
-        private readonly StockService _stockService;
         private readonly ReceiptService _receiptService;
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
@@ -160,13 +156,11 @@ namespace WMS.Desktop.ViewModels
 
 
         public ReceiptViewModel(
-            StockService stockService,
             ReceiptService receiptService,
             DialogService dialogService,
             OperatorService operatorrService,
             WarehouseService warehouseService)
         {
-            _stockService = stockService;
             _receiptService = receiptService;
             _dialogService = dialogService;
             _operatorrService = operatorrService;
@@ -205,20 +199,18 @@ namespace WMS.Desktop.ViewModels
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
                 $"Количество: {ReceiptItem.OperationQuantity}\n" +
-                $"Cтеллаж: {SearchRacks} Ячейка: {SearchCell}"))
+                $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}"))
                 return;
 
             await _lock.WaitAsync();
 
             try
             {
-                var receiptDto = new ServiceItemDTO(
+                var receiptDto = new ReceiptItemDto(
                     ReceiptItem.ComponentId,
-                    ReceiptItem.Id,
                     SelectedRack.Id,
                     SelectedCell.Id,
                     ReceiptItem.OperationQuantity);
-
 
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
                 await LoadDataAsync();
@@ -226,11 +218,15 @@ namespace WMS.Desktop.ViewModels
                 SelectedRack.IsSelected = false;
                 SelectedRack = null;
                 SearchRacks = string.Empty;
+
                 SelectedCell.IsSelected = false;
                 SelectedCell = null;
                 SearchCell = string.Empty;
+
                 ReceiptItem.OperationQuantity = 0;
                 CommentText = string.Empty;
+
+                OnSearchStockOrComponentChanged(SearchStockOrComponent);
             }
             catch (BusinessException ex)
             {
@@ -284,6 +280,8 @@ namespace WMS.Desktop.ViewModels
                 if (obj is not ViewItemDTO stock)
                     return;
 
+
+                ReceiptItem.Id = stock.StockId;
                 ReceiptItem.ComponentId = stock.ComponentId;
                 ReceiptItem.Article = stock.Article;
                 ReceiptItem.ComponentName = stock.ComponentName;
@@ -367,7 +365,7 @@ namespace WMS.Desktop.ViewModels
 
         private async Task RefreshStockInRackAsync()
         {
-            _cts?.Cancel();
+            this._cts?.Cancel();
 
             if (SelectedRack == null)
             {
@@ -375,13 +373,12 @@ namespace WMS.Desktop.ViewModels
                 return;
             }
 
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
+            this._cts = new CancellationTokenSource();
+            var token = this._cts.Token;
 
             try
             {
-                var stocks = await _stockService
-                    .GetStocksInRackAsync(SelectedRack.Id);
+                var stocks = await _receiptService.GetStocksInRackAsync(SelectedRack.Id);
 
                 token.ThrowIfCancellationRequested();
 
@@ -469,19 +466,18 @@ namespace WMS.Desktop.ViewModels
             }
 
             _cts = new CancellationTokenSource();
-            var token = _cts.Token;
 
             Task.Run(async () =>
             {
                 try
                 {
-                    await Task.Delay(500, token);
+                    await Task.Delay(500, _cts.Token);
 
-                    var suggestions = await _receiptService.GetFilteredStockOrComponentsAsync(value, maxCount: 15);
+                    var suggestions = await _receiptService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!token.IsCancellationRequested)
+                        if (!_cts.Token.IsCancellationRequested)
                         {
                             FilteredStocksOrComponents.Clear();
                             foreach (var item in suggestions)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
+using WMS.Application.DTO;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 
@@ -12,20 +13,19 @@ namespace WMS.Application.Services
     public class IssueService
     {
         private readonly IStockRepository _stockRepo;
-        private readonly IOperationRepository _operationRepo;
+        private readonly IHistoryRepository _operationRepo;
 
         public IssueService(
             IStockRepository stockRepo,
             IComponentRepository componentRepo,
-            IRackRepository rackRepo,
-            IOperationRepository operationRepo)
+            IHistoryRepository operationRepo)
         {
             _stockRepo = stockRepo;
             _operationRepo = operationRepo;
         }
 
         public async Task IssueAsync(
-            IReadOnlyCollection<ServiceItemDTO> items,
+            IReadOnlyCollection<IssueItemDto> items,
             string operatorName,
             string? comment = null)
         {
@@ -36,7 +36,7 @@ namespace WMS.Application.Services
 
             foreach (var item in items)
             {
-                var stock = await _stockRepo.GetStockAsync(item.Stockid);
+                var stock = await _stockRepo.GetByIdAsync(item.StockId);
 
                 if (stock is null)
                     throw new BusinessException("Товар в указанной ячейке не найден");
@@ -48,18 +48,32 @@ namespace WMS.Application.Services
                 await _stockRepo.UpdateAsync(stock);
 
                 if (stock.Quantity == 0)
-                    await _stockRepo.RemoveAsync(stock);
+                    await _stockRepo.DeletAsync(stock);
 
                 operation.AddItem(
-                    item.ComponentId,
-                    item.RackId,
-                    item.CellId,
+                    stock.ComponentId,
+                    stock.RackId,
+                    stock.CellId,
                     before,
                     stock.Quantity);
             }
 
             operation.Validate();
             await _operationRepo.AddAsync(operation);
+        }
+
+        public async Task<ViewItemDTO> GetStockByIdAsync(Guid stokId)
+        {
+            var result = await _stockRepo.GetByIdAsync(stokId);
+
+            return MappingExtensions.ToViewItemDto(result);
+        }
+
+        public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount)
+        {
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
+
+            return stocks.Select(MappingExtensions.ToViewItemDto).ToList();
         }
 
     }
