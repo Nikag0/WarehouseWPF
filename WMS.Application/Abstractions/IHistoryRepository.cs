@@ -14,7 +14,7 @@ namespace WMS.Application.Abstractions
             string searchText,
             DateTime? dateFrom,
             DateTime? dateTo,
-            OperationType? operationType,
+            OperationType operationType,
             int maxCount,
             CancellationToken token);
     }

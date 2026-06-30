@@ -27,7 +27,7 @@ namespace WMS.Infrastructure
              string? searchText,
              DateTime? dateFrom,
              DateTime? dateTo,
-             OperationType? operationType,
+             OperationType operationType,
              int maxCount,
              CancellationToken token)
         {
@@ -49,17 +49,19 @@ namespace WMS.Infrastructure
 
             if (dateFrom.HasValue)
             {
-                query = query.Where(x => x.Operation.OccurredAt >= dateFrom.Value);
+                var utcFrom = DateTime.SpecifyKind(dateFrom.Value.Date, DateTimeKind.Utc);
+                query = query.Where(x => x.Operation.OccurredAt >= utcFrom);
             }
 
             if (dateTo.HasValue)
             {
-                query = query.Where(x => x.Operation.OccurredAt <= dateTo.Value);
+                var utcTo = DateTime.SpecifyKind(dateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
+                query = query.Where(x => x.Operation.OccurredAt < utcTo);
             }
 
-            if (operationType.HasValue)
+            if (operationType != OperationType.All)
             {
-                query = query.Where(x => x.Operation.Type == operationType.Value);
+                query = query.Where(x => x.Operation.Type == operationType);
             }
 
             return await query

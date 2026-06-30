@@ -41,7 +41,6 @@ namespace WMS.Desktop.ViewModels
                 UpdateCellHighlights();
             }
         }
-
         public CellViewModel SelectedCell
         {
             get => _selectedCell;
@@ -133,8 +132,9 @@ namespace WMS.Desktop.ViewModels
             {
                 SelectedRack = RacksGrid.First(r => r.Id == item.RackId);
 
-                _selectedCell = CellsGrid.First(c => c.Id == item.CellId);
-                _selectedCell.ItemInCell = true;
+                SelectedCell = CellsGrid.First(c => c.Id == item.CellId);
+                SelectedCell.ItemInCell = true;
+                SelectedCell.IsSelected = true;
 
                 var question = $"Получилось найти товар?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
 
@@ -143,7 +143,8 @@ namespace WMS.Desktop.ViewModels
                     IssueItems.Remove(item);
                     if (!IssueItems.Any(i => i.RackId == SelectedRack.Id))
                         SelectedRack.ItemInCell = false;
-                    _selectedCell.ItemInCell = false;
+                    SelectedCell.ItemInCell = false;
+                    SelectedCell.IsSelected = false;
                 }
             }
 
@@ -211,7 +212,7 @@ namespace WMS.Desktop.ViewModels
         [RelayCommand]
         public void SelectCell(CellViewModel cell)
         {
-            return;
+            SelectedCell = cell;
         }
 
         [RelayCommand]

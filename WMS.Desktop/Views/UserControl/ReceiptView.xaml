@@ -18,7 +18,7 @@
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
     </UserControl.Resources>
 
-    <Grid Margin="5,0,0,0"
+    <Grid Margin="10"
           Background="#36495b">
 
         <Grid.ColumnDefinitions>
@@ -40,7 +40,7 @@
                        Style="{StaticResource WindowNames}"/>
 
             <TextBox Grid.Row="1"
-                     Margin="0,5,0,5" 
+                     Margin="0,5,10,5" 
                      Tag="Поиск:"
                      Style="{StaticResource SearchTextBox}"
                      Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
@@ -58,7 +58,7 @@
                           FontSize="15" 
                           IsReadOnly="True" 
                           RowHeight="40"
-                          Margin="0,5,0,5">
+                          Margin="0,5,10,5">
                     
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
@@ -290,7 +290,7 @@
 
                         <Border Grid.Column="5"
                                 Height="Auto"
-                                Margin="5,5,0,5"
+                                Margin="5,5,10,5"
                                 CornerRadius="4,0,0,4"
                                 BorderBrush="#CCCCCC"
                                 BorderThickness="1"
@@ -328,10 +328,12 @@
                     </Grid>
 
                     <ComboBox Grid.Row="1"
-                              Margin="5,5,0,5"
+                              Margin="5,5,10,5"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
-                              Tag="ФИО оператора:">
+                              Tag="ФИО оператора:"
+                              VerticalContentAlignment="Center"
+                              HorizontalContentAlignment="Center">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -347,7 +349,7 @@
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
                              Style="{StaticResource InputTextBoxStyle}"
-                             Margin="5,5,0,5"
+                             Margin="5,5,10,5"
                              FontSize="15"
                              />
 
@@ -362,7 +364,7 @@
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
                     FontSize="20"
-                    Margin="0,5,0,10">
+                    Margin="0,5,10,0">
             </Button>
 
         </Grid>
@@ -378,8 +380,7 @@
                                     Grid.Row="0"
                                     Racks="{Binding RacksGrid}" />
 
-            <Grid Grid.Row="1"
-                  Margin="0,0,10,10">
+            <Grid Grid.Row="1">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -388,7 +389,7 @@
                 
                 <local:CellsGridControl Grid.Column="0"
                                         Cells="{Binding CellsGrid}"
-                                        RackType="{Binding SelectedRack.Type, Mode=OneWay, FallbackValue=R1, TargetNullValue=R1}"
+                                        RackType="{Binding SelectedRack.Type}"
                                         SelectedCell="{Binding SelectedCell}"
                                         Margin="0,0,5,0"/>
 

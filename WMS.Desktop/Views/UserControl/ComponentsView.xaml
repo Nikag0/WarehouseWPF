@@ -11,7 +11,7 @@
              d:DesignHeight="1008" d:DesignWidth="1920">
 
 
-    <Grid Margin="5,0,0,0"
+    <Grid Margin="10"
         Background="#36495b">
 
         <Grid.RowDefinitions>
@@ -24,7 +24,7 @@
                    Style="{StaticResource WindowNames}"/>
 
         <TextBox Grid.Row="1"
-                 Margin="0,5,0,5" 
+                 Margin="0,5,10,5" 
                  Tag="Поиск:"
                  Style="{StaticResource SearchTextBox}"
                  Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>

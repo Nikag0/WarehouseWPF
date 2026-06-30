@@ -17,7 +17,7 @@ namespace WMS.Application.Services
             string? searchText,
             DateTime? dateFrom,
             DateTime? dateTo,
-            OperationType? operationType,
+            OperationType operationType,
             int maxCount,
             CancellationToken token)
         {

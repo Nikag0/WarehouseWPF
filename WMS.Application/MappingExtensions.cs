@@ -74,7 +74,7 @@ namespace WMS.Application
             return new HistoryDto(
                 o.Operation.OccurredAt,
                 o.Operation.Operator,
-                LocationFormatter.NumToOperation(o.Operation.Type),
+                LocationFormatter.OperationToStr(o.Operation.Type),
                 o.Component.Name,
                 o.QuantityBefore,
                 o.QuantityAfter

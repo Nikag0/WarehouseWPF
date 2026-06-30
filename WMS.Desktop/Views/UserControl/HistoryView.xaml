@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="1008" d:DesignWidth="1920">
 
-    <Grid Margin="5,0,0,0"
+    <Grid Margin="10"
        Background="#36495b">
 
         <Grid.RowDefinitions>
@@ -27,8 +27,7 @@
                 <ColumnDefinition Width="15*"/>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="15*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="17*"/>
             </Grid.ColumnDefinitions>
 
             <TextBox 
@@ -36,7 +35,7 @@
                 Margin="0,5,0,5" 
                 Tag="Поиск:"
                 Style="{StaticResource SearchTextBox}"
-                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                Text="{Binding SearchHistory, UpdateSourceTrigger=PropertyChanged}">
             </TextBox>
 
             <TextBlock
@@ -49,8 +48,10 @@
 
             <DatePicker
                 Grid.Column="2"
-                Margin="5,0,10,0"
-                VerticalAlignment="Center"
+                Margin="5,0,0,0"
+                Height="50" 
+                FontSize="20"
+                VerticalContentAlignment="Center"
                 HorizontalAlignment="Stretch"
                 SelectedDate="{Binding DateFrom}">
             </DatePicker>
@@ -65,27 +66,24 @@
 
             <DatePicker
                 Grid.Column="4"
-                Margin="5,0,10,0"
-                VerticalAlignment="Center"
+                Margin="5,0,0,0"
+                Height="50" 
+                FontSize="20"
+                VerticalContentAlignment="Center"
                 HorizontalAlignment="Stretch"
-                SelectedDate="{Binding DateTo}" />
+                SelectedDate="{Binding DateTo}"/>
 
-            <TextBlock
-                Grid.Column="5"
-                VerticalAlignment="Center"
-                HorizontalAlignment="Right"
-                Text="Тип:"
-                Foreground="White"
-                FontSize="20"/>
 
-            <ComboBox
-                Grid.Column="6"
+            <ComboBox Grid.Column="6"
                 ItemsSource="{Binding Type}"
+                Tag="Тип операции:"
                 SelectedItem="{Binding SelectedOperationType}"
-                Margin="5,5,5,5" />
+                Margin="0,5,5,5"
+                VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center">
+            </ComboBox>
 
         </Grid>
-        
 
         <Grid Grid.Row="2"
               Width="300"
@@ -94,7 +92,7 @@
         </Grid>
 
         <Grid Grid.Row="3"
-              Margin="0,5,0,5">
+              Margin="0,5,0,0">
             
             <DataGrid ItemsSource="{Binding History}" 
                       AutoGenerateColumns="False" 

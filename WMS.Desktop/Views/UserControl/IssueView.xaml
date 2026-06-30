@@ -21,7 +21,7 @@
     </UserControl.Resources>
 
 
-    <Grid Margin="5,0,0,0"
+    <Grid Margin="10"
           Background="#36495b">
 
         <Grid.ColumnDefinitions>
@@ -42,7 +42,7 @@
                        Style="{StaticResource WindowNames}"/>
 
             <Grid Grid.Row="1"
-                  Margin="0,5,0,5">
+                  Margin="0,5,10,5">
 
                 <TextBox x:Name="SearchToIssue" 
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
@@ -119,7 +119,7 @@
             </Grid>
 
             <Grid Grid.Row="2"
-                  Margin="0,5,0,5">
+                  Margin="0,5,10,5">
 
                 <DataGrid x:Name="IssueGrid" 
                           ItemsSource="{Binding IssueItems}" 
@@ -251,13 +251,16 @@
                               ItemsSource="{Binding Operators}"
                               Tag="ФИО оператора:"
                               SelectedItem="{Binding OperatorName}"
-                              Margin="0,5,5,5">
+                              Margin="0,5,5,5"
+                              VerticalContentAlignment="Center"
+                              HorizontalContentAlignment="Center">
 
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding FullName}"/>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
+                        
                     </ComboBox>
 
                     <TextBox Grid.Column="1"
@@ -265,7 +268,7 @@
                              Tag="Комментарий:"
                              FontSize="15"
                              Style="{StaticResource InputTextBoxStyle}"
-                             Margin="5,5,0,5"/>
+                             Margin="5,5,10,5"/>
 
                 </Grid>
 
@@ -274,7 +277,7 @@
                         Command="{Binding IssueCommand}"
                         Style="{StaticResource ButtonStyle}"
                         FontSize="20"
-                        Margin="0,5,0,10"
+                        Margin="0,5,10,0"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"/>
                 
@@ -299,7 +302,7 @@
                                     Cells="{Binding CellsGrid}"
                                     RackType="{Binding SelectedRack.Type}"
                                     SelectedCell="{Binding SelectedCell}"
-                                    Margin="0,5,0,10"/>
+                                    Margin="0,5,0,0"/>
         </Grid>
 
     </Grid>

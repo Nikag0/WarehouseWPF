@@ -15,12 +15,73 @@ namespace WMS.Desktop.ViewModels
 
         private CancellationTokenSource? _cts;
 
-        [ObservableProperty] private string _searchText = string.Empty;
-        [ObservableProperty] private DateTime? dateFrom;
-        [ObservableProperty] private DateTime? dateTo;
-        [ObservableProperty] private OperationType? selectedOperationType;
+        private string _searchHistory;
+        public string SearchHistory
+        {
+            get => _searchHistory;
+            
+            set 
+            {
+                if (_searchHistory == value) return;
+
+                _searchHistory = value;
+
+                OnPropertyChanged(nameof(SearchHistory));
+
+                SearchHistoryChanged();
+            }
+        }
+
+        private DateTime _dateFrom = DateTime.Today.AddDays(-1);
+        public DateTime DateFrom
+        {
+            get => _dateFrom;
+
+            set
+            {
+                if (_dateFrom == value) return;
+
+                _dateFrom = value;
+
+                OnPropertyChanged(nameof(DateFrom));
+
+                SearchHistoryChanged();
+            }
+        }
+
+        private DateTime _dateTo = DateTime.Today;
+        public DateTime DateTo
+        {
+            get => _dateTo;
+
+            set
+            {
+                if (_dateTo == value) return;
+
+                _dateTo = value;
+
+                OnPropertyChanged(nameof(DateTo));
+
+                SearchHistoryChanged();
+            }
+        }
+
+        private string _selectedOperationType;
+        public string SelectedOperationType
+        {
+            get => _selectedOperationType;
+            set
+            {
+                if (_selectedOperationType == value) return;
+                _selectedOperationType = value;
+                OnPropertyChanged(nameof(SelectedOperationType));
+                SearchHistoryChanged(); 
+            }
+        }
+
+
         public ObservableCollection<HistoryDto> History { get; } = [];
-        public ObservableCollection<OperationType> Type { get; } = [];
+        public ObservableCollection<string> Type { get; set; } = new();
 
         public HistoryViewModel(HistoryService historyService)
         {
@@ -30,10 +91,10 @@ namespace WMS.Desktop.ViewModels
         public async Task LoadDataAsync()
         {
             LoadType();
-            OnSearchTextChanged(SearchText);
+            SearchHistoryChanged();
         }
 
-        partial void OnSearchTextChanged(string value)
+        private void SearchHistoryChanged()
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
@@ -47,10 +108,10 @@ namespace WMS.Desktop.ViewModels
                     await Task.Delay(1000, token);
 
                     var data = await _historyService.GetFilteredAsync(
-                        SearchText,
+                        SearchHistory,
                         DateFrom,
                         DateTo,
-                        SelectedOperationType,
+                        LocationFormatter.StrToOperation(SelectedOperationType),
                         100,
                         _cts.Token);
 
@@ -75,8 +136,12 @@ namespace WMS.Desktop.ViewModels
 
         private void LoadType()
         {
-            Type.Add(OperationType.Issue);
-            Type.Add(OperationType.Receipt);
+            Type.Clear();
+            Type.Add(LocationFormatter.OperationToStr(OperationType.All));     
+            Type.Add(LocationFormatter.OperationToStr(OperationType.Receipt)); 
+            Type.Add(LocationFormatter.OperationToStr(OperationType.Issue));   
+
+            SelectedOperationType = Type[0];
         }
     }
 }

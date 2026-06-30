@@ -24,13 +24,24 @@ public static class LocationFormatter
         };
     }
 
-    public static string NumToOperation(OperationType operationType)
+    public static string OperationToStr(OperationType operationType)
     {
         return operationType switch
         {
+            OperationType.All => "Все типы",
             OperationType.Receipt => "Приёмка",
             OperationType.Issue => "Выдача",
-            _ => operationType.ToString()
+            _ => operationType.ToString(),
+        };
+    }
+
+    public static OperationType StrToOperation(string operationName)
+    {
+        return operationName switch
+        {
+            "Приёмка" => OperationType.Receipt,
+            "Выдача" => OperationType.Issue,
+            _ => OperationType.All
         };
     }
 }
