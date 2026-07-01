@@ -97,7 +97,7 @@
                             <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>
                             <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*"/>
-                            <DataGridTextColumn Header="Минимальны остаток" Binding="{Binding MinQuantity}" Width="300*"/>
+                            <DataGridTextColumn Header="Минимальный остаток" Binding="{Binding MinQuantity}" Width="300*"/>
                             
                             <DataGridTemplateColumn Width="150" IsReadOnly="False">
                                 <DataGridTemplateColumn.CellTemplate>

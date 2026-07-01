@@ -3,5 +3,5 @@
     string Article,
     string Name,
     string Manufacturer,
-    DateOnly ExpirationDate,
+    DateOnly? ExpirationDate,
     int MinQuantity);

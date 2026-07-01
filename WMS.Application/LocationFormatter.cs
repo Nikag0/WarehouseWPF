@@ -5,7 +5,7 @@ public static class LocationFormatter
 {
     public static string CodeToDisplay(int column, int row)
     {
-        return $"{column}-{NumToLetter(row)}";
+        return $"{NumToLetter(row)}-{column}";
     }
 
     public static string NumToLetter(int number)

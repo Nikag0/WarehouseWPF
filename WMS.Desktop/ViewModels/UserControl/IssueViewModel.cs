@@ -146,6 +146,11 @@ namespace WMS.Desktop.ViewModels
                     SelectedCell.ItemInCell = false;
                     SelectedCell.IsSelected = false;
                 }
+                else if (item.Quantity < item.OperationQuantity)
+                {
+                    _dialogService.ShowWarning($"{item.ComponentName} не хватает. Осталось товара {item.Quantity}. В выдаче {item.OperationQuantity}");
+                    return;
+                }
             }
 
             if (!IssueItems.Any())

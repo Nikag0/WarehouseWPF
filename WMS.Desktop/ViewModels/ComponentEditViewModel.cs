@@ -18,7 +18,7 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private string _article = string.Empty;
         [ObservableProperty] private string _name = string.Empty;
         [ObservableProperty] private string _manufacturer = string.Empty;
-        [ObservableProperty] private DateTime expirationDate;
+        //[ObservableProperty] private DateTime expirationDate;
         [ObservableProperty] private int _minQuantity;
 
         public ComponentEditViewModel(
@@ -38,7 +38,7 @@ namespace WMS.Desktop.ViewModels
                 Article = componentDto.Article;
                 Name = componentDto.Name;
                 Manufacturer = componentDto.Manufacturer;
-                ExpirationDate = componentDto.ExpirationDate.ToDateTime(TimeOnly.MinValue);
+                //ExpirationDate = componentDto.ExpirationDate.ToDateTime(TimeOnly.MinValue);
                 MinQuantity = componentDto.MinQuantity;
             }
         }
@@ -58,7 +58,7 @@ namespace WMS.Desktop.ViewModels
                         Name,
                         Article,
                         Manufacturer,
-                        DateOnly.FromDateTime(ExpirationDate),
+                        null, /*DateOnly.FromDateTime(ExpirationDate)*/
                         MinQuantity
                     ));
                 }
@@ -68,7 +68,7 @@ namespace WMS.Desktop.ViewModels
                         Name,
                         Article,
                         Manufacturer,
-                        DateOnly.FromDateTime(ExpirationDate),
+                        null, /*DateOnly.FromDateTime(ExpirationDate)*/
                         MinQuantity
                     );
                 }

@@ -10,7 +10,7 @@ public class Component : ISoftDeletable
     public string Article { get; private set; } = null!;
     public string Name { get; private set; } = null!;
     public string Manufacturer { get; private set; } = null!;
-    public DateOnly ExpirationDate { get; private set; }
+    public DateOnly? ExpirationDate { get; private set; }
     public int MinQuantity { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
@@ -24,7 +24,7 @@ public class Component : ISoftDeletable
         string article,
         string name,
         string manufacturer,
-        DateOnly expirationDate,
+        DateOnly? expirationDate,
         int minQuantity,
         DateTime createdAt,
         DateTime updatedAt)
@@ -37,7 +37,7 @@ public class Component : ISoftDeletable
         SetArticle(article);
         SetName(name);
         SetManufacturer(manufacturer);
-        SetExpirationDate(expirationDate);
+        ExpirationDate = expirationDate;
         SetMinQuantity(minQuantity);
     }
 
@@ -46,7 +46,7 @@ public class Component : ISoftDeletable
         string article,
         string name,
         string manufacturer,
-        DateOnly expirationDate,
+        DateOnly? expirationDate,
         int minQuantity)
     {
         var now = DateTime.UtcNow;
@@ -66,15 +66,15 @@ public class Component : ISoftDeletable
        string article,
        string name,
        string manufacturer,
-       DateOnly expirationDate,
+       DateOnly? expirationDate,
        int minQuantity)
     {
         UpdatedAt = DateTime.UtcNow;
 
         SetArticle(article);
         SetName(name);
-        SetManufacturer(manufacturer);  
-        SetExpirationDate(expirationDate);
+        SetManufacturer(manufacturer);
+        ExpirationDate =  expirationDate;
         SetMinQuantity(minQuantity);
 
     }

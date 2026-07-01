@@ -213,7 +213,8 @@ namespace WMS.Desktop.ViewModels
                     ReceiptItem.OperationQuantity);
 
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
-                await LoadDataAsync();
+
+                await LoadWarehouseAsync();
 
                 SelectedRack.IsSelected = false;
                 SelectedRack = null;
@@ -223,10 +224,16 @@ namespace WMS.Desktop.ViewModels
                 SelectedCell = null;
                 SearchCell = string.Empty;
 
+                ReceiptItem.Article = string.Empty;
+                ReceiptItem.ComponentName = string.Empty;
+                ReceiptItem.Manufacturer = string.Empty;
                 ReceiptItem.OperationQuantity = 0;
                 CommentText = string.Empty;
 
                 OnSearchStockOrComponentChanged(SearchStockOrComponent);
+                ReplaceCollection(FilteredRacks, RacksGrid);
+
+                _dialogService.ShowInfo("Приём товаров успешно выполнен.");
             }
             catch (BusinessException ex)
             {
@@ -245,8 +252,6 @@ namespace WMS.Desktop.ViewModels
                 await LoadWarehouseAsync();
                 await LoadOperatorsAsync();
                 ReplaceCollection(FilteredRacks, RacksGrid);
-
-                await LoadOperatorsAsync();
             }
             catch (BusinessException ex)
             {

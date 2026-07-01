@@ -34,8 +34,8 @@
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Производитель:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Срок годности:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding ExpirationDate, Mode=TwoWay}" Margin="0,5"/>
+        <!--<TextBlock Grid.Row="3" Grid.Column="0" Text="Срок годности:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
+        <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding ExpirationDate, Mode=TwoWay}" Margin="0,5"/>-->
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Мин. остаток:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
         <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>

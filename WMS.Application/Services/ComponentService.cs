@@ -47,7 +47,7 @@ namespace WMS.Application.Services
             return MappingExtensions.ToComponentDTO(result);
         }
 
-        public async Task<Result> AddAsync(string article, string name, string manufacturer, DateOnly expirationDate, int minQuantity)
+        public async Task<Result> AddAsync(string article, string name, string manufacturer, DateOnly? expirationDate, int minQuantity)
         {
             try
             {

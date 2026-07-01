@@ -245,23 +245,25 @@
                         <DataTemplate>
                             <Border Width="{Binding Width}"
                                     Height="{Binding Height}">
-                                
+
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="Transparent"/>
-
+                                        
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="BorderBrush" Value="LightBlue"/>
-                                                <Setter Property="BorderThickness" Value="10"/>  
+                                                <Setter Property="BorderThickness" Value="10"/>
                                             </DataTrigger>
-
+                                            
                                             <DataTrigger Binding="{Binding ItemInCell}" Value="True">
-                                                <Setter Property="Background" Value="#CDA434"/>
+                                                <Setter Property="Background" Value="#85CDA434"/>
                                             </DataTrigger>
                                         </Style.Triggers>
+                                        
                                     </Style>
                                 </Border.Style>
+
 
                                 <Border.InputBindings>
                                     <MouseBinding Gesture="LeftClick"
