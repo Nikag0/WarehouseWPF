@@ -6,21 +6,21 @@
         "Code": "1-1",
         "X": 10,
         "Y": 10,
-        "Width": 325,
+        "Width": 100,
         "Height": 95
       },
       {
         "Code": "2-1",
         "X": 115,
         "Y": 10,
-        "Width": 325,
+        "Width": 115,
         "Height": 95
       },
       {
         "Code": "3-1",
         "X": 230,
         "Y": 10,
-        "Width": 325,
+        "Width": 100,
         "Height": 95
       },
       {
@@ -158,28 +158,28 @@
         "Code": "1-1",
         "X": 10,
         "Y": 10,
-        "Width": 455,
+        "Width": 110,
         "Height": 95
       },
       {
         "Code": "2-1",
         "X": 125,
         "Y": 10,
-        "Width": 455,
+        "Width": 110,
         "Height": 95
       },
       {
         "Code": "3-1",
         "X": 240,
         "Y": 10,
-        "Width": 455,
+        "Width": 110,
         "Height": 95
       },
       {
         "Code": "4-1",
         "X": 355,
         "Y": 10,
-        "Width": 455,
+        "Width": 110,
         "Height": 95
       },
       {
