@@ -8,16 +8,16 @@
     <Compile Update="Views\ComponentEditWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\UserControl\HistoryView.xaml.cs">
+    <Compile Update="Views\MenuView\HistoryView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\UserControl\IssueView.xaml.cs">
+    <Compile Update="Views\MenuView\IssueView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\NotificationView.xaml.cs">
+    <Compile Update="Views\MenuView\NotificationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\OperatorEditWindow.xaml.cs">
@@ -26,7 +26,7 @@
     <Compile Update="Views\RacksGridControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\UserControl\ReceiptView.xaml.cs">
+    <Compile Update="Views\MenuView\ReceiptView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\SettingsView.xaml.cs">
@@ -37,10 +37,10 @@
     <Page Update="Styles.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\UserControl\HistoryView.xaml">
+    <Page Update="Views\MenuView\HistoryView.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\NotificationView.xaml">
+    <Page Update="Views\MenuView\NotificationView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SettingsView.xaml">

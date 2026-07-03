@@ -14,6 +14,7 @@ namespace WMS.Application.Abstractions
         Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId);
         Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId);
         Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount);
+        Task<IReadOnlyList<Stock>> GetMinQuantityAsync();
         Task AddAsync(Stock stock);
         Task UpdateAsync(Stock stock);
         Task DeletAsync(Stock stock);

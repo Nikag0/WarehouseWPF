@@ -7,7 +7,7 @@ using WMS.Application.Services;
 using WMS.Domain;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class HistoryViewModel : ObservableObject
     {

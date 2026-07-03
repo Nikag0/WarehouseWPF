@@ -13,8 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WMS.Desktop.ViewModels;
+using WMS.Desktop.ViewModels.MenuViewModels;
 
-namespace WMS.Desktop.Views
+namespace WMS.Desktop.Views.MenuView
 {
     /// <summary>
     /// Interaction logic for HistoryView.xaml

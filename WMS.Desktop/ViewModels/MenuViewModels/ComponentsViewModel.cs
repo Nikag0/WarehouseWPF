@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using WMS.Application.Services;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class ComponentsViewModel : ObservableObject
     {

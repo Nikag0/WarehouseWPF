@@ -1,0 +1,108 @@
+﻿<UserControl x:Class="WMS.Desktop.Views.MenuView.NotificationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WMS.Desktop.Views.MenuView"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Панель фильтров (если будет) -->
+            <RowDefinition Height="*"/>
+            <!-- Список уведомлений -->
+        </Grid.RowDefinitions>
+
+        <ListBox Grid.Row="1" 
+                 ItemsSource="{Binding NotificationItems}" 
+                 HorizontalContentAlignment="Stretch"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+
+            <!-- Шаблон самой карточки уведомления -->
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <!-- Граница карточки. Если уведомление прочитано (IsNew == false), можно сделать фон темнее/светлее -->
+                    <Border Background="White" 
+                            CornerRadius="6" 
+                            Margin="10,0,10,0" 
+                            Padding="15,10"
+                            BorderBrush="#E0E0E0"
+                            BorderThickness="1">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- Индикатор новизны (круг) -->
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- Иконка типа -->
+                                <ColumnDefinition Width="*"/>
+                                <!-- Текст (Заголовок + Описание) -->
+                                <ColumnDefinition Width="Auto"/>
+                                <!-- Кнопки действий -->
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 1. Зеленый кружок (показывается, только если IsNew == true) -->
+                            <!-- Для управления видимостью используется конвертер, либо триггер -->
+                            <Ellipse Grid.Column="0" 
+                                     Width="8" Height="8" 
+                                     Fill="#4CAF50" 
+                                     Margin="0,0,10,0"
+                                     VerticalAlignment="Center"></Ellipse>
+
+                            <!-- 2. Иконка категории (используем эмодзи или текст для простоты) -->
+                            <!-- В реальном проекте здесь может быть триггер, меняющий иконку в зависимости от Type -->
+                            <TextBlock Grid.Column="1" 
+                                       Text="⚠️" 
+                                       FontSize="20" 
+                                       Margin="0,0,12,0" 
+                                       VerticalAlignment="Center"/>
+
+                            <!-- 3. Текстовый блок -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Title}" 
+                                           FontWeight="SemiBold" 
+                                           FontSize="14" 
+                                           Foreground="#333333"
+                                           TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Description}" 
+                                           FontSize="12" 
+                                           Foreground="#666666" 
+                                           Margin="0,4,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <!-- 4. Кнопки управления справа -->
+                            <StackPanel Grid.Column="3" 
+                                        Orientation="Horizontal" 
+                                        VerticalAlignment="Center" 
+                                        Margin="10,0,0,0">
+
+                                <!-- Кнопка "Прочитано" -->
+                                <!--<Button Content="👁️" 
+                                        Width="32" Height="32" 
+                                        Margin="0,0,5,0"
+                                        ToolTip="Отметить как просмотренное"
+                                        Command="{Binding DataContext.MarkAsReadCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"/>
+
+                                --><!-- Кнопка "Удалить" --><!--
+                                <Button Content="❌" 
+                                        Width="32" Height="32" 
+                                        Background="#FFEAEA" 
+                                        Foreground="#D32F2F"
+                                        ToolTip="Удалить безвозвратно"
+                                        Command="{Binding DataContext.DeleteNotificationCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"/>-->
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

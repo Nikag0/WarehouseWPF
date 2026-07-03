@@ -2,8 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:WMS.Desktop"
-             xmlns:views="clr-namespace:WMS.Desktop.Views"
-             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels">
+             xmlns:views="clr-namespace:WMS.Desktop.Views.MenuView"
+             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels.MenuViewModels">
 
     <Application.Resources>
 
@@ -12,12 +12,12 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Notifications -->
+            
+            <!-- Notification -->
             <DataTemplate DataType="{x:Type viewmodels:NotificationViewModel}">
                 <views:NotificationView/>
             </DataTemplate>
-
+            
             <!-- Components -->
             <DataTemplate DataType="{x:Type viewmodels:ComponentsViewModel}">
                 <views:ComponentsView/>

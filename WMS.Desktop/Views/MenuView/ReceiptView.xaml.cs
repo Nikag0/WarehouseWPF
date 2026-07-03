@@ -13,9 +13,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WMS.Desktop.ViewModels;
+using WMS.Desktop.ViewModels.MenuViewModels;
 using WMS.Domain;
 
-namespace WMS.Desktop.Views
+namespace WMS.Desktop.Views.MenuView
 {
     public partial class ReceiptView : UserControl
     {

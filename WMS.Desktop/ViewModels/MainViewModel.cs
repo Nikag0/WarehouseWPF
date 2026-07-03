@@ -8,8 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WMS.Application.Services;
-using WMS.Desktop.Views;
+using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Desktop.ViewModels;
+using WMS.Desktop.Views.MenuView;
 using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
+using WMS.Desktop.Views;
 
 namespace WMS.Desktop.ViewModels
 {
@@ -17,7 +20,7 @@ namespace WMS.Desktop.ViewModels
     {
         [ObservableProperty] private object _currentView;
 
-        public NotificationViewModel Notifications { get; }
+        public NotificationViewModel Notification { get; }
         public ComponentsViewModel Components { get; }
         public IssueViewModel Issue { get; }
         public ReceiptViewModel Receipt { get; }
@@ -31,14 +34,14 @@ namespace WMS.Desktop.ViewModels
         public ICommand ShowSettingsCommand { get; }
 
         public MainViewModel(
-                    NotificationViewModel notifications,
+                    NotificationViewModel notification,
                     ComponentsViewModel components,
                     IssueViewModel issue,
                     ReceiptViewModel receipt,
                     HistoryViewModel history,
                     Func<SettingsView> settingsWindowFactory)
         {
-            Notifications = notifications;
+            Notification = notification;
             Components = components;
             Issue = issue;
             Receipt = receipt;
@@ -47,7 +50,7 @@ namespace WMS.Desktop.ViewModels
             CurrentView = Components;
 
             ShowNotificationCommand =
-                new RelayCommand(_ => CurrentView = Notifications);
+                new RelayCommand(_ => CurrentView = Notification);
 
             ShowComponentsCommand =
                 new RelayCommand(_ => CurrentView = Components);

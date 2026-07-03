@@ -55,7 +55,7 @@
                 <StackPanel VerticalAlignment="Top">
 
                     <Button Command="{Binding ShowNotificationCommand}" 
-                            CommandParameter="{Binding Notifications}"
+                            CommandParameter="{Binding Notification}"
                             Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="✉️" FontSize="22" HorizontalAlignment="Center"/>

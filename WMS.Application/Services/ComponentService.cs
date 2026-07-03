@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
+﻿using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;

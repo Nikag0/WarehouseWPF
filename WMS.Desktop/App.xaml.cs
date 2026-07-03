@@ -8,6 +8,7 @@ using WMS.Desktop.ViewModels;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Migrations;
 using Microsoft.Extensions.Logging;
+using WMS.Desktop.ViewModels.MenuViewModels;
 
 
 namespace WMS.Desktop
@@ -51,10 +52,10 @@ namespace WMS.Desktop
             services.AddScoped<OperatorService>();
             services.AddScoped<WarehouseService>();
             services.AddScoped<HistoryService>();
+            services.AddScoped<NotificationService>();
 
             // view models
             services.AddSingleton<MainViewModel>();
-            services.AddTransient<NotificationViewModel>();
             services.AddTransient<ComponentsViewModel>(); 
             services.AddTransient<ReceiptViewModel>();    
             services.AddTransient<IssueViewModel>();      
@@ -62,6 +63,7 @@ namespace WMS.Desktop
             services.AddTransient<ComponentEditViewModel>();
             services.AddTransient<OperatorEditViewModel>();
             services.AddTransient<HistoryViewModel>();
+            services.AddTransient<NotificationViewModel>();
 
             // views
             services.AddTransient<Views.SettingsView>();

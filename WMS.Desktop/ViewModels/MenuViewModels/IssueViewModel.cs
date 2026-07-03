@@ -17,7 +17,7 @@ using Component = WMS.Domain.Component;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WMS.Application.DTO;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class IssueViewModel : ObservableObject
     {

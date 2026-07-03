@@ -12,17 +12,27 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WMS.Desktop.ViewModels.MenuViewModels;
 
-namespace WMS.Desktop.Views
+namespace WMS.Desktop.Views.MenuView
 {
     /// <summary>
     /// Interaction logic for NotificationView.xaml
     /// </summary>
-    public partial class NotificationView : UserControl
+    public partial class NotificationView : System.Windows.Controls.UserControl
     {
         public NotificationView()
         {
             InitializeComponent();
+            this.Loaded += NotificationViewLoaded;
+        }
+
+        private async void NotificationViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is NotificationViewModel viewModel)
+            {
+                await viewModel.LoadNotification();
+            }
         }
     }
 }

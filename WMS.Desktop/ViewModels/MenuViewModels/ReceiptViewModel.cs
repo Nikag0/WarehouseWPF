@@ -17,7 +17,7 @@ using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Xceed.Wpf.AvalonDock.Layout;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class ReceiptViewModel : ObservableObject
     {
