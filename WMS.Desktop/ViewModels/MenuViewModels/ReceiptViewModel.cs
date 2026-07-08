@@ -285,7 +285,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 if (obj is not ViewItemDTO stock)
                     return;
 
-
                 ReceiptItem.Id = stock.StockId;
                 ReceiptItem.ComponentId = stock.ComponentId;
                 ReceiptItem.Article = stock.Article;

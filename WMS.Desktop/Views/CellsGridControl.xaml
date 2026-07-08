@@ -74,8 +74,12 @@
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Style="{StaticResource HeaderTextStyle}" Text="1"/>
+            <TextBlock Grid.Column="1" Style="{StaticResource HeaderTextStyle}" Text="2"/>
+            <TextBlock Grid.Column="2" Style="{StaticResource HeaderTextStyle}" Text="3"/>
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="1"
@@ -170,59 +174,55 @@
         </Grid>
 
         <Grid Grid.Column="0" Grid.Row="1"
-              Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
-                                   Converter={StaticResource RackTypeToVisibilityConverter},
-                                   ConverterParameter=R3}">
+            Visibility="{Binding RackType, RelativeSource={RelativeSource AncestorType=UserControl},
+                           Converter={StaticResource RackTypeToVisibilityConverter},
+                           ConverterParameter=R3}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="А" Margin="0,10,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
 
-                <TextBlock Grid.Row="0" Text="А" Margin="0,10,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Row="1" Text="Б" Margin="0,15,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
 
-                <TextBlock Grid.Row="1" Text="Б" Margin="0,10,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
-                
-                <TextBlock Grid.Row="2" Text="В" Margin="0,10,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
-                
-                <TextBlock Grid.Row="3" Text="Г" Margin="0,10,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Row="2" Text="В" Margin="0,20,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
 
-                <TextBlock Grid.Row="4" Text="Д" Margin="0,20,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
-                
-                <TextBlock Grid.Row="5" Text="Е" Margin="0,30,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
+            <TextBlock Grid.Row="3" Text="Г" Margin="0,15,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
 
-                <TextBlock Grid.Row="6" Text="Ж" Margin="0,10,0,0" 
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource HeaderTextStyle}"/>
-            </Grid>
-            
+            <TextBlock Grid.Row="4" Text="Д" Margin="0,15,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="5" Text="Е" Margin="0,20,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="6" Text="Ж" Margin="0,15,0,0" 
+            HorizontalAlignment="Center" 
+            Style="{StaticResource HeaderTextStyle}"/>
+
         </Grid>
 
         <Viewbox Grid.Column="1"
                  Grid.Row="1"
                  Stretch="Fill">
-            
-            <Grid Grid.Column="1"
-                  Grid.Row="1">
+
+            <Grid Width="800" Height="1200">
 
                 <Image Source="{Binding SelectedRack.Type, Converter={StaticResource RackImageConverter}}"
                        Stretch="Fill"/>
@@ -235,7 +235,7 @@
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemContainerStyle>
-                        <Style>
+                        <Style TargetType="ContentPresenter">
                             <Setter Property="Canvas.Left" Value="{Binding X}" />
                             <Setter Property="Canvas.Top" Value="{Binding Y}" />
                         </Style>
@@ -264,18 +264,20 @@
                                     </Style>
                                 </Border.Style>
 
-
                                 <Border.InputBindings>
                                     <MouseBinding Gesture="LeftClick"
                                       Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                       CommandParameter="{Binding}" />
                                 </Border.InputBindings>
+                                
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
             </Grid>
+            
         </Viewbox>
+        
     </Grid>
 </UserControl>
