@@ -32,6 +32,7 @@ namespace WMS.Desktop.ViewModels
         public ICommand ShowReceiptCommand { get; }
         public ICommand ShowHistoryCommand { get; }
         public ICommand ShowSettingsCommand { get; }
+        public ICommand ShowWarehouseCommand { get; }
 
         public MainViewModel(
                     NotificationViewModel notification,
@@ -39,7 +40,8 @@ namespace WMS.Desktop.ViewModels
                     IssueViewModel issue,
                     ReceiptViewModel receipt,
                     HistoryViewModel history,
-                    Func<SettingsView> settingsWindowFactory)
+                    Func<SettingsView> settingsWindowFactory,
+                    Func<WarehouseView> WarehouseFactory)
         {
             Notification = notification;
             Components = components;
@@ -67,6 +69,13 @@ namespace WMS.Desktop.ViewModels
             ShowSettingsCommand = new RelayCommand(_ =>
             {
                 var window = settingsWindowFactory();
+
+                window.ShowDialog();
+            });
+
+            ShowWarehouseCommand = new RelayCommand(_ =>
+            {
+                var window = WarehouseFactory();
 
                 window.ShowDialog();
             });

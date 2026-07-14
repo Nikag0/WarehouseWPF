@@ -52,6 +52,13 @@
                     </StackPanel>
                 </Button>
 
+                <Button DockPanel.Dock="Bottom" Command="{Binding ShowWarehouseCommand}" Cursor="Hand" Margin="0,10">
+                    <StackPanel>
+                        <TextBlock Text="🖼️" FontSize="22" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Общий вид" FontSize="11" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
                 <StackPanel VerticalAlignment="Top">
 
                     <Button Command="{Binding ShowNotificationCommand}" 

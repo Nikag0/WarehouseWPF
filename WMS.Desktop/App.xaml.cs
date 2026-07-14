@@ -67,9 +67,11 @@ namespace WMS.Desktop
 
             // views
             services.AddTransient<Views.SettingsView>();
+            services.AddTransient<Views.WarehouseView>();
 
             // Func
             services.AddTransient<Func<Views.SettingsView>>(provider => () => provider.GetRequiredService<Views.SettingsView>());
+            services.AddTransient<Func<Views.WarehouseView>>(provider => () => provider.GetRequiredService<Views.WarehouseView>());
 
             Services = services.BuildServiceProvider();
 

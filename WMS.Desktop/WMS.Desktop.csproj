@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\AllWarehouse.JPG" />
     <None Remove="Images\Warehouse.png" />
   </ItemGroup>
 
@@ -41,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\AllWarehouse.JPG" />
     <Resource Include="Images\RackType2.jpg" />
     <Resource Include="Images\RackType1.jpg" />
     <Resource Include="Images\RackType3.jpg" />
