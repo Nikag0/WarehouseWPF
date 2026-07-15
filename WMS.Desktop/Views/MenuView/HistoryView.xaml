@@ -49,7 +49,7 @@
             <DatePicker
                 Grid.Column="2"
                 Margin="5,0,0,0"
-                Height="50" 
+                Height="35" 
                 FontSize="20"
                 VerticalContentAlignment="Center"
                 HorizontalAlignment="Stretch"
@@ -67,10 +67,9 @@
             <DatePicker
                 Grid.Column="4"
                 Margin="5,0,0,0"
-                Height="50" 
+                Height="35" 
                 FontSize="20"
                 VerticalContentAlignment="Center"
-                HorizontalAlignment="Stretch"
                 SelectedDate="{Binding DateTo}"/>
 
 
@@ -78,7 +77,7 @@
                 ItemsSource="{Binding Type}"
                 Tag="Тип операции:"
                 SelectedItem="{Binding SelectedOperationType}"
-                Margin="0,5,5,5"
+                Margin="5,5,0,5"
                 VerticalContentAlignment="Center"
                 HorizontalContentAlignment="Center">
             </ComboBox>

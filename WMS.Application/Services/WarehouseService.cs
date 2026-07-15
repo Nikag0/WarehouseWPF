@@ -114,9 +114,48 @@ namespace WMS.Application.Services
             return layouts.ToDictionary(x => x.Code);
         }
 
+        // Редаетирование сетки ячеек в процессе работы приложения.
+        //private async Task<Dictionary<RackType, Dictionary<string, CellLayout>>> LoadCellLayoutsAsync()
+        //{
+        //    var path = @"E:\Code\WarehouseManagementSystem\WMS.Desktop\CellDescription.json";
+
+        //    if (!File.Exists(path))
+        //    {
+        //        throw new FileNotFoundException(
+        //            "JSON-файл конфигурации ячеек не найден.",
+        //            path);
+        //    }
+
+        //    // Принудительно читаем файл без кэширования
+        //    using var fileStream = new FileStream(
+        //        path,
+        //        FileMode.Open,
+        //        FileAccess.Read,
+        //        FileShare.ReadWrite,  // Важно: разрешаем совместный доступ
+        //        bufferSize: 4096,
+        //        useAsync: true);
+
+        //    using var reader = new StreamReader(fileStream);
+        //    var json = await reader.ReadToEndAsync();
+
+        //    var options = new JsonSerializerOptions
+        //    {
+        //        PropertyNameCaseInsensitive = true
+        //    };
+
+        //    var layouts = JsonSerializer.Deserialize<List<CellLayoutRoot>>(json, options) ?? [];
+
+        //    return layouts.ToDictionary(
+        //        rackType => rackType.RackType,
+        //        rackType => rackType.Cells.ToDictionary(
+        //            cell => cell.Code));
+        //}
+
         private async Task<Dictionary<RackType, Dictionary<string, CellLayout>>> LoadCellLayoutsAsync()
         {
-            var path = @"E:\Code\WarehouseManagementSystem\WMS.Desktop\CellDescription.json";
+            var path = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "CellDescription.json");
 
             if (!File.Exists(path))
             {
@@ -125,17 +164,7 @@ namespace WMS.Application.Services
                     path);
             }
 
-            // Принудительно читаем файл без кэширования
-            using var fileStream = new FileStream(
-                path,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.ReadWrite,  // Важно: разрешаем совместный доступ
-                bufferSize: 4096,
-                useAsync: true);
-
-            using var reader = new StreamReader(fileStream);
-            var json = await reader.ReadToEndAsync();
+            var json = await File.ReadAllTextAsync(path);
 
             var options = new JsonSerializerOptions
             {
@@ -149,33 +178,5 @@ namespace WMS.Application.Services
                 rackType => rackType.Cells.ToDictionary(
                     cell => cell.Code));
         }
-
-        //private async Task<Dictionary<RackType, Dictionary<string, CellLayout>>> LoadCellLayoutsAsync()
-        //    {
-        //    var path = Path.Combine(
-        //        AppDomain.CurrentDomain.BaseDirectory,
-        //        "CellDescription.json");
-
-        //    if (!File.Exists(path))
-        //    {
-        //        throw new FileNotFoundException(
-        //            "JSON-файл конфигурации ячеек не найден.",
-        //            path);
-        //    }
-
-        //    var json = await File.ReadAllTextAsync(path);
-
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        PropertyNameCaseInsensitive = true
-        //    };
-
-        //    var layouts = JsonSerializer.Deserialize<List<CellLayoutRoot>>(json, options)?? [];
-
-        //    return layouts.ToDictionary(
-        //        rackType => rackType.RackType,
-        //        rackType => rackType.Cells.ToDictionary(
-        //            cell => cell.Code));
-        //}
     }
 }
