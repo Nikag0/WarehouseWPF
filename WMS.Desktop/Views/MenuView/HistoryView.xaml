@@ -23,32 +23,41 @@
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="49*"/>
-                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="15*"/>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="17*"/>
             </Grid.ColumnDefinitions>
 
             <TextBox 
                 Grid.Column="0"
-                Margin="0,5,0,5" 
+                Margin="0,5,5,5" 
                 Tag="Поиск:"
                 Style="{StaticResource SearchTextBox}"
                 Text="{Binding SearchHistory, UpdateSourceTrigger=PropertyChanged}">
             </TextBox>
 
+            <ComboBox Grid.Column="1" 
+                      ItemsSource="{Binding Type}"
+                      Tag="Тип операции:"
+                      SelectedItem="{Binding SelectedOperationType}"
+                      Margin="5"
+                      VerticalContentAlignment="Center"
+                      HorizontalContentAlignment="Center">
+            </ComboBox>
+
             <TextBlock
-                Grid.Column="1"
+                Grid.Column="2"
                 VerticalAlignment="Center"
-                HorizontalAlignment="Right"
+                HorizontalAlignment="Center"
                 Text="От:"
                 Foreground="White"
                 FontSize="20"/>
 
             <DatePicker
-                Grid.Column="2"
-                Margin="5,0,0,0"
+                Grid.Column="3"
+                Margin="0,0,5,0"
                 Height="35" 
                 FontSize="20"
                 VerticalContentAlignment="Center"
@@ -57,16 +66,15 @@
             </DatePicker>
 
             <TextBlock
-                Grid.Column="3"
+                Grid.Column="4"
                 VerticalAlignment="Center"
-                HorizontalAlignment="Right"
+                HorizontalAlignment="Center"
                 Text="До:"
                 Foreground="White"
                 FontSize="20"/>
 
             <DatePicker
-                Grid.Column="4"
-                Margin="5,0,0,0"
+                Grid.Column="5"
                 Height="35" 
                 FontSize="20"
                 VerticalContentAlignment="Center"
