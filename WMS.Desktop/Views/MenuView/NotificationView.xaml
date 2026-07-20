@@ -9,10 +9,7 @@
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Панель фильтров (если будет) -->
-            <RowDefinition Height="*"/>
-            <!-- Список уведомлений -->
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
         <ListBox Grid.Row="1" 
@@ -22,11 +19,20 @@
                  BorderThickness="0"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
+            <ListBox.Style>
+                <Style TargetType="ListBox">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <!-- Если элементов нет, скрываем ListBox и показываем текст -->
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.Style>
 
-            <!-- Шаблон самой карточки уведомления -->
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <!-- Граница карточки. Если уведомление прочитано (IsNew == false), можно сделать фон темнее/светлее -->
                     <Border Background="White" 
                             CornerRadius="6" 
                             Margin="10,0,10,0" 
@@ -37,11 +43,8 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Индикатор новизны (круг) -->
                                 <ColumnDefinition Width="Auto"/>
-                                <!-- Иконка типа -->
                                 <ColumnDefinition Width="*"/>
-                                <!-- Текст (Заголовок + Описание) -->
                                 <ColumnDefinition Width="Auto"/>
                                 <!-- Кнопки действий -->
                             </Grid.ColumnDefinitions>
@@ -54,15 +57,12 @@
                                      Margin="0,0,10,0"
                                      VerticalAlignment="Center"></Ellipse>
 
-                            <!-- 2. Иконка категории (используем эмодзи или текст для простоты) -->
-                            <!-- В реальном проекте здесь может быть триггер, меняющий иконку в зависимости от Type -->
                             <TextBlock Grid.Column="1" 
                                        Text="⚠️" 
                                        FontSize="20" 
                                        Margin="0,0,12,0" 
                                        VerticalAlignment="Center"/>
 
-                            <!-- 3. Текстовый блок -->
                             <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Title}" 
                                            FontWeight="SemiBold" 
@@ -76,7 +76,6 @@
                                            TextWrapping="Wrap"/>
                             </StackPanel>
 
-                            <!-- 4. Кнопки управления справа -->
                             <StackPanel Grid.Column="3" 
                                         Orientation="Horizontal" 
                                         VerticalAlignment="Center" 
@@ -104,5 +103,23 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <TextBlock Text="Ноых уведомлений нет"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               FontSize="25"
+               Foreground="#999999">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding NotificationItems.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
     </Grid>
 </UserControl>

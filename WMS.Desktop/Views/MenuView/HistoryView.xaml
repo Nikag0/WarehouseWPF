@@ -80,16 +80,6 @@
                 VerticalContentAlignment="Center"
                 SelectedDate="{Binding DateTo}"/>
 
-
-            <ComboBox Grid.Column="6"
-                ItemsSource="{Binding Type}"
-                Tag="Тип операции:"
-                SelectedItem="{Binding SelectedOperationType}"
-                Margin="5,5,0,5"
-                VerticalContentAlignment="Center"
-                HorizontalContentAlignment="Center">
-            </ComboBox>
-
         </Grid>
 
         <Grid Grid.Row="2"

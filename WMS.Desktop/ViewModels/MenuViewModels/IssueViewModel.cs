@@ -262,6 +262,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 RacksGrid.Add(new RackViewModel(rackDTO));
             }
         }
+
         private void LoadCells()
         {
             CellsGrid.Clear();

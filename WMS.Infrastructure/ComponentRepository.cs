@@ -30,6 +30,15 @@ namespace WMS.Infrastructure
             return await db.Components.FindAsync(id);
         }
 
+        public async Task<Component?> GetByArticleAsync(string article)
+        {
+            using var db = _factory.CreateDbContext();
+
+            return await db.Components
+                .AsNoTracking()           
+                .FirstOrDefaultAsync(c => c.Article == article);
+        }
+
         public async Task AddAsync(Component component)
         {
             using var db = _factory.CreateDbContext();

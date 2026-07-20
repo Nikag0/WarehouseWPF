@@ -76,6 +76,13 @@ namespace WMS.Application.Services
                 if (component is null)
                     return Result.Failure("Компонент не найден.");
 
+                if (!string.Equals(component.Article, dto.Article, StringComparison.OrdinalIgnoreCase))
+                {
+                    var existing = await _componentRepo.GetByArticleAsync(dto.Article);
+                    if (existing is not null && existing.Id != dto.Id)
+                        return Result.Failure($"Артикул '{dto.Article}' уже используется другим компонентом.");
+                }
+
                 component.Update(
                     dto.Article,
                     dto.Name,

@@ -55,8 +55,8 @@ namespace WMS.Desktop.ViewModels
                     result = await _componentService.UpdateAsync(
                     new ComponentDTO(
                         _currentComponentDto.Id,
-                        Name,
                         Article,
+                        Name,
                         Manufacturer,
                         null, /*DateOnly.FromDateTime(ExpirationDate)*/
                         MinQuantity
@@ -65,8 +65,8 @@ namespace WMS.Desktop.ViewModels
                 else
                 {
                     result = await _componentService.AddAsync(
-                        Name,
                         Article,
+                        Name,
                         Manufacturer,
                         null, /*DateOnly.FromDateTime(ExpirationDate)*/
                         MinQuantity
