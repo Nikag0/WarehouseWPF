@@ -9,6 +9,8 @@ using WMS.Infrastructure;
 using WMS.Infrastructure.Migrations;
 using Microsoft.Extensions.Logging;
 using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Application;
+using System;
 
 
 namespace WMS.Desktop
@@ -42,6 +44,7 @@ namespace WMS.Desktop
             services.AddScoped<IOperatorRepository, OperatorRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
+            services.AddScoped<ILedStripRepository, LedStripRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
@@ -53,6 +56,9 @@ namespace WMS.Desktop
             services.AddScoped<WarehouseService>();
             services.AddScoped<HistoryService>();
             services.AddScoped<NotificationService>();
+            services.AddScoped<LedStripService>();
+
+            services.AddSingleton<ITcpPacketSender>(new TcpPacketSender(TimeSpan.FromSeconds(3)));
 
             // view models
             services.AddSingleton<MainViewModel>();
@@ -75,10 +81,23 @@ namespace WMS.Desktop
 
             Services = services.BuildServiceProvider();
 
+
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<WmsDbContext>();
 
             await db.Database.MigrateAsync();
+
+            var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
+            var success = await ledService.InitializeSectorsAsync();
+
+            if (!success)
+            {
+                MessageBox.Show(
+                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
+                    "Ошибка LED",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
 
             var window = new Views.MainWindow();
             window.DataContext = Services.GetRequiredService<MainViewModel>();

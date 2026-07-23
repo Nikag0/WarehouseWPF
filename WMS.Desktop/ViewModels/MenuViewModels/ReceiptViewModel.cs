@@ -153,18 +153,21 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
         private readonly WarehouseService _warehouseService;
+        private readonly LedStripService _ledStripService;
 
 
         public ReceiptViewModel(
             ReceiptService receiptService,
             DialogService dialogService,
             OperatorService operatorrService,
-            WarehouseService warehouseService)
+            WarehouseService warehouseService,
+            LedStripService ledStripService)
         {
             _receiptService = receiptService;
             _dialogService = dialogService;
             _operatorrService = operatorrService;
             _warehouseService = warehouseService;
+            _ledStripService = ledStripService;
         }
 
         [RelayCommand]
@@ -195,12 +198,18 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
-            if (!_dialogService.ShowConfirmation("Вы уверены, что хотите выполнить приёмку товара? \n" +
+            await _ledStripService.SetCellColorAsync(SelectedCell.Id, 255, 0, 0);
+
+            if (!_dialogService.ShowConfirmation("Товар принят? \n" +
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
                 $"Количество: {ReceiptItem.OperationQuantity}\n" +
                 $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}"))
+            {
+                await _ledStripService.SetCellColorAsync(SelectedCell.Id, 0, 0, 0);
                 return;
+            }
+
 
             await _lock.WaitAsync();
 
@@ -215,6 +224,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
 
                 await LoadWarehouseAsync();
+
+                await _ledStripService.SetCellColorAsync(SelectedCell.Id, 0, 0, 0);
 
                 SelectedRack.IsSelected = false;
                 SelectedRack = null;
@@ -234,6 +245,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 ReplaceCollection(FilteredRacks, RacksGrid);
 
                 _dialogService.ShowInfo("Приём товаров успешно выполнен.");
+
             }
             catch (BusinessException ex)
             {
@@ -252,6 +264,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 await LoadWarehouseAsync();
                 await LoadOperatorsAsync();
                 ReplaceCollection(FilteredRacks, RacksGrid);
+                OnSearchStockOrComponentChanged(SearchStockOrComponent);
             }
             catch (BusinessException ex)
             {

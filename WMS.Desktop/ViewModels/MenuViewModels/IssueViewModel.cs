@@ -61,6 +61,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly IssueService _issueService;
         private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
+        private readonly LedStripService _ledStripService;
 
         private CancellationTokenSource? token;
         
@@ -77,12 +78,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             IssueService issueService,
             DialogService dialogService,
             OperatorService operatorService,
-            WarehouseService warehouseService)
+            WarehouseService warehouseService,
+            LedStripService ledStripService)
         {
             _issueService = issueService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _warehouseService = warehouseService;
+            _ledStripService = ledStripService;
         }
 
         [RelayCommand]
@@ -136,8 +139,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedCell.ItemInCell = true;
                 SelectedCell.IsSelected = true;
 
-                var question = $"Получилось найти товар?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
-
+                var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+                await _ledStripService.SetCellColorAsync(item.CellId, 255, 0, 0);
                 if (!_dialogService.ShowConfirmation(question))
                 {
                     IssueItems.Remove(item);
@@ -151,6 +154,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     _dialogService.ShowWarning($"{item.ComponentName} не хватает. Осталось товара {item.Quantity}. В выдаче {item.OperationQuantity}");
                     return;
                 }
+
+                await _ledStripService.SetCellColorAsync(item.CellId, 0, 0, 0);
             }
 
             if (!IssueItems.Any())
@@ -190,8 +195,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     LoadOperators()
                 );
 
+                OnSearchStockChanged(SearchStock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
+                UpdateItemToReceipt();
             }
             catch (BusinessException ex)
             {
@@ -354,6 +361,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             foreach (var rack in RacksGrid)
             {
                 rack.ItemInCell = rackIds.Contains(rack.Id);
+            }
+        }
+
+        private async void UpdateItemToReceipt()
+        {
+            if (IssueItems.Count == 0) return;
+
+            for (int i = 0; i < IssueItems.Count; i++)
+            {
+                var updated = await _issueService.GetStockByIdAsync(IssueItems[i].StockId);
+                IssueItems[i] = updated;  
             }
         }
     }

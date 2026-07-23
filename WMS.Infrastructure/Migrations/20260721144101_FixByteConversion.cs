@@ -5,7 +5,7 @@
 namespace WMS.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Refresh1 : Migration
+    public partial class FixByteConversion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

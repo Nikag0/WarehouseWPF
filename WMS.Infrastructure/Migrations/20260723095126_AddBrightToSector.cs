@@ -5,25 +5,25 @@
 namespace WMS.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class addIsDelet : Migration
+    public partial class AddBrightToSector : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDeleted",
-                table: "operators",
-                type: "boolean",
+            migrationBuilder.AddColumn<byte>(
+                name: "Bright",
+                table: "sector",
+                type: "smallint",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: (byte)0);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsDeleted",
-                table: "operators");
+                name: "Bright",
+                table: "sector");
         }
     }
 }

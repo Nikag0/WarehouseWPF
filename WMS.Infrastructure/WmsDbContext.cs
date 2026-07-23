@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection.Emit;
 using WMS.Domain;
+using WMS.Domain.LedStrip;
 using Component = WMS.Domain.Component;
 
 namespace WMS.Infrastructure
@@ -18,6 +19,9 @@ namespace WMS.Infrastructure
         public DbSet<Cell> Cells => Set<Cell>();
         public DbSet<Rack> Racks => Set<Rack>();
         public DbSet<Operator> Operators => Set<Operator>();
+        public DbSet<Microcontroller> Microcontrollers => Set<Microcontroller>();
+        public DbSet<Strip> Strips => Set<Strip>();
+        public DbSet<Sector> Sectors => Set<Sector>();
 
         public WmsDbContext(DbContextOptions<WmsDbContext> options)
             : base(options) { }
