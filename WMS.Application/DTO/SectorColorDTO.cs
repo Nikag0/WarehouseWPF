@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 namespace WMS.Application.DTO
 {
     public record SectorColorDTO(
-      byte DeviceAddress,
-      byte StripNumber,
-      byte Index,
-      string Ip,
-      int Port,
-      byte Brightness
+        byte DeviceAddress,
+        byte StripNumber,
+        byte Index,
+        string Ip,
+        int Port,
+        byte R, byte G, byte B,
+        byte Brightness
     );
 }

@@ -10,11 +10,8 @@ namespace WMS.Application.Abstractions
 {
     public interface ILedStripRepository
     {
-        Task<IReadOnlyList<Strip>> GetAllStripsAsync(CancellationToken ct = default);
-        Task<IReadOnlyList<Microcontroller>> GetAllMicrocontrollersAsync(CancellationToken ct = default);
-        Task<IReadOnlyList<SectorInitDTO>> GetAllSectorInitAsync(CancellationToken ct = default);
-        Task<SectorColorDTO?> GetSectorByCellIdAsync(Guid cellId, CancellationToken ct = default);
-        Task<IReadOnlyList<Sector>> GetSectorsByStripAsync(Guid stripId, CancellationToken ct = default);
-        Task UpdateSectorColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default);
+        Task<IReadOnlyList<SectorInitDTO>> GetAllInitAsync(CancellationToken ct = default);
+        Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default);
+        Task SetColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default);
     }
 }

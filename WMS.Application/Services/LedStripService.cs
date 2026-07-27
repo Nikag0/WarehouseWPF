@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
+using WMS.Domain;
 using WMS.Domain.LedStrip;
 
 namespace WMS.Application.Services
@@ -21,48 +22,9 @@ namespace WMS.Application.Services
             _packetSender = packetSender;
         }
 
-        //public async Task<bool> InitializeSectorsAsync(CancellationToken ct = default)
-        //{
-        //    string ip = "172.20.4.50";
-        //    int port = 7;
-
-        //    //Регистрация сектора
-        //    var packetReg = BuildCreateSectorPacket(
-        //        (byte)0,
-        //        (byte)0,
-        //        (byte)0,
-        //        (byte)0,
-        //        29
-        //    );
-
-        //    var success = await _packetSender.SendAsync(
-        //        ip,
-        //        port,
-        //        packetReg,
-        //        ct
-        //    );
-
-        //    //Зажигание сектора
-        //    var packetCol = BuildColorPacket(
-        //      0,
-        //      0,
-        //      0,
-        //      255, 255, 0
-        //    );
-
-        //    success = await _packetSender.SendAsync(
-        //        ip,
-        //        port,
-        //        packetCol,
-        //        ct
-        //    );
-
-        //    return true;
-        //}
-
         public async Task<bool> InitializeSectorsAsync(CancellationToken ct = default)
         {
-            var strips = await _repository.GetAllSectorInitAsync(ct);
+            var strips = await _repository.GetAllInitAsync(ct);
 
             foreach (var sector in strips)
             {
@@ -91,27 +53,51 @@ namespace WMS.Application.Services
             return true;
         }
 
-        public async Task<bool> SetCellColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
+        public async Task TurnOnSectorAsync(Guid cellId, CancellationToken ct = default)
         {
-            var sector = await _repository.GetSectorByCellIdAsync(cellId, ct);
-            if (sector is null) return false;
+            var sector = await _repository.GetByCellIdAsync(cellId, ct);
+            if (sector is null) return;
 
             var packet = BuildColorPacket(
-                sector.DeviceAddress,
-                sector.StripNumber,
-                sector.Index,
-                r, g, b,
-                sector.Brightness
+              sector.DeviceAddress,
+              sector.StripNumber,
+              sector.Index,
+              sector.R, sector.G, sector.B,
+              sector.Brightness
             );
 
             var success = await _packetSender.SendAsync(
-                sector.Ip,
-                sector.Port,
-                packet,
-                ct
+                    sector.Ip,
+                    sector.Port,
+                    packet,
+                    ct
+                );
+        }
+
+        public async Task TurnOffSectorAsync(Guid cellId, CancellationToken ct = default)
+        {
+            var sector = await _repository.GetByCellIdAsync(cellId, ct);
+            if (sector is null) return;
+
+            var packet = BuildColorPacket(
+              sector.DeviceAddress,
+              sector.StripNumber,
+              sector.Index,
+              0, 0, 0,
+              sector.Brightness
             );
 
-            return success;
+            var success = await _packetSender.SendAsync(
+                    sector.Ip,
+                    sector.Port,
+                    packet,
+                    ct
+                );
+        }
+
+        public async Task SetCellColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
+        {
+            await _repository.SetColorAsync(cellId, r, g, b, ct);
         }
 
         // ============ Пакеты ============

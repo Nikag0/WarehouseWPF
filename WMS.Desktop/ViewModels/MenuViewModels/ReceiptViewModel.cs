@@ -198,7 +198,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
-            await _ledStripService.SetCellColorAsync(SelectedCell.Id, 255, 0, 0);
+            await _ledStripService.TurnOnSectorAsync(SelectedCell.Id);
 
             if (!_dialogService.ShowConfirmation("Товар принят? \n" +
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
@@ -206,7 +206,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 $"Количество: {ReceiptItem.OperationQuantity}\n" +
                 $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}"))
             {
-                await _ledStripService.SetCellColorAsync(SelectedCell.Id, 0, 0, 0);
+                await _ledStripService.TurnOffSectorAsync(SelectedCell.Id);
                 return;
             }
 

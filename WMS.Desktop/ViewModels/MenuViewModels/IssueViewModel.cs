@@ -140,7 +140,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedCell.IsSelected = true;
 
                 var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
-                await _ledStripService.SetCellColorAsync(item.CellId, 255, 0, 0);
+                await _ledStripService.TurnOnSectorAsync(item.CellId);
                 if (!_dialogService.ShowConfirmation(question))
                 {
                     IssueItems.Remove(item);
@@ -155,7 +155,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     return;
                 }
 
-                await _ledStripService.SetCellColorAsync(item.CellId, 0, 0, 0);
+                await _ledStripService.TurnOffSectorAsync(item.CellId);
             }
 
             if (!IssueItems.Any())

@@ -20,30 +20,10 @@ namespace WMS.Infrastructure
         {
             _factory = factory;
         }
-
-        public async Task<IReadOnlyList<Strip>> GetAllStripsAsync(CancellationToken ct = default)
-        {
-            using var db = _factory.CreateDbContext();
-            return await db.Strips
-                .AsNoTracking()
-                .Include(s => s.Microcontroller)
-                .Include(s => s.Sectors)
-                .ToListAsync(ct);
-        }
-
-        public async Task<IReadOnlyList<Microcontroller>> GetAllMicrocontrollersAsync(CancellationToken ct = default)
-        {
-            using var db = _factory.CreateDbContext();
-            return await db.Microcontrollers
-                .AsNoTracking()
-                .Include(m => m.Strips)
-                    .ThenInclude(s => s.Sectors)
-                .ToListAsync(ct);
-        }     
         
-        public async Task<IReadOnlyList<SectorInitDTO>> GetAllSectorInitAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<SectorInitDTO>> GetAllInitAsync(CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
+            await using var db =  await _factory.CreateDbContextAsync(ct);
             return await db.Sectors
                 .AsNoTracking()
                 .Select(s => new SectorInitDTO(
@@ -57,9 +37,9 @@ namespace WMS.Infrastructure
                 .ToListAsync(ct);
         }
 
-        public async Task<SectorColorDTO?> GetSectorByCellIdAsync(Guid cellId, CancellationToken ct = default)
+        public async Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
+            await using var db = await _factory.CreateDbContextAsync();
             return await db.Sectors
                 .AsNoTracking()
                 .Where(s => s.CellId == cellId)
@@ -69,24 +49,16 @@ namespace WMS.Infrastructure
                     s.Index,
                     s.Strip.Microcontroller.Ip,
                     s.Strip.Microcontroller.Port,
+                    s.R, s.G, s.B,
                     s.Bright
                 ))
                 .FirstOrDefaultAsync(ct);
         }
 
-        public async Task<IReadOnlyList<Sector>> GetSectorsByStripAsync(Guid stripId, CancellationToken ct = default)
+        public async Task SetColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-            return await db.Sectors
-                .AsNoTracking()
-                .Where(s => s.StripId == stripId)
-                .ToListAsync(ct);
-        }
-
-        public async Task UpdateSectorColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default)
-        {
-            using var db = _factory.CreateDbContext();
-            var sector = await db.Sectors.FindAsync(new object[] { sectorId }, ct);
+            await using var db = await _factory.CreateDbContextAsync();
+            var sector = await db.Sectors.FindAsync(new object[] { cellId }, ct);
             if (sector is null) return;
 
             sector.SetColor(r, g, b);
