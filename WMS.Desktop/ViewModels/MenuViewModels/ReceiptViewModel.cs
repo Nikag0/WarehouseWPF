@@ -210,6 +210,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            await _ledStripService.TurnOffSectorAsync(SelectedCell.Id);
 
             await _lock.WaitAsync();
 

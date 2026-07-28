@@ -8,10 +8,10 @@ using WMS.Domain.LedStrip;
 
 namespace WMS.Application.Abstractions
 {
-    public interface ILedStripRepository
+    public interface ISectorRepository
     {
-        Task<IReadOnlyList<SectorInitDTO>> GetAllInitAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<SectorInitDTO>> GetAllForInitializationAsync(CancellationToken ct = default);
         Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default);
-        Task SetColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default);
+        Task<bool> SetColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default);
     }
 }

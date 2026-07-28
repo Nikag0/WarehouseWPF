@@ -13,10 +13,10 @@ namespace WMS.Application.Services
 {
     public class LedStripService
     {
-        private readonly ILedStripRepository _repository;
+        private readonly ISectorRepository _repository;
         private readonly ITcpPacketSender _packetSender;
 
-        public LedStripService(ILedStripRepository repository, ITcpPacketSender packetSender)
+        public LedStripService(ISectorRepository repository, ITcpPacketSender packetSender)
         {
             _repository = repository;
             _packetSender = packetSender;
@@ -24,7 +24,7 @@ namespace WMS.Application.Services
 
         public async Task<bool> InitializeSectorsAsync(CancellationToken ct = default)
         {
-            var strips = await _repository.GetAllInitAsync(ct);
+            var strips = await _repository.GetAllForInitializationAsync(ct);
 
             foreach (var sector in strips)
             {

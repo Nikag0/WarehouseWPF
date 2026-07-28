@@ -44,12 +44,11 @@ namespace WMS.Desktop
             services.AddScoped<IOperatorRepository, OperatorRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
-            services.AddScoped<ILedStripRepository, LedStripRepository>();
+            services.AddScoped<ISectorRepository, SectorRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
             services.AddScoped<IssueService>();
-            services.AddScoped<InventoryService>();
             services.AddScoped<ReceiptService>();
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
