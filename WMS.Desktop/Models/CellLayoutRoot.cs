@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WMS.Domain;
 
-namespace WMS.Application.WarehouseVisualization
+namespace WMS.Desktop.Models
 {
     public class CellLayoutRoot
     {

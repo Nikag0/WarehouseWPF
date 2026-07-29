@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using WMS.Application.Services;
+using WMS.Desktop.Services;
 
 namespace WMS.Desktop.ViewModels.MenuViewModels
 {

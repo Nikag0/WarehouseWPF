@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using WMS.Desktop.ViewModels.MenuViewModels;
 using WMS.Application;
 using System;
+using WMS.Desktop.Services;
 
 
 namespace WMS.Desktop
@@ -53,6 +54,7 @@ namespace WMS.Desktop
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
             services.AddScoped<WarehouseService>();
+            services.AddScoped<WarehouseVisualizationService>();
             services.AddScoped<HistoryService>();
             services.AddScoped<NotificationService>();
             services.AddScoped<LedStripService>();

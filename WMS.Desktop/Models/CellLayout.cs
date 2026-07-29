@@ -2,22 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using WMS.Domain;
 
-namespace WMS.Application.WarehouseVisualization
+namespace WMS.Desktop.Models
 {
-    public class RackLayout
+    public class CellLayout
     {
         public string Code { get; set; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RackType Type { get; set; }
-
         public double X { get; set; }
         public double Y { get; set; }
-
         public double Width { get; set; }
         public double Height { get; set; }
     }

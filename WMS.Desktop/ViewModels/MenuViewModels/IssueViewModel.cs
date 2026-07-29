@@ -9,13 +9,14 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using WMS.Application.WarehouseVisualization;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WMS.Application.DTO;
+using WMS.Desktop.Services;
+using WMS.Desktop.Models;
 
 namespace WMS.Desktop.ViewModels.MenuViewModels
 {
@@ -61,6 +62,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly IssueService _issueService;
         private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
+        private readonly WarehouseVisualizationService _warehouseVisualizationService;
         private readonly LedStripService _ledStripService;
 
         private CancellationTokenSource? token;
@@ -79,12 +81,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             DialogService dialogService,
             OperatorService operatorService,
             WarehouseService warehouseService,
+            WarehouseVisualizationService warehouseVisualizationService,
             LedStripService ledStripService)
         {
             _issueService = issueService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _warehouseService = warehouseService;
+            _warehouseVisualizationService = warehouseVisualizationService;
             _ledStripService = ledStripService;
         }
 
@@ -260,15 +264,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async Task LoadWarehouseAsync()
         {
-            var racks = await _warehouseService.GetWarehouseAsync();
+            var racks = await _warehouseService.GetRacksAsync();
+            var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
             RacksGrid.Clear();
 
-            foreach (var rackDTO in racks)
+            foreach (var rack in racksView)
             {
-                RacksGrid.Add(new RackViewModel(rackDTO));
+                RacksGrid.Add(rack);
             }
-        }
+        }      
+
         private void LoadCells()
         {
             CellsGrid.Clear();

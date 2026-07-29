@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.Models
 {
     public class StockViewModel : INotifyPropertyChanged
     {
@@ -24,7 +24,7 @@ namespace WMS.Desktop.ViewModels
         public Guid ComponentId
         {
             get => _componentId;
-            set 
+            set
             {
                 _componentId = value;
                 OnPropertyChanged();
@@ -34,7 +34,7 @@ namespace WMS.Desktop.ViewModels
         public string Article
         {
             get => _article;
-            set 
+            set
             {
                 _article = value;
                 OnPropertyChanged();
@@ -44,7 +44,7 @@ namespace WMS.Desktop.ViewModels
         public string ComponentName
         {
             get => _componentName;
-            set 
+            set
             {
                 _componentName = value;
                 OnPropertyChanged();
@@ -54,7 +54,7 @@ namespace WMS.Desktop.ViewModels
         public string Manufacturer
         {
             get => _manufacturer;
-            set 
+            set
             {
                 _manufacturer = value;
                 OnPropertyChanged();
@@ -65,7 +65,7 @@ namespace WMS.Desktop.ViewModels
         public Guid RackId
         {
             get => _rackId;
-            set 
+            set
             {
                 _rackId = value;
                 OnPropertyChanged();
@@ -75,7 +75,7 @@ namespace WMS.Desktop.ViewModels
         public string RackCode
         {
             get => _rackCode;
-            set 
+            set
             {
                 _rackCode = value;
                 OnPropertyChanged();
@@ -86,7 +86,7 @@ namespace WMS.Desktop.ViewModels
         public Guid CellId
         {
             get => _cellId;
-            set 
+            set
             {
                 _cellId = value;
                 OnPropertyChanged();
@@ -96,7 +96,7 @@ namespace WMS.Desktop.ViewModels
         public string CellCode
         {
             get => _cellCode;
-            set 
+            set
             {
                 _cellCode = value;
                 OnPropertyChanged();

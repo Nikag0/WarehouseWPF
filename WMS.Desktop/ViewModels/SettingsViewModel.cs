@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using WMS.Application.Services;
+using WMS.Desktop.Services;
 using WMS.Desktop.Views;
 using WMS.Domain;
 

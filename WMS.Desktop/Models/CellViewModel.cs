@@ -5,23 +5,21 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 using WMS.Application.DTO;
-using WMS.Application.WarehouseVisualization;
 using WMS.Domain;
 
-namespace WMS.Desktop.ViewModels
+namespace WMS.Desktop.Models
 {
-    public class RackViewModel : ObservableObject
+    public class CellViewModel : ObservableObject
     {
         public Guid Id { get; }
         public string Code { get; }
-        public RackType Type { get; }
-        public ObservableCollection<CellViewModel> Cells { get; }
 
         public double X { get; }
         public double Y { get; }
+
         public double Width { get; }
         public double Height { get; }
 
@@ -47,19 +45,17 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        public RackViewModel(RackDTO dto)
+        public CellViewModel(Guid id, string code, double x, double y, double width, double height)
         {
-            Id = dto.Id;
-            Code = LocationFormatter.CodeToDisplay(dto.Column, dto.Row);
-            Type = dto.Type;
+            Id = id;
 
-            Cells = new ObservableCollection<CellViewModel>(
-                dto.Cells.Select(c => new CellViewModel(c)));
+            Code = code;
 
-            X = dto.X;
-            Y = dto.Y;
-            Width = dto.Width;
-            Height = dto.Height;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
         }
+
     }
 }

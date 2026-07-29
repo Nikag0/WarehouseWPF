@@ -12,7 +12,8 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using WMS.Application.DTO;
 using WMS.Application.Services;
-using WMS.Application.WarehouseVisualization;
+using WMS.Desktop.Models;
+using WMS.Desktop.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Xceed.Wpf.AvalonDock.Layout;
@@ -153,6 +154,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
         private readonly WarehouseService _warehouseService;
+        private readonly WarehouseVisualizationService _warehouseVisualizationService;
         private readonly LedStripService _ledStripService;
 
 
@@ -161,12 +163,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             DialogService dialogService,
             OperatorService operatorrService,
             WarehouseService warehouseService,
+            WarehouseVisualizationService warehouseVisualizationService,
             LedStripService ledStripService)
         {
             _receiptService = receiptService;
             _dialogService = dialogService;
             _operatorrService = operatorrService;
             _warehouseService = warehouseService;
+            _warehouseVisualizationService = warehouseVisualizationService;
             _ledStripService = ledStripService;
         }
 
@@ -339,13 +343,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async Task LoadWarehouseAsync()
         {
-            var racks = await _warehouseService.GetWarehouseAsync();
+            var racks = await _warehouseService.GetRacksAsync();
+            var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
             RacksGrid.Clear();
 
-            foreach (var rackDTO in racks)
+            foreach (var rack in racksView)
             {
-                RacksGrid.Add(new RackViewModel(rackDTO));
+                RacksGrid.Add(rack);
             }
         }
 

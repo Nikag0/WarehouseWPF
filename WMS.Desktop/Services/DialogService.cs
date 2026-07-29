@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using WMS.Application.Abstractions;
 
-namespace WMS.Desktop
+namespace WMS.Desktop.Services
 {
     public class DialogService : IDialogService
     {
