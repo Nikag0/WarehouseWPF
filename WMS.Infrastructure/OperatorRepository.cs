@@ -6,45 +6,40 @@ namespace WMS.Infrastructure.Migrations
 {
     public class OperatorRepository : IOperatorRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly AppDbContext _db;
 
-        public OperatorRepository(IDbContextFactory<WmsDbContext> factory)
+        public OperatorRepository(AppDbContext db)
         {
-            _factory = factory;
+            _db = db;
         }
 
         public async Task<List<Operator>> GetAllAsync()
         {
-            using var db = _factory.CreateDbContext();
-            return await db.Operators.ToListAsync();
+            return await _db.Operators.ToListAsync();
         }
 
         public async Task<Operator?> GetByIdAsync(Guid id)
         {
-            using var db = _factory.CreateDbContext();
-            return await db.Operators.FindAsync(id);
+            return await _db.Operators.FindAsync(id);
         }
 
         public async Task AddAsync(Operator operatorr)
         {
-            using var db = _factory.CreateDbContext();
-            db.Operators.Add(operatorr);
-            await db.SaveChangesAsync();
+            _db.Operators.Add(operatorr);
+            await _db.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Operator operatorr)
         {
-            using var db = _factory.CreateDbContext();
-            db.Entry(operatorr).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _db.Entry(operatorr).State = EntityState.Modified;
+            await _db.SaveChangesAsync();
         }
 
         public async Task RemoveAsync(Operator operatorr)
         {
-            using var db = _factory.CreateDbContext();
             operatorr.Delete();
-            db.Entry(operatorr).Property(o => o.IsDeleted).IsModified = true;
-            await db.SaveChangesAsync();
+            _db.Entry(operatorr).Property(o => o.IsDeleted).IsModified = true;
+            await _db.SaveChangesAsync();
         }
     }
 }

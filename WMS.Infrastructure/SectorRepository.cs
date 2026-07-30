@@ -15,10 +15,10 @@ namespace WMS.Infrastructure
 {
     public class SectorRepository : ISectorRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly IDbContextFactory<AppDbContext> _factory;
         private readonly ILogger<SectorRepository> _logger;
 
-        public SectorRepository(IDbContextFactory<WmsDbContext> factory, ILogger<SectorRepository> logger)
+        public SectorRepository(IDbContextFactory<AppDbContext> factory, ILogger<SectorRepository> logger)
         {
             _factory = factory;
             _logger = logger;

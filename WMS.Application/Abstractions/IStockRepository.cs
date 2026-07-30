@@ -9,18 +9,16 @@ namespace WMS.Application.Abstractions
 {
     public interface IStockRepository
     {
-        Task<IReadOnlyList<Stock>> GetAllAsync();
-        Task<Stock?> GetByIdAsync(Guid stockId);
-        Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId);
-        Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId);
-        Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount);
-        Task<IReadOnlyList<Stock>> GetMinQuantityAsync();
-        Task AddAsync(Stock stock);
-        Task UpdateAsync(Stock stock);
-        Task DeletAsync(Stock stock);
+        Task<Stock?> GetByIdAsync(Guid stockId, CancellationToken ct = default);
+        Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId, CancellationToken ct = default);
+        Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default);
+        Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default);
+        Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default);
+        Task AddAsync(Stock stock, CancellationToken ct = default);
+        Task UpdateAsync(Stock stock, CancellationToken ct = default);
+        Task DeletAsync(Stock stock, CancellationToken ct = default);
 
         //Можно подумать над реалзацией.
-        Task<List<Stock>> GetRawStockDataAsync();
-        Task<bool> HasStockWithQuantityAsync(Guid componentId);
+        Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default);
     }
 }

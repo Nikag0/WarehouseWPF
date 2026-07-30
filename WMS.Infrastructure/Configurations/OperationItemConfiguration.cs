@@ -10,9 +10,9 @@ using WMS.Domain;
 namespace WMS.Infrastructure.Configurations
 {
     public class OperationItemConfiguration
-     : IEntityTypeConfiguration<OperationItem>
+     : IEntityTypeConfiguration<HistoryItem>
     {
-        public void Configure(EntityTypeBuilder<OperationItem> builder)
+        public void Configure(EntityTypeBuilder<HistoryItem> builder)
         {
             builder.ToTable("operation_items");
 

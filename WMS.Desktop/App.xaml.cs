@@ -35,10 +35,11 @@ namespace WMS.Desktop
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            services.AddDbContextFactory<WmsDbContext>(opt =>
+            services.AddDbContextFactory<AppDbContext>(opt =>
                 opt.UseNpgsql(config.GetConnectionString("Warehouse")));
 
             // репозитории
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStockRepository, StockRepository>();
             services.AddScoped<IComponentRepository, ComponentRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
@@ -49,8 +50,7 @@ namespace WMS.Desktop
 
             // application services
             services.AddScoped<ComponentService>();
-            services.AddScoped<IssueService>();
-            services.AddScoped<ReceiptService>();
+            services.AddScoped<StockService>();
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
             services.AddScoped<WarehouseService>();
@@ -84,7 +84,7 @@ namespace WMS.Desktop
 
 
             using var scope = Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<WmsDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             await db.Database.MigrateAsync();
 

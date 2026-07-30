@@ -49,6 +49,7 @@ namespace WMS.Application.Services
         {
             try
             {
+                // Не проверяем уникальность добавляемого компонента.
                 var component = Domain.Component.Create(article, name, manufacturer, expirationDate, minQuantity);
                 await _componentRepo.AddAsync(component);
 

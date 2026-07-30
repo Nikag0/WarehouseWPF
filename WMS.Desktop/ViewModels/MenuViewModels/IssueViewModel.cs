@@ -59,7 +59,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         }
 
         private readonly DialogService _dialogService;
-        private readonly IssueService _issueService;
+        private readonly StockService _stockService;
         private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
         private readonly WarehouseVisualizationService _warehouseVisualizationService;
@@ -77,14 +77,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private CellViewModel _selectedCell;
 
         public IssueViewModel(
-            IssueService issueService,
+            StockService stockService,
             DialogService dialogService,
             OperatorService operatorService,
             WarehouseService warehouseService,
             WarehouseVisualizationService warehouseVisualizationService,
             LedStripService ledStripService)
         {
-            _issueService = issueService;
+            _stockService = stockService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _warehouseService = warehouseService;
@@ -177,7 +177,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         item.OperationQuantity))
                     .ToList();
 
-                await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
+                await _stockService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
                 CommentText = string.Empty;
                 SearchStock = string.Empty;
@@ -251,7 +251,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             try
             {
-                var stock = await _issueService.GetStockByIdAsync(item.StockId);
+                var stock = await _stockService.GetStockByIdAsync(item.StockId);
                 IssueItems.Add(stock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
@@ -323,7 +323,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _issueService.GetFilteredStockAsync(value, maxCount: 15);
+                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
@@ -376,7 +376,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             for (int i = 0; i < IssueItems.Count; i++)
             {
-                var updated = await _issueService.GetStockByIdAsync(IssueItems[i].StockId);
+                var updated = await _stockService.GetStockByIdAsync(IssueItems[i].StockId);
                 IssueItems[i] = updated;  
             }
         }

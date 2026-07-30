@@ -2,9 +2,9 @@
 using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain;
-public class Operation
+public class History
 {
-    private readonly List<OperationItem> _items = new();
+    private readonly List<HistoryItem> _items = new();
 
     public Guid Id { get; private set; }
     public OperationType Type { get; private set; }
@@ -12,12 +12,12 @@ public class Operation
     public string Operator { get; private set; }
     public string? Comment { get; private set; }
 
-    public IReadOnlyCollection<OperationItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<HistoryItem> Items => _items.AsReadOnly();
 
     // Для EF Core
-    private Operation() { }
+    private History() { }
 
-    private Operation(OperationType type, string operatorName, string? comment)
+    private History(OperationType type, string operatorName, string? comment)
     {
         Id = Guid.NewGuid();
         Type = type;
@@ -27,14 +27,14 @@ public class Operation
     }
 
     // Factory method
-    public static Operation Create(OperationType type, string operatorName, string? comment = null)
+    public static History Create(OperationType type, string operatorName, string? comment = null)
     {
         if (operatorName == string.Empty || operatorName == null)
             throw new BusinessException("Имя оператора не указано");
 
         if (comment == null) comment = string.Empty;
 
-        return new Operation(type, operatorName, comment);
+        return new History(type, operatorName, comment);
     }
 
     // -------- Aggregate behavior --------
@@ -53,7 +53,7 @@ public class Operation
             throw new BusinessException("Операция уже содержит позицию для этого товара и ячейки");
         }
 
-        _items.Add(new OperationItem(
+        _items.Add(new HistoryItem(
             componentId,
             rackId,
             cellId,

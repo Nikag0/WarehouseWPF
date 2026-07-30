@@ -8,32 +8,27 @@ namespace WMS.Infrastructure
 {
     public class HistoryRepository : IHistoryRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly AppDbContext _db;
 
-        public HistoryRepository(IDbContextFactory<WmsDbContext> factory)
+        public HistoryRepository(AppDbContext db)
         {
-            _factory = factory;
+            _db = db;
         }
 
-        public async Task AddAsync(Operation op)
+        public void Add(History op, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            db.Operations.Add(op);
-            await db.SaveChangesAsync();
+            _db.Operations.Add(op);
         }
 
-        public async Task<IReadOnlyList<OperationItem>> GetFilteredAsync(
+        public async Task<IReadOnlyList<HistoryItem>> GetFilteredAsync(
              string? searchText,
              DateTime? dateFrom,
              DateTime? dateTo,
              OperationType operationType,
              int maxCount,
-             CancellationToken token)
+             CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            IQueryable<OperationItem> query = db.OperationItems
+            IQueryable<HistoryItem> query = _db.OperationItems
                    .AsNoTracking()
                    .Include(x => x.Component)
                    .Include(x => x.Operation);
@@ -67,55 +62,7 @@ namespace WMS.Infrastructure
             return await query
                  .OrderByDescending(o => o.Operation.OccurredAt)
                  .Take(maxCount)
-                 .ToListAsync(token);
+                 .ToListAsync(ct);
         }
-
-        //public async Task<IReadOnlyList<Operation>> GetFilteredAsync(
-        //    string searchText, 
-        //    DateTime? dateFrom,
-        //    DateTime? dateTo,
-        //    OperationType? operationType,
-        //    int maxCount,
-        //    CancellationToken token)
-        //{
-        //    using var db = _factory.CreateDbContext();
-
-        //    IQueryable<Operation> query = db.Operations.AsNoTracking();
-
-        //    if (operationType.HasValue)
-        //    {
-        //        query = query.Where(o => o.Type == operationType.Value);
-        //    }
-
-        //    if (dateFrom.HasValue)
-        //    {
-        //        query = query.Where(o => o.OccurredAt >= dateFrom.Value);
-        //    }
-
-        //    if (dateTo.HasValue)
-        //    {
-        //        var endDate = dateTo.Value.Date.AddDays(1);
-
-        //        query = query.Where(o => o.OccurredAt < endDate);
-        //    }
-
-        //    if (!string.IsNullOrWhiteSpace(searchText))
-        //    {
-        //        var text = searchText.Trim();
-
-        //        query = query.Where(o =>
-        //            o.Items.Any(i =>
-        //                EF.Functions.ILike(i.Component.Name, $"%{text}%") ||
-        //                EF.Functions.ILike(i.Component.Article, $"%{text}%") ||
-        //                EF.Functions.ILike(i.Component.Manufacturer, $"%{text}%")));
-        //    }
-
-        //    return await query
-        //        .Include(o => o.Items)
-        //        .ThenInclude(i => i.Component)
-        //        .OrderByDescending(o => o.OccurredAt)
-        //        .Take(maxCount)
-        //        .ToListAsync(token);
-        //}
     }
 }

@@ -2,12 +2,12 @@
 
 namespace WMS.Domain;
 
-public class OperationItem
+public class HistoryItem
 {
     public Guid Id { get; private set; }
     public Guid OperationId { get; private set; }
     // Навигационное свойство.
-    public Operation Operation { get; private set; } = null!;
+    public History Operation { get; private set; } = null!;
     public Guid ComponentId { get; private set; }
     // Навигационное свойство.
     public Component Component { get; private set; } = null!;
@@ -19,9 +19,9 @@ public class OperationItem
     public int QuantityAfter { get; private set; }
 
     // Для EF Core
-    private OperationItem() { }
+    private HistoryItem() { }
 
-    internal OperationItem(
+    internal HistoryItem(
         Guid componentId,
         Guid rackId,
         Guid cellId,

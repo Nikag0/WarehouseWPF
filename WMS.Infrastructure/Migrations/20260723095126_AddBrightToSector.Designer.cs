@@ -11,7 +11,7 @@ using WMS.Infrastructure;
 
 namespace WMS.Infrastructure.Migrations
 {
-    [DbContext(typeof(WmsDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20260723095126_AddBrightToSector")]
     partial class AddBrightToSector
     {

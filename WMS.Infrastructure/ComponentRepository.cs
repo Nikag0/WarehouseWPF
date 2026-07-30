@@ -12,20 +12,18 @@ namespace WMS.Infrastructure
 {
     public class ComponentRepository : IComponentRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly AppDbContext _db;
         private readonly ILogger<ComponentRepository> _logger;
 
-        public ComponentRepository(IDbContextFactory<WmsDbContext> factory, ILogger<ComponentRepository> logger)
+        public ComponentRepository(AppDbContext db, ILogger<ComponentRepository> logger)
         {
-            _factory = factory;
+            _db = db;
             _logger = logger;
         }
 
         public async Task<IReadOnlyList<Component>> GetAllAsync(CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
-
-            var result = await db.Components.ToListAsync(ct).ConfigureAwait(false);
+            var result = await _db.Components.ToListAsync(ct).ConfigureAwait(false);
 
             _logger.LogInformation("Loaded {Count} componetns", result.Count);
             return result;
@@ -33,8 +31,7 @@ namespace WMS.Infrastructure
 
         public async Task<Component?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var result = await db.Components.FindAsync(new object[] { id }, ct).ConfigureAwait(false);
+            var result = await _db.Components.FindAsync(new object[] { id }, ct).ConfigureAwait(false);
 
             if (result is null)
                 _logger.LogWarning("Component for id {id} not found", id);
@@ -44,12 +41,11 @@ namespace WMS.Infrastructure
 
         public async Task AddAsync(Component component, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
             
-                db.Components.Add(component);
+                _db.Components.Add(component);
             try
             {
-                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
             }
             catch (DbUpdateException ex)
             {
@@ -60,13 +56,12 @@ namespace WMS.Infrastructure
 
         public async Task UpdateAsync(Component component, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-            db.Components.Update(component);
+            _db.Components.Update(component);
 
             try
             {
-                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
             }
             catch (DbUpdateException ex)
             {
@@ -77,14 +72,12 @@ namespace WMS.Infrastructure
 
         public async Task RemoveAsync(Component component, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
-
-            db.Components.Attach(component);
+            _db.Components.Attach(component);
             component.Delete();
 
             try
             {
-                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
             }
             catch (DbUpdateException ex)
             {
@@ -98,9 +91,7 @@ namespace WMS.Infrastructure
             int maxCount, 
             CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
-
-            IQueryable<Component> query = db.Components.AsNoTracking();
+            IQueryable<Component> query = _db.Components.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {

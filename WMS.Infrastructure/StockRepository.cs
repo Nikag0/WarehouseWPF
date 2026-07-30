@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,51 +15,65 @@ namespace WMS.Infrastructure
 {
     public class StockRepository : IStockRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly AppDbContext _db;
+        private readonly ILogger<StockRepository> _logger;
 
-        public StockRepository(IDbContextFactory<WmsDbContext> factory)
+        public StockRepository(AppDbContext db, ILogger<StockRepository> logger)
         {
-            _factory = factory;
+            _db = db;
+            _logger = logger;
         }
 
-        public async Task<IReadOnlyList<Stock>> GetAllAsync()
+        public async Task<Stock?> GetByIdAsync(Guid stockId, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
+            try
+            {
+                var stock = await _db.Stocks
+                    .AsNoTracking()
+                    .Include(s => s.Component)
+                    .Include(s => s.Rack)
+                    .Include(s => s.Cell)
+                    .FirstOrDefaultAsync(x => x.Id == stockId, ct)
+                    .ConfigureAwait(false);
 
-            return await db.Stocks.ToListAsync();
+                if (stock is null)
+                    _logger.LogWarning("Stock {StockId} not found", stockId);
+
+                return stock;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database error fetching stock {StockId}", stockId);
+                throw; 
+            }
         }
 
-        public async Task<Stock?> GetByIdAsync(Guid stockId)
+        public async Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Stocks
-                .AsNoTracking()
-                .Include(s => s.Component)
-                .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .FirstOrDefaultAsync(x => x.Id == stockId);
+            try
+            {
+                return await _db.Stocks
+                    .AsNoTracking()
+                    .Include(s => s.Component)
+                    .Include(s => s.Rack)
+                    .Include(s => s.Cell)
+                    .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
+                                                s.RackId == rackId &&
+                                                s.CellId == cellId, ct)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Database error fetching stock by location. Component:{ComponentId}, Rack:{RackId}, Cell:{CellId}",
+                    componentId, rackId, cellId);
+                throw;
+            }
         }
 
-        public async Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId)
+        public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Stocks
-                .AsNoTracking()
-                .Include(s => s.Component)
-                .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
-                                          s.RackId == rackId &&
-                                          s.CellId == cellId);
-        }
-
-        public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId)
-        {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Stocks
+            return await _db.Stocks
                 .AsNoTracking()
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
@@ -67,35 +82,27 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
-        public async Task AddAsync(Stock stock)
+        public async Task AddAsync(Stock stock, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            db.Stocks.Add(stock);
-            await db.SaveChangesAsync();
+            _db.Stocks.Add(stock);
+            await _db.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Stock stock)
+        public async Task UpdateAsync(Stock stock, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            db.Stocks.Update(stock);
-            await db.SaveChangesAsync();
+            _db.Stocks.Update(stock);
+            await _db.SaveChangesAsync();
         }
 
-        public async Task DeletAsync(Stock stock)
+        public async Task DeletAsync(Stock stock, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            db.Stocks.Remove(stock);
-            await db.SaveChangesAsync();
+            _db.Stocks.Remove(stock);
+            await _db.SaveChangesAsync();
         }
 
-        public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            var query = db.Stocks
+            var query = _db.Stocks
                 .AsNoTracking()
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
@@ -120,10 +127,8 @@ namespace WMS.Infrastructure
         }
 
 
-        public async Task<IReadOnlyList<Stock>> GetMinQuantityAsync()
+        public async Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
             // Экранируем кавычки для PostgreSQL, чтобы сохранить оригинальный регистр EF Core
             var query = @"
                 SELECT s.""Id"", s.""ComponentId"", s.""RackId"", s.""CellId"", s.""Quantity""
@@ -137,7 +142,7 @@ namespace WMS.Infrastructure
                     AND s.""TotalComponentQuantity"" <= c.""MinQuantity""";
 
 
-            return await db.Stocks
+            return await _db.Stocks
                 .FromSqlRaw(query)
                 .AsNoTracking()
                 .Include(s => s.Component)
@@ -147,22 +152,10 @@ namespace WMS.Infrastructure
         }
 
         //Можно подумать над реалзацией.
-        public async Task<List<Stock>> GetRawStockDataAsync()
-        {
-            using var db = _factory.CreateDbContext();
 
-            return await db.Stocks
-                .AsNoTracking() // Отключаем кэш отслеживания для скорости чтения
-                .Include(s => s.Component) // SQL INNER JOIN к таблице Components
-                .Include(s => s.Rack)      // SQL INNER JOIN к таблице Racks
-                .Include(s => s.Cell)      // SQL INNER JOIN к таблице Cells
-                .ToListAsync();
-        }
-
-        public async Task<bool> HasStockWithQuantityAsync(Guid componentId)
+        public async Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default)
         {
-            using var context = _factory.CreateDbContext();
-            return await context.Stocks
+            return await _db.Stocks
                 .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
         }
 

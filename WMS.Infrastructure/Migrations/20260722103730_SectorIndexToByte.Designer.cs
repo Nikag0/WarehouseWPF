@@ -11,7 +11,7 @@ using WMS.Infrastructure;
 
 namespace WMS.Infrastructure.Migrations
 {
-    [DbContext(typeof(WmsDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20260722103730_SectorIndexToByte")]
     partial class SectorIndexToByte
     {

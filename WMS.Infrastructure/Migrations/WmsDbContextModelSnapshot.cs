@@ -10,7 +10,7 @@ using WMS.Infrastructure;
 
 namespace WMS.Infrastructure.Migrations
 {
-    [DbContext(typeof(WmsDbContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class WmsDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -87,6 +87,64 @@ namespace WMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("components", (string)null);
+                });
+
+            modelBuilder.Entity("WMS.Domain.History", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("operations", (string)null);
+                });
+
+            modelBuilder.Entity("WMS.Domain.HistoryItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CellId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ComponentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QuantityAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantityBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RackId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ComponentId");
+
+                    b.HasIndex("OperationId");
+
+                    b.ToTable("operation_items", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.LedStrip.Microcontroller", b =>
@@ -176,64 +234,6 @@ namespace WMS.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("strip", (string)null);
-                });
-
-            modelBuilder.Entity("WMS.Domain.Operation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("OccurredAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Operator")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("operations", (string)null);
-                });
-
-            modelBuilder.Entity("WMS.Domain.OperationItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CellId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ComponentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("OperationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("QuantityAfter")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("QuantityBefore")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("RackId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ComponentId");
-
-                    b.HasIndex("OperationId");
-
-                    b.ToTable("operation_items", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Operator", b =>
@@ -334,6 +334,25 @@ namespace WMS.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WMS.Domain.HistoryItem", b =>
+                {
+                    b.HasOne("WMS.Domain.Component", "Component")
+                        .WithMany()
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WMS.Domain.History", "Operation")
+                        .WithMany("Items")
+                        .HasForeignKey("OperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Component");
+
+                    b.Navigation("Operation");
+                });
+
             modelBuilder.Entity("WMS.Domain.LedStrip.Sector", b =>
                 {
                     b.HasOne("WMS.Domain.Cell", "Cell")
@@ -364,25 +383,6 @@ namespace WMS.Infrastructure.Migrations
                     b.Navigation("Microcontroller");
                 });
 
-            modelBuilder.Entity("WMS.Domain.OperationItem", b =>
-                {
-                    b.HasOne("WMS.Domain.Component", "Component")
-                        .WithMany()
-                        .HasForeignKey("ComponentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WMS.Domain.Operation", "Operation")
-                        .WithMany("Items")
-                        .HasForeignKey("OperationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Component");
-
-                    b.Navigation("Operation");
-                });
-
             modelBuilder.Entity("WMS.Domain.Stock", b =>
                 {
                     b.HasOne("WMS.Domain.Cell", "Cell")
@@ -410,6 +410,11 @@ namespace WMS.Infrastructure.Migrations
                     b.Navigation("Rack");
                 });
 
+            modelBuilder.Entity("WMS.Domain.History", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("WMS.Domain.LedStrip.Microcontroller", b =>
                 {
                     b.Navigation("Strips");
@@ -418,11 +423,6 @@ namespace WMS.Infrastructure.Migrations
             modelBuilder.Entity("WMS.Domain.LedStrip.Strip", b =>
                 {
                     b.Navigation("Sectors");
-                });
-
-            modelBuilder.Entity("WMS.Domain.Operation", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("WMS.Domain.Rack", b =>

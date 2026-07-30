@@ -69,7 +69,7 @@ namespace WMS.Application
             );
         }
 
-        public static HistoryDto ToHistoryDTO(this OperationItem o)
+        public static HistoryDto ToHistoryDTO(this HistoryItem o)
         {
             return new HistoryDto(
                 o.Operation.OccurredAt,

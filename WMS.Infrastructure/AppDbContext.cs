@@ -10,12 +10,12 @@ using Component = WMS.Domain.Component;
 
 namespace WMS.Infrastructure
 {
-    public class WmsDbContext : DbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<Component> Components => Set<Component>();
         public DbSet<Stock> Stocks => Set<Stock>();
-        public DbSet<Operation> Operations => Set<Operation>();
-        public DbSet<OperationItem> OperationItems => Set<OperationItem>();
+        public DbSet<History> Operations => Set<History>();
+        public DbSet<HistoryItem> OperationItems => Set<HistoryItem>();
         public DbSet<Cell> Cells => Set<Cell>();
         public DbSet<Rack> Racks => Set<Rack>();
         public DbSet<Operator> Operators => Set<Operator>();
@@ -23,13 +23,13 @@ namespace WMS.Infrastructure
         public DbSet<Strip> Strips => Set<Strip>();
         public DbSet<Sector> Sectors => Set<Sector>();
 
-        public WmsDbContext(DbContextOptions<WmsDbContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(
-                typeof(WmsDbContext).Assembly);
+                typeof(AppDbContext).Assembly);
         }
     }
 }
