@@ -9,7 +9,7 @@ using WMS.Domain;
 
 namespace WMS.Infrastructure.Configurations
 {
-    public class OperationItemConfiguration
+    public class HistoryItemConfiguration
      : IEntityTypeConfiguration<HistoryItem>
     {
         public void Configure(EntityTypeBuilder<HistoryItem> builder)

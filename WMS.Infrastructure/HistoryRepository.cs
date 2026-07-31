@@ -17,7 +17,7 @@ namespace WMS.Infrastructure
 
         public void Add(History op, CancellationToken ct = default)
         {
-            _db.Operations.Add(op);
+            _db.History.Add(op);
         }
 
         public async Task<IReadOnlyList<HistoryItem>> GetFilteredAsync(
@@ -28,7 +28,7 @@ namespace WMS.Infrastructure
              int maxCount,
              CancellationToken ct = default)
         {
-            IQueryable<HistoryItem> query = _db.OperationItems
+            IQueryable<HistoryItem> query = _db.HistoryItems
                    .AsNoTracking()
                    .Include(x => x.Component)
                    .Include(x => x.Operation);

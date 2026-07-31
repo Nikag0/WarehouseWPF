@@ -14,8 +14,8 @@ namespace WMS.Infrastructure
     {
         public DbSet<Component> Components => Set<Component>();
         public DbSet<Stock> Stocks => Set<Stock>();
-        public DbSet<History> Operations => Set<History>();
-        public DbSet<HistoryItem> OperationItems => Set<HistoryItem>();
+        public DbSet<History> History => Set<History>();
+        public DbSet<HistoryItem> HistoryItems => Set<HistoryItem>();
         public DbSet<Cell> Cells => Set<Cell>();
         public DbSet<Rack> Racks => Set<Rack>();
         public DbSet<Operator> Operators => Set<Operator>();

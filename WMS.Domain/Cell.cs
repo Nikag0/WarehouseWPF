@@ -17,7 +17,7 @@ namespace WMS.Domain
 
         private Cell() { }
 
-        internal Cell(Guid rackId, int column, int row)
+        public Cell(Guid rackId, int column, int row)
         {
             Id = Guid.NewGuid();
             RackId = rackId;
