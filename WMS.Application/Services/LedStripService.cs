@@ -24,9 +24,9 @@ namespace WMS.Application.Services
 
         public async Task<bool> InitializeSectorsAsync(CancellationToken ct = default)
         {
-            var strips = await _repository.GetAllForInitializationAsync(ct);
+            var sectors = await _repository.GetAllSectorsForInitializationAsync(ct);
 
-            foreach (var sector in strips)
+            foreach (var sector in sectors)
             {
                 var packet = BuildCreateSectorPacket(
                     sector.DeviceAddress,

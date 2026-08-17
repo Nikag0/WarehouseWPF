@@ -67,7 +67,7 @@ public class StockServiceTests
         // Assert
         uowMock.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
 
-        stockRepo.Verify(r => r.AddAsync(
+        stockRepo.Verify(r => r.Add(
             It.Is<Stock>(s => s.Quantity == 10 && s.RackId == rackId),
             It.IsAny<CancellationToken>()), Times.Once);
 

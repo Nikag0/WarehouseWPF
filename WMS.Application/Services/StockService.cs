@@ -53,10 +53,10 @@ namespace WMS.Application.Services
 
                 stock.Issue(item.Quantity);
 
-                await _stockRepo.UpdateAsync(stock);
+                _stockRepo.Update(stock);
 
                 if (stock.Quantity == 0)
-                    await _stockRepo.DeletAsync(stock);
+                    _stockRepo.Delet(stock);
 
                 operation.AddItem(
                     stock.ComponentId,
@@ -112,7 +112,7 @@ namespace WMS.Application.Services
                     before = 0;
                     stock.Receive(item.Quantity);
                     after = stock.Quantity;
-                    await _uow.Stocks.AddAsync(stock, ct);
+                    _uow.Stocks.Add(stock, ct);
                 }
                 else
                 {
@@ -124,7 +124,7 @@ namespace WMS.Application.Services
                         "Updating stock {StockId}: {Before} -> {After}",
                         stock.Id, before, after);
 
-                    await _uow.Stocks.UpdateAsync(stock, ct);
+                    _uow.Stocks.Update(stock, ct);
                 }
 
                 var operation = History.Create(OperationType.Receipt, operatorName, comment);

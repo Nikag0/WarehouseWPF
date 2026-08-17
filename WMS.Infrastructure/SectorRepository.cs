@@ -24,7 +24,7 @@ namespace WMS.Infrastructure
             _logger = logger;
         }
         
-        public async Task<IReadOnlyList<SectorInitDTO>> GetAllForInitializationAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<SectorInitDTO>> GetAllSectorsForInitializationAsync(CancellationToken ct = default)
         {
             await using var db =  await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
             var result = await db.Sectors
@@ -75,18 +75,17 @@ namespace WMS.Infrastructure
 
         public async Task<bool> SetColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var sector = await db.Sectors.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
-
-            if (sector is null)
-            {
-                _logger.LogWarning("Cannot set color: sector for CellId {CellId} not found", cellId);
-                return false;
-            }
-
             try
             {
-                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+                await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
+                var sector = await db.Sectors.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
+
+                if (sector is null)
+                {
+                    _logger.LogWarning("Cannot set color: sector for CellId {CellId} not found", cellId);
+                    return false;
+                }
+
                 return true;
             }
             catch (DbUpdateException ex)

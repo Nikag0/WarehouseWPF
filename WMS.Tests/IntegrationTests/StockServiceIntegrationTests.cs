@@ -83,8 +83,6 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         var compRepo = new ComponentRepository(context, Mock.Of<ILogger<ComponentRepository>>());
         var stockRepo = new StockRepository(context, Mock.Of<ILogger<StockRepository>>());
         var opRepo = Mock.Of<IOperatorRepository>();
-
-        // Мок History, который реально добавляет в Change Tracker (имитируем репозиторий)
         var historyMock = new Mock<IHistoryRepository>();
         historyMock
             .Setup(r => r.Add(It.IsAny<History>(), It.IsAny<CancellationToken>()))
@@ -119,16 +117,14 @@ public class StockServiceIntegrationTests : IntegrationTestBase
     [Fact]
     public async Task ReceiveAsync_ExistingStock_IncreasesQuantity()
     {
-        var component = Component.Create("ART-003", "Diode", "Vishay", null, 2);
-        var rack = new Rack(3, 1, RackType.R1); // <-- замените на ваше значение
-        var cell = new Cell(rack.Id, 2, 1);
+        var componentId = Guid.NewGuid();
+        var rackId = Guid.NewGuid();
+        var cellId = Guid.NewGuid();
 
         using (var seed = new AppDbContext(DbOptions))
         {
-            seed.Components.Add(component);
-            seed.Racks.Add(rack);
-            seed.Cells.Add(cell);
-            seed.Stocks.Add(Stock.Create(component.Id, rack.Id, cell.Id, 5));
+            seed.Components.Add(Component.Create("ART-002", "Capacitor", "Murata", null, 5));
+            seed.Stocks.Add(Stock.Create(componentId, rackId, cellId, 5));
             await seed.SaveChangesAsync();
         }
 
@@ -137,13 +133,12 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         var compRepo = new ComponentRepository(context, Mock.Of<ILogger<ComponentRepository>>());
         var stockRepo = new StockRepository(context, Mock.Of<ILogger<StockRepository>>());
         var opRepo = Mock.Of<IOperatorRepository>();
-
         var historyMock = new Mock<IHistoryRepository>();
         historyMock
             .Setup(r => r.Add(It.IsAny<History>(), It.IsAny<CancellationToken>()))
             .Callback<History, CancellationToken>((h, _) => context.History.Add(h));
-
         var uow = new UnitOfWork(context, compRepo, stockRepo, historyMock.Object, opRepo);
+
         var service = new StockService(
             compRepo,
             stockRepo,
@@ -151,12 +146,14 @@ public class StockServiceIntegrationTests : IntegrationTestBase
             Mock.Of<ILogger<StockService>>(),
             uow);
 
-        var dto = new ReceiptItemDto(component.Id, rack.Id, cell.Id, 3);
+        await service.ReceiveAsync(new ReceiptItemDto
+        (
+            componentId,
+            rackId,
+            cellId,
+            3
+        ), "Sidorov");
 
-        // Act
-        await service.ReceiveAsync(dto, "Sidorov");
-
-        // Assert
         using var verify = new AppDbContext(DbOptions);
         var stock = await verify.Stocks.SingleAsync();
 

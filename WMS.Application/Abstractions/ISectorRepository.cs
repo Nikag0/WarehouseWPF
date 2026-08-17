@@ -10,7 +10,7 @@ namespace WMS.Application.Abstractions
 {
     public interface ISectorRepository
     {
-        Task<IReadOnlyList<SectorInitDTO>> GetAllForInitializationAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<SectorInitDTO>> GetAllSectorsForInitializationAsync(CancellationToken ct = default);
         Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default);
         Task<bool> SetColorAsync(Guid sectorId, byte r, byte g, byte b, CancellationToken ct = default);
     }

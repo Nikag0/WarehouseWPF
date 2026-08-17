@@ -41,27 +41,22 @@ namespace WMS.Infrastructure
 
         public async Task AddAsync(Component component, CancellationToken ct = default)
         {
-            
-                _db.Components.Add(component);
             try
             {
-                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+                _db.Components.Add(component);
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogError(ex, "Failed to add component {Name}", component.Name);
+                _logger.LogError(ex, "Failed to add component {Id}", component.Id);
                 throw;
             }
         }
 
         public async Task UpdateAsync(Component component, CancellationToken ct = default)
         {
-
-            _db.Components.Update(component);
-
             try
             {
-                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+                _db.Components.Update(component);
             }
             catch (DbUpdateException ex)
             {
@@ -72,12 +67,11 @@ namespace WMS.Infrastructure
 
         public async Task RemoveAsync(Component component, CancellationToken ct = default)
         {
-            _db.Components.Attach(component);
-            component.Delete();
 
             try
             {
-                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+                _db.Components.Attach(component);
+                component.Delete();
             }
             catch (DbUpdateException ex)
             {

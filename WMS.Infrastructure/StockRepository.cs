@@ -82,22 +82,28 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
-        public async Task AddAsync(Stock stock, CancellationToken ct = default)
+        public void Add(Stock stock, CancellationToken ct = default)
         {
-            _db.Stocks.Add(stock);
-            await _db.SaveChangesAsync();
+
+            try
+            {
+                _db.Stocks.Add(stock);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Failed to add stock {Name}", stock.Id);
+                throw;
+            }
         }
 
-        public async Task UpdateAsync(Stock stock, CancellationToken ct = default)
+        public void Update(Stock stock, CancellationToken ct = default)
         {
             _db.Stocks.Update(stock);
-            await _db.SaveChangesAsync();
         }
 
-        public async Task DeletAsync(Stock stock, CancellationToken ct = default)
+        public void Delet(Stock stock, CancellationToken ct = default)
         {
             _db.Stocks.Remove(stock);
-            await _db.SaveChangesAsync();
         }
 
         public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default)
