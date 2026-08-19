@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WMS.Infrastructure", "WMS.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WMS.Desktop", "WMS.Desktop\WMS.Desktop.csproj", "{10D5B2FE-5B97-40D8-820B-06D9ADFDC08D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMS.Tests", "WMS.Tests\WMS.Tests.csproj", "{D0BA089C-306A-429B-8BA8-3EDA968A38E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WMS.Tests", "WMS.Tests\WMS.Tests.csproj", "{D0BA089C-306A-429B-8BA8-3EDA968A38E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WMS.Domain.UnitTests", "WMS.Domain.UnitTests\WMS.Domain.UnitTests.csproj", "{E4AB6D59-1EEB-4A3D-A1AC-AC4F5C92CDF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{D0BA089C-306A-429B-8BA8-3EDA968A38E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0BA089C-306A-429B-8BA8-3EDA968A38E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0BA089C-306A-429B-8BA8-3EDA968A38E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4AB6D59-1EEB-4A3D-A1AC-AC4F5C92CDF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4AB6D59-1EEB-4A3D-A1AC-AC4F5C92CDF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4AB6D59-1EEB-4A3D-A1AC-AC4F5C92CDF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4AB6D59-1EEB-4A3D-A1AC-AC4F5C92CDF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
