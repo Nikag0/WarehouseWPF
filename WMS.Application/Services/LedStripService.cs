@@ -1,4 +1,5 @@
-﻿using WMS.Application.Abstractions;
+﻿using System.Net.NetworkInformation;
+using WMS.Application.Abstractions;
 
 namespace WMS.Application.Services
 {
@@ -111,7 +112,7 @@ namespace WMS.Application.Services
             var sector = await _repository.GetByCellIdAsync(cellId, ct);
             if (sector is null) return;
 
-            var packet = BuildSetGPIO(sector.DeviceAddress);
+            var packet = BuildSetGPIO(sector.DeviceAddress, 1, 1, 1, 1);
 
             var success = await _packetSender.SendAsync(
                     sector.Ip,
@@ -190,16 +191,17 @@ namespace WMS.Application.Services
             };
         }
 
-        private static byte[] BuildSetGPIO(byte deviceAddress)
+        private static byte[] BuildSetGPIO(byte deviceAddress, int pin0, int pin1, int pin2, int pin3)
         {
             var random = new Random();
+            byte gpioByte = (byte)((pin0 & 1) | ((pin1 & 1) << 1) | ((pin2 & 1) << 2) | ((pin3 & 1) << 3));
 
             return new byte[]
             {
                 deviceAddress,
                 (byte)random.Next(0, 255),
                 0xFC,
-                0x00,
+                gpioByte,
                 0x00,
                 0x00,
                 0x00,

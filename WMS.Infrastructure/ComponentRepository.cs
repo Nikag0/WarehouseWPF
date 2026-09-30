@@ -23,7 +23,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<Component>> GetAllAsync(CancellationToken ct = default)
         {
-            var result = await _db.Components.ToListAsync(ct).ConfigureAwait(false);
+            var result = await _db.Components.ToListAsync(ct);
 
             _logger.LogInformation("Loaded {Count} componetns", result.Count);
             return result;
@@ -31,7 +31,7 @@ namespace WMS.Infrastructure
 
         public async Task<Component?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            var result = await _db.Components.FindAsync(new object[] { id }, ct).ConfigureAwait(false);
+            var result = await _db.Components.FindAsync(new object[] { id }, ct);
 
             if (result is null)
                 _logger.LogWarning("Component for id {id} not found", id);
