@@ -87,7 +87,7 @@
             
             <Grid Width="1000" Height="800">
 
-                <Image Source="/Images/Warehouse.png"
+                <Image Source="/VisualizationResources/Warehouse.png"
                        Stretch="Fill"/>
 
                 <ItemsControl ItemsSource="{Binding Racks, RelativeSource={RelativeSource AncestorType=local:RacksGridControl}}">

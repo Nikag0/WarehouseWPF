@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore.Design;
 using WMS.Infrastructure;
 
 public class WmsDbContextFactory
-    : IDesignTimeDbContextFactory<WmsDbContext>
+    : IDesignTimeDbContextFactory<AppDbContext>
 {
-    public WmsDbContext CreateDbContext(string[] args)
+    public AppDbContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<WmsDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(
                 "Host=localhost;Port=5432;Database=Warehouse;Username=postgres;Password=admin")
             .Options;
 
-        return new WmsDbContext(options);
+        return new AppDbContext(options);
     }
 }

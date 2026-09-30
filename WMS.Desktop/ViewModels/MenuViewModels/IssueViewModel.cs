@@ -9,13 +9,14 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using WMS.Application.WarehouseVisualization;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
 using CommunityToolkit.Mvvm.ComponentModel;
 using WMS.Application.DTO;
+using WMS.Desktop.Services;
+using WMS.Desktop.Models;
 
 namespace WMS.Desktop.ViewModels.MenuViewModels
 {
@@ -58,9 +59,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         }
 
         private readonly DialogService _dialogService;
-        private readonly IssueService _issueService;
+        private readonly StockService _stockService;
         private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
+        private readonly WarehouseVisualizationService _warehouseVisualizationService;
+        private readonly LedStripService _ledStripService;
 
         private CancellationTokenSource? token;
         
@@ -74,15 +77,19 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private CellViewModel _selectedCell;
 
         public IssueViewModel(
-            IssueService issueService,
+            StockService stockService,
             DialogService dialogService,
             OperatorService operatorService,
-            WarehouseService warehouseService)
+            WarehouseService warehouseService,
+            WarehouseVisualizationService warehouseVisualizationService,
+            LedStripService ledStripService)
         {
-            _issueService = issueService;
+            _stockService = stockService;
             _dialogService = dialogService;
             _operatorService = operatorService;
             _warehouseService = warehouseService;
+            _warehouseVisualizationService = warehouseVisualizationService;
+            _ledStripService = ledStripService;
         }
 
         [RelayCommand]
@@ -136,8 +143,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedCell.ItemInCell = true;
                 SelectedCell.IsSelected = true;
 
-                var question = $"Получилось найти товар?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
-
+                var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+                await _ledStripService.TurnOnSectorAsync(item.CellId);
                 if (!_dialogService.ShowConfirmation(question))
                 {
                     IssueItems.Remove(item);
@@ -151,6 +158,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     _dialogService.ShowWarning($"{item.ComponentName} не хватает. Осталось товара {item.Quantity}. В выдаче {item.OperationQuantity}");
                     return;
                 }
+
+                await _ledStripService.TurnOffSectorAsync(item.CellId);
             }
 
             if (!IssueItems.Any())
@@ -168,7 +177,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         item.OperationQuantity))
                     .ToList();
 
-                await _issueService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
+                await _stockService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
 
                 CommentText = string.Empty;
                 SearchStock = string.Empty;
@@ -190,8 +199,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     LoadOperators()
                 );
 
+                OnSearchStockChanged(SearchStock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
+                UpdateItemToReceipt();
             }
             catch (BusinessException ex)
             {
@@ -240,7 +251,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             try
             {
-                var stock = await _issueService.GetStockByIdAsync(item.StockId);
+                var stock = await _stockService.GetStockByIdAsync(item.StockId);
                 IssueItems.Add(stock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
@@ -253,16 +264,16 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async Task LoadWarehouseAsync()
         {
-            var racks = await _warehouseService.GetWarehouseAsync();
+            var racks = await _warehouseService.GetRacksAsync();
+            var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
             RacksGrid.Clear();
 
-            foreach (var rackDTO in racks)
+            foreach (var rack in racksView)
             {
-                RacksGrid.Add(new RackViewModel(rackDTO));
+                RacksGrid.Add(rack);
             }
         }
-
         private void LoadCells()
         {
             CellsGrid.Clear();
@@ -311,7 +322,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _issueService.GetFilteredStockAsync(value, maxCount: 15);
+                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
@@ -355,6 +366,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             foreach (var rack in RacksGrid)
             {
                 rack.ItemInCell = rackIds.Contains(rack.Id);
+            }
+        }
+
+        private async void UpdateItemToReceipt()
+        {
+            if (IssueItems.Count == 0) return;
+
+            for (int i = 0; i < IssueItems.Count; i++)
+            {
+                var updated = await _stockService.GetStockByIdAsync(IssueItems[i].StockId);
+                IssueItems[i] = updated;  
             }
         }
     }

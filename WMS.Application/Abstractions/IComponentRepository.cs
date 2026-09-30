@@ -14,7 +14,6 @@ namespace WMS.Application.Abstractions
         Task UpdateAsync(Component component);
         Task RemoveAsync(Component component);
         Task<Component?> GetByIdAsync(Guid id);
-        Task<Component?> GetByArticleAsync(string article);
         Task<IReadOnlyList<Component>> GetFilteredComponentAsync(string searchText, int maxCount, CancellationToken token);
     }
 }

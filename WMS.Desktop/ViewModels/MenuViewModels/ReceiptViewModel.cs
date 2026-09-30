@@ -1,21 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Windows;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using WMS.Application.DTO;
 using WMS.Application.Services;
-using WMS.Application.WarehouseVisualization;
+using WMS.Desktop.Models;
+using WMS.Desktop.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
-using Xceed.Wpf.AvalonDock.Layout;
 
 namespace WMS.Desktop.ViewModels.MenuViewModels
 {
@@ -149,22 +140,31 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private CellViewModel _selectedCell;
         private CancellationTokenSource? _cts;
         private readonly SemaphoreSlim _lock = new(1, 1);
-        private readonly ReceiptService _receiptService;
+        private readonly StockService _stockService;
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
         private readonly WarehouseService _warehouseService;
+        private readonly WarehouseVisualizationService _warehouseVisualizationService;
+        private readonly LedStripService _ledStripService;
+        private readonly ILogger<ReceiptViewModel> _logger;
 
 
         public ReceiptViewModel(
-            ReceiptService receiptService,
+            StockService stockService,
             DialogService dialogService,
             OperatorService operatorrService,
-            WarehouseService warehouseService)
+            WarehouseService warehouseService,
+            WarehouseVisualizationService warehouseVisualizationService,
+            LedStripService ledStripService,
+            ILogger<ReceiptViewModel> logger)
         {
-            _receiptService = receiptService;
+            _stockService = stockService;
             _dialogService = dialogService;
             _operatorrService = operatorrService;
             _warehouseService = warehouseService;
+            _warehouseVisualizationService = warehouseVisualizationService;
+            _ledStripService = ledStripService;
+            _logger = logger;
         }
 
         [RelayCommand]
@@ -195,14 +195,41 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
-            if (!_dialogService.ShowConfirmation("Вы уверены, что хотите выполнить приёмку товара? \n" +
+            try
+            {
+                await _ledStripService.TurnOnSectorAsync(SelectedCell.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "LED turn-on failed for cell {CellId}", SelectedCell.Id);
+                _dialogService.ShowWarning("При включении подсветки ячейки произошла ошибка.");
+            }
+
+
+            if (!_dialogService.ShowConfirmation("Товар принят? \n" +
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
                 $"Количество: {ReceiptItem.OperationQuantity}\n" +
                 $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}"))
+            {
+                await SectorTurnOffAsync(SelectedCell.Id);
                 return;
+            }
 
-            await _lock.WaitAsync();
+            await SectorTurnOffAsync(SelectedCell.Id);
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+            try
+            {
+                await _lock.WaitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("Receipt aborted: lock timeout");
+                _dialogService.ShowWarning("Операция занята. Попробуйте позже.");
+                return;
+            }
 
             try
             {
@@ -212,32 +239,27 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     SelectedCell.Id,
                     ReceiptItem.OperationQuantity);
 
-                await _receiptService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText);
+                await _stockService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText, cts.Token);
 
                 await LoadWarehouseAsync();
 
-                SelectedRack.IsSelected = false;
-                SelectedRack = null;
-                SearchRacks = string.Empty;
-
-                SelectedCell.IsSelected = false;
-                SelectedCell = null;
-                SearchCell = string.Empty;
-
-                ReceiptItem.Article = string.Empty;
-                ReceiptItem.ComponentName = string.Empty;
-                ReceiptItem.Manufacturer = string.Empty;
-                ReceiptItem.OperationQuantity = 0;
-                CommentText = string.Empty;
-
-                OnSearchStockOrComponentChanged(SearchStockOrComponent);
-                ReplaceCollection(FilteredRacks, RacksGrid);
+                ResetReceiptState();
 
                 _dialogService.ShowInfo("Приём товаров успешно выполнен.");
+
             }
             catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
+            }
+            catch (OperationCanceledException) when (cts.IsCancellationRequested)
+            {
+                _dialogService.ShowWarning("Операция отменена по таймауту.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError("Произошла непредвиденная ошибка.");
+                _logger.LogError(ex, "Receipt failed unexpectedly");
             }
             finally
             {
@@ -252,6 +274,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 await LoadWarehouseAsync();
                 await LoadOperatorsAsync();
                 ReplaceCollection(FilteredRacks, RacksGrid);
+                OnSearchStockOrComponentChanged(SearchStockOrComponent);
             }
             catch (BusinessException ex)
             {
@@ -319,19 +342,60 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"Ошибка при выборе элемента к выдаче: {ex.Message}");
+                _logger.LogError(ex, "Receipt failed unexpectedly");
+                _dialogService.ShowError($"Ошибка при выборе элемента к выдаче.");
+            }
+        }
+
+        private void ResetReceiptState()
+        {
+            if (SelectedRack is not null)
+            {
+                SelectedRack.IsSelected = false;
+                SelectedRack = null;
+            }
+            SearchRacks = string.Empty;
+
+            if (SelectedCell is not null)
+            {
+                SelectedCell.IsSelected = false;
+                SelectedCell = null;
+            }
+            SearchCell = string.Empty;
+
+            ReceiptItem.Article = string.Empty;
+            ReceiptItem.ComponentName = string.Empty;
+            ReceiptItem.Manufacturer = string.Empty;
+            ReceiptItem.OperationQuantity = 0;
+            CommentText = string.Empty;
+
+            OnSearchStockOrComponentChanged(SearchStockOrComponent);
+            ReplaceCollection(FilteredRacks, RacksGrid);
+        }
+
+        private async Task SectorTurnOffAsync(Guid cellId)
+        {
+            try
+            {
+                await _ledStripService.TurnOffSectorAsync(cellId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "LED turn-off failed for cell {CellId}", cellId);
+                _dialogService.ShowWarning("При выключении подсветки ячейки произошла ошибка.");
             }
         }
 
         private async Task LoadWarehouseAsync()
         {
-            var racks = await _warehouseService.GetWarehouseAsync();
+            var racks = await _warehouseService.GetRacksAsync();
+            var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
             RacksGrid.Clear();
 
-            foreach (var rackDTO in racks)
+            foreach (var rack in racksView)
             {
-                RacksGrid.Add(new RackViewModel(rackDTO));
+                RacksGrid.Add(rack);
             }
         }
 
@@ -382,7 +446,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             try
             {
-                var stocks = await _receiptService.GetStocksInRackAsync(SelectedRack.Id);
+                var stocks = await _stockService.GetStocksInRackAsync(SelectedRack.Id);
 
                 token.ThrowIfCancellationRequested();
 
@@ -477,7 +541,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, _cts.Token);
 
-                    var suggestions = await _receiptService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, _cts.Token);
+                    var suggestions = await _stockService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {

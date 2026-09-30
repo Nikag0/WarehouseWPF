@@ -8,6 +8,6 @@
         Title="WarehouseView" Height="900" Width="1600"
         WindowStartupLocation="CenterScreen">
     <Grid Background="#36495b">
-        <Image Source="/Images/AllWarehouse.JPG"/>
+        <Image Source="/VisualizationResources/AllWarehouse.JPG"/>
     </Grid>
 </Window>

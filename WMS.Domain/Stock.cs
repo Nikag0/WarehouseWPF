@@ -69,14 +69,6 @@ public class Stock
         Quantity -= quantity;
     }
 
-    public void Inventory(int actualQuantity)
-    {
-        if (actualQuantity < 0)
-            throw new BusinessException("Фактическое количество не может быть отрицательным");
-
-        Quantity = actualQuantity;
-    }
-
     // -------- Helpers --------
 
     private void SetInitialQuantity(int quantity)

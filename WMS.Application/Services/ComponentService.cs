@@ -52,8 +52,6 @@ namespace WMS.Application.Services
                 var component = Domain.Component.Create(article, name, manufacturer, expirationDate, minQuantity);
                 await _componentRepo.AddAsync(component);
 
-                _logger.LogInformation($"Успешно добавлен компонент: {name}");
-
                 return Result.Success();
             }
             catch (BusinessException domainEx)

@@ -12,9 +12,9 @@ namespace WMS.Infrastructure
 {
     public class RackRepository : IRackRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly IDbContextFactory<AppDbContext> _factory;
 
-        public RackRepository(IDbContextFactory<WmsDbContext> factory)
+        public RackRepository(IDbContextFactory<AppDbContext> factory)
         {
             _factory = factory;
         }

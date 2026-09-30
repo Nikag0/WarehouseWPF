@@ -9,6 +9,9 @@ using WMS.Infrastructure;
 using WMS.Infrastructure.Migrations;
 using Microsoft.Extensions.Logging;
 using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Application;
+using System;
+using WMS.Desktop.Services;
 
 
 namespace WMS.Desktop
@@ -32,27 +35,31 @@ namespace WMS.Desktop
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            services.AddDbContextFactory<WmsDbContext>(opt =>
+            services.AddDbContextFactory<AppDbContext>(opt =>
                 opt.UseNpgsql(config.GetConnectionString("Warehouse")));
 
             // репозитории
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IStockRepository, StockRepository>();
             services.AddScoped<IComponentRepository, ComponentRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
             services.AddScoped<IOperatorRepository, OperatorRepository>();
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
+            services.AddScoped<ISectorRepository, SectorRepository>();
 
             // application services
             services.AddScoped<ComponentService>();
-            services.AddScoped<IssueService>();
-            services.AddScoped<InventoryService>();
-            services.AddScoped<ReceiptService>();
+            services.AddScoped<StockService>();
             services.AddScoped<DialogService>();
             services.AddScoped<OperatorService>();
             services.AddScoped<WarehouseService>();
+            services.AddScoped<WarehouseVisualizationService>();
             services.AddScoped<HistoryService>();
             services.AddScoped<NotificationService>();
+            services.AddScoped<LedStripService>();
+
+            services.AddSingleton<ITcpPacketSender>(new TcpPacketSender(TimeSpan.FromSeconds(3)));
 
             // view models
             services.AddSingleton<MainViewModel>();
@@ -75,10 +82,23 @@ namespace WMS.Desktop
 
             Services = services.BuildServiceProvider();
 
+
             using var scope = Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<WmsDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             await db.Database.MigrateAsync();
+
+            var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
+            var success = await ledService.InitializeSectorsAsync();
+
+            if (!success)
+            {
+                MessageBox.Show(
+                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
+                    "Ошибка LED",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
 
             var window = new Views.MainWindow();
             window.DataContext = Services.GetRequiredService<MainViewModel>();

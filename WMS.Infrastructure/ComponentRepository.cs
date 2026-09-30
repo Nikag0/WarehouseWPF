@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,64 +12,80 @@ namespace WMS.Infrastructure
 {
     public class ComponentRepository : IComponentRepository
     {
-        private readonly IDbContextFactory<WmsDbContext> _factory;
+        private readonly AppDbContext _db;
+        private readonly ILogger<ComponentRepository> _logger;
 
-        public ComponentRepository(IDbContextFactory<WmsDbContext> factory)
+        public ComponentRepository(AppDbContext db, ILogger<ComponentRepository> logger)
         {
-            _factory = factory;
+            _db = db;
+            _logger = logger;
         }
 
-        public async Task<IReadOnlyList<Component>> GetAllAsync()
+        public async Task<IReadOnlyList<Component>> GetAllAsync(CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-            return await db.Components.ToListAsync();
+            var result = await _db.Components.ToListAsync(ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Loaded {Count} componetns", result.Count);
+            return result;
         }
 
-        public async Task<Component?> GetByIdAsync(Guid id)
+        public async Task<Component?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-            return await db.Components.FindAsync(id);
+            var result = await _db.Components.FindAsync(new object[] { id }, ct).ConfigureAwait(false);
+
+            if (result is null)
+                _logger.LogWarning("Component for id {id} not found", id);
+
+            return result;
         }
 
-        public async Task<Component?> GetByArticleAsync(string article)
+        public async Task AddAsync(Component component, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            return await db.Components
-                .AsNoTracking()           
-                .FirstOrDefaultAsync(c => c.Article == article);
+            try
+            {
+                _db.Components.Add(component);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Failed to add component {Id}", component.Id);
+                throw;
+            }
         }
 
-        public async Task AddAsync(Component component)
+        public async Task UpdateAsync(Component component, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-            db.Components.Add(component);
-            await db.SaveChangesAsync();
+            try
+            {
+                _db.Components.Update(component);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Failed to update component {Id}", component.Id);
+                throw;
+            }
         }
 
-        public async Task UpdateAsync(Component component)
+        public async Task RemoveAsync(Component component, CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-            db.Entry(component).State = EntityState.Modified;
-            await db.SaveChangesAsync();
-        }
 
-        public async Task RemoveAsync(Component component)
-        {
-            using var db = _factory.CreateDbContext();
-            component.Delete();
-            db.Entry(component).Property(c => c.IsDeleted).IsModified = true;
-            await db.SaveChangesAsync();
+            try
+            {
+                _db.Components.Attach(component);
+                component.Delete();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Failed to remove component {Id}", component.Id);
+                throw;
+            }
         }
 
         public async Task<IReadOnlyList<Component>> GetFilteredComponentAsync(
             string searchText, 
             int maxCount, 
-            CancellationToken token)
+            CancellationToken ct = default)
         {
-            using var db = _factory.CreateDbContext();
-
-            IQueryable<Component> query = db.Components.AsNoTracking();
+            IQueryable<Component> query = _db.Components.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
@@ -83,8 +100,10 @@ namespace WMS.Infrastructure
             var result = await query
                 .OrderByDescending(s => s.CreatedAt)
                 .Take(maxCount)
-                .ToListAsync(token);
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
 
+            _logger.LogDebug("Found {Count} components by filter", result.Count);
             return result;
         }
     }

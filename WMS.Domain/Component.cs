@@ -88,6 +88,7 @@ public class Component : ISoftDeletable
 
         Article = article.Trim();
     }
+
     private void SetName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -95,6 +96,7 @@ public class Component : ISoftDeletable
 
         Name = name.Trim();
     }
+
     private void SetManufacturer(string manufacturer)
     {
         if (string.IsNullOrWhiteSpace(manufacturer))
@@ -102,6 +104,8 @@ public class Component : ISoftDeletable
 
         Manufacturer = manufacturer.Trim();
     }
+
+    // Не протестировано, т. к. не используется.
     private void SetExpirationDate(DateOnly expirationDate)
     {
         if (expirationDate < DateOnly.FromDateTime(DateTime.UtcNow))
@@ -111,10 +115,11 @@ public class Component : ISoftDeletable
 
         ExpirationDate = expirationDate;
     }
+
     private void SetMinQuantity(int minQuantity)
     {
-        if (minQuantity < 0)
-            throw new BusinessException("Минимальный остаток не может быть отрицательным");
+        if (minQuantity <= 0)
+            throw new BusinessException("Минимальный остаток не может быть отрицательным или равным нулю");
 
         MinQuantity = minQuantity;
     }

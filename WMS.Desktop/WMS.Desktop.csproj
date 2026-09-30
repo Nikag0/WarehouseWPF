@@ -9,15 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Images\AllWarehouse.JPG" />
-    <None Remove="Images\Warehouse.png" />
+    <None Remove="VisualizationResources\AllWarehouse.JPG" />
+    <None Remove="VisualizationResources\Warehouse.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="CellDescription.json">
+    <Content Include="VisualizationResources\CellDescription.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="RackDescription.json">
+    <Content Include="VisualizationResources\RackDescription.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -42,11 +42,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\AllWarehouse.JPG" />
-    <Resource Include="Images\RackType2.jpg" />
-    <Resource Include="Images\RackType1.jpg" />
-    <Resource Include="Images\RackType3.jpg" />
-    <Resource Include="Images\Warehouse.png" />
+    <Resource Include="VisualizationResources\AllWarehouse.JPG" />
+    <Resource Include="VisualizationResources\RackType2.jpg" />
+    <Resource Include="VisualizationResources\RackType1.jpg" />
+    <Resource Include="VisualizationResources\RackType3.jpg" />
+    <Resource Include="VisualizationResources\Warehouse.png" />
   </ItemGroup>
 
   <ItemGroup>

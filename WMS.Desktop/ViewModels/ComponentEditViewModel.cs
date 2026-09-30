@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Windows;
 using WMS.Application.Services;
+using WMS.Desktop.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 

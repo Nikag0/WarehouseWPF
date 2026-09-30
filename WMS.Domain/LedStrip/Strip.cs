@@ -11,7 +11,9 @@ namespace WMS.Domain.LedStrip
         public Guid Id { get; private set; }
         public Guid MicrocontrollerId { get; private set; }
         public Microcontroller Microcontroller { get; private set; } = null!;
-        public int StartDiode { get; private set; }
-        public int EndDiode { get; private set; }
+
+        public byte StripNumber { get; private set; }
+
+        public ICollection<Sector> Sectors { get; private set; } = new List<Sector>();
     }
 }
