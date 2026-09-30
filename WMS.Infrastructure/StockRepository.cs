@@ -33,8 +33,7 @@ namespace WMS.Infrastructure
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
                     .Include(s => s.Cell)
-                    .FirstOrDefaultAsync(x => x.Id == stockId, ct)
-                    .ConfigureAwait(false);
+                    .FirstOrDefaultAsync(x => x.Id == stockId, ct);
 
                 if (stock is null)
                     _logger.LogWarning("Stock {StockId} not found", stockId);
@@ -59,8 +58,7 @@ namespace WMS.Infrastructure
                     .Include(s => s.Cell)
                     .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
                                                 s.RackId == rackId &&
-                                                s.CellId == cellId, ct)
-                    .ConfigureAwait(false);
+                                                s.CellId == cellId, ct);
             }
             catch (Exception ex)
             {

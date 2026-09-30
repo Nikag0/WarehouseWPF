@@ -31,8 +31,7 @@ namespace WMS.Infrastructure
                     s.EndDiode,
                     s.Strip.Microcontroller.Ip,
                     s.Strip.Microcontroller.Port))
-                .ToListAsync(ct)
-                .ConfigureAwait(false);
+                .ToListAsync(ct);
 
             _logger.LogInformation("Loaded {Count} sectors for initialization", result.Count);
 
@@ -56,8 +55,7 @@ namespace WMS.Infrastructure
                     s.R, s.G, s.B,
                     s.Bright
                 ))
-                .SingleOrDefaultAsync(ct)
-                .ConfigureAwait(false);
+                .SingleOrDefaultAsync(ct);
 
             if (dto is null)
                 _logger.LogWarning("Sector for CellId {CellId} not found", cellId);

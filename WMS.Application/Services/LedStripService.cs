@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.NetworkInformation;
 using WMS.Application.Abstractions;
-using WMS.Application.DTO;
-using WMS.Domain;
-using WMS.Domain.LedStrip;
 
 namespace WMS.Application.Services
 {
@@ -100,6 +92,36 @@ namespace WMS.Application.Services
             await _repository.SetColorAsync(cellId, r, g, b, ct);
         }
 
+        public async Task AskGPIOAsync(Guid cellId, CancellationToken ct = default)
+        {
+            var sector = await _repository.GetByCellIdAsync(cellId, ct);
+            if (sector is null) return;
+
+            var packet = BuildAskGPIO(sector.DeviceAddress);
+
+            var success = await _packetSender.SendAsync(
+                    sector.Ip,
+                    sector.Port,
+                    packet,
+                    ct
+            );
+        }
+
+        public async Task SetGPIOAsync(Guid cellId, CancellationToken ct = default)
+        {
+            var sector = await _repository.GetByCellIdAsync(cellId, ct);
+            if (sector is null) return;
+
+            var packet = BuildSetGPIO(sector.DeviceAddress, 1, 1, 1, 1);
+
+            var success = await _packetSender.SendAsync(
+                    sector.Ip,
+                    sector.Port,
+                    packet,
+                    ct
+                );
+        }
+
         // ============ Пакеты ============
 
         private static byte[] BuildCreateSectorPacket(
@@ -109,10 +131,13 @@ namespace WMS.Application.Services
             int startDiode,
             int endDiode)
         {
+
+            var random = new Random();
+
             return new byte[]
             {
             deviceAddress,
-            0x02,
+            (byte)random.Next(0, 255),
             0xF0,
             stripNumber,
             sectorIndex,
@@ -132,17 +157,57 @@ namespace WMS.Application.Services
             byte brightness)
         {
             var (pwmR, pwmG, pwmB) = CalculatePwm(r, g, b, brightness);
+            var random = new Random();
 
             return new byte[]
             {
-            deviceAddress,
-            0x02,
-            0xEF,
-            stripNumber,
-            sectorIndex,
-            pwmR, pwmG, pwmB,
-            0x00,
-            0x00
+                deviceAddress,
+                (byte)random.Next(0, 255),
+                0xEF,
+                stripNumber,
+                sectorIndex,
+                pwmR, pwmG, pwmB,
+                0x00,
+                0x00
+            };
+        }
+
+        private static byte[] BuildAskGPIO(byte deviceAddress)
+        {
+            var random = new Random();
+
+            return new byte[]
+            {
+                deviceAddress,
+                (byte)random.Next(0, 255),
+                0xFD,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00
+            };
+        }
+
+        private static byte[] BuildSetGPIO(byte deviceAddress, int pin0, int pin1, int pin2, int pin3)
+        {
+            var random = new Random();
+            byte gpioByte = (byte)((pin0 & 1) | ((pin1 & 1) << 1) | ((pin2 & 1) << 2) | ((pin3 & 1) << 3));
+
+            return new byte[]
+            {
+                deviceAddress,
+                (byte)random.Next(0, 255),
+                0xFC,
+                gpioByte,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x00
             };
         }
 
