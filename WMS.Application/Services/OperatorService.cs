@@ -24,7 +24,7 @@ namespace WMS.Application.Services
             _logger = logger;
         }
 
-        public async Task<List<Operator>> GetAllAsync()
+        public async Task<IReadOnlyList<Operator>> GetAllAsync()
         {
             return await _operatorRepo.GetAllAsync();
         }
@@ -42,6 +42,8 @@ namespace WMS.Application.Services
         {
             var @operator = Operator.Create(surname, name, patronymic);
             await _operatorRepo.AddAsync(@operator);
+
+            await _operatorRepo.SaveChangesAsync();
         }
 
         public async Task<Result> UpdateAsync(OperatorDTO dto)
@@ -52,7 +54,7 @@ namespace WMS.Application.Services
 
             @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
 
-            await _operatorRepo.UpdateAsync(@operator);
+            await _operatorRepo.SaveChangesAsync();
 
             return Result.Success();
         }
@@ -67,9 +69,11 @@ namespace WMS.Application.Services
                     return Result.Failure("Оператор не найден.");
                 }
 
-                await _operatorRepo.RemoveAsync(op);
+                op.Delete();
 
-                _logger.LogInformation($"Оператор с ID {id} успешно удален.");
+                await _operatorRepo.SaveChangesAsync();
+
+                _logger.LogInformation($"Оператор с ID {id} удален.");
 
                 return Result.Success();
             }

@@ -15,6 +15,5 @@ namespace WMS.Application.Abstractions
 
 
         Task<int> SaveChangesAsync(CancellationToken ct = default);
-
     }
 }

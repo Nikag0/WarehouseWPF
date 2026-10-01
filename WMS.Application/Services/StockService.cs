@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,28 +8,25 @@ using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
-using WMS.Domain.ExceptionControl;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Application.Services
 {
-    public class StockService
+    public class StockService : IStockService
     {
         private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepo;
-        private readonly IHistoryRepository _historyRepo;
         private readonly ILogger<StockService> _logger;
         private readonly IUnitOfWork _uow;
         public StockService(
             IComponentRepository componentRepo,
             IStockRepository stockRepo,
-            IHistoryRepository operationRepo,
             ILogger<StockService> logger,
             IUnitOfWork uow)
         {
             _componentRepo = componentRepo;
             _stockRepo = stockRepo;
-            _historyRepo = operationRepo;
             _logger = logger;
             _uow = uow;
         }
@@ -38,6 +37,7 @@ namespace WMS.Application.Services
             string? comment = null,
             CancellationToken ct = default)
         {
+
             if (items.Count == 0)
                 throw new BusinessException("Список выдачи пуст");
 
@@ -49,14 +49,18 @@ namespace WMS.Application.Services
             {
                 var operation = History.Create(OperationType.Issue, operatorName, comment);
 
+                var stockIds = items.Select(x => x.StockId).ToList();
+
+                var stocks = await _uow.Stocks.GetByIdsAsync(stockIds, ct);
+
+                var stocksDictionary = stocks.ToDictionary(x => x.Id);
+
                 foreach (var item in items)
                 {
-                    var stock = await _uow.Stocks.GetByIdAsync(item.StockId, ct);
-
-                    if (stock is null)
+                    if (!stocksDictionary.TryGetValue(item.StockId, out var stock))
                     {
-                        _logger.LogWarning("Stock {StockId} not found", item.StockId);
-                        throw new BusinessException("Товар в указанной ячейке не найден");
+                        _logger.LogWarning("Stock {StockId} not found in preloaded data", item.StockId);
+                        throw new BusinessException("Товар в одной из указанных ячеек не найден");
                     }
 
                     var before = stock.Quantity;
@@ -70,7 +74,7 @@ namespace WMS.Application.Services
                     if (stock.Quantity == 0)
                     {
                         _logger.LogInformation("Stock {StockId} quantity is 0, marking for deletion", stock.Id);
-                        _uow.Stocks.Delet(stock, ct);
+                        _uow.Stocks.Delete(stock, ct);
                     }
                     else
                     {
@@ -122,7 +126,7 @@ namespace WMS.Application.Services
 
             try
             {
-                var component = await _uow.Components.GetByIdAsync(item.ComponentId, ct);
+                var component = await _uow.Components.GetByIdAsync(item.ComponentId);
 
                 if (component is null)
                 {
@@ -157,8 +161,6 @@ namespace WMS.Application.Services
                     _logger.LogInformation(
                         "Updating stock {StockId}: {Before} -> {After}",
                         stock.Id, before, after);
-
-                    _uow.Stocks.Update(stock, ct);
                 }
 
                 var operation = History.Create(OperationType.Receipt, operatorName, comment);
@@ -186,7 +188,7 @@ namespace WMS.Application.Services
         public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
         {
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
-            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount, token);
+            var components = await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
             var result = new List<ViewItemDTO>();
 
@@ -201,7 +203,7 @@ namespace WMS.Application.Services
                 if (existingComponentIds.Contains(component.Id))
                     continue; // Пропускаем, так как Stock для этого компонента уже добавлен
 
-                result.Add(MappingExtensions.ToViewItemDto(component));
+                result.Add(MappingExtensions.ComponentViewtoItemView(component));
             }
 
             return result.Take(maxCount).ToList();

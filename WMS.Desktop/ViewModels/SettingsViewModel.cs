@@ -18,7 +18,7 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class SettingsViewModel : ObservableObject
     {
-        [ObservableProperty] private ObservableCollection<ComponentDTO> _filteredComponents = new();
+        [ObservableProperty] private ObservableCollection<ComponentEditDto> _filteredComponents = new();
         [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
         [ObservableProperty] private string _searchComponent = string.Empty;
 
@@ -66,7 +66,7 @@ namespace WMS.Desktop.ViewModels
         }
 
         [RelayCommand]
-        private void EditComponent(ComponentDTO component)
+        private void EditComponent(ComponentEditDto component)
         {
             if (component == null) return;
 
@@ -80,7 +80,7 @@ namespace WMS.Desktop.ViewModels
         }
 
         [RelayCommand]
-        private async Task DeleteComponent(ComponentDTO component)
+        private async Task DeleteComponent(ComponentEditDto component)
         {
             if (component == null) return;
 
@@ -158,7 +158,7 @@ namespace WMS.Desktop.ViewModels
                 {
                     await Task.Delay(500, _cts.Token);
 
-                    var result = await _componentService.GetFilteredAsync(searchText: value, maxCount: 100, _cts.Token);
+                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {

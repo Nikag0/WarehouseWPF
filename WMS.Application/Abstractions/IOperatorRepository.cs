@@ -9,10 +9,10 @@ namespace WMS.Application.Abstractions
 {
     public interface IOperatorRepository
     {
-        Task<List<Operator>> GetAllAsync();
+        Task<IReadOnlyList<Operator>> GetAllAsync();
         Task<Operator?> GetByIdAsync(Guid id);
         Task AddAsync(Operator operatorr);
-        Task UpdateAsync(Operator operatorr);
-        Task RemoveAsync(Operator operatorr);
+
+        Task SaveChangesAsync();
     }
 }

@@ -107,12 +107,12 @@ namespace WMS.Application.Services
             );
         }
 
-        public async Task SetGPIOAsync(Guid cellId, CancellationToken ct = default)
+        public async Task SetGPIOAsync(Guid cellId, int active, CancellationToken ct = default)
         {
             var sector = await _repository.GetByCellIdAsync(cellId, ct);
             if (sector is null) return;
 
-            var packet = BuildSetGPIO(sector.DeviceAddress, 1, 1, 1, 1);
+            var packet = BuildSetGPIO(sector.DeviceAddress, active, active, active, active);
 
             var success = await _packetSender.SendAsync(
                     sector.Ip,

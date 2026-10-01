@@ -198,6 +198,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             try
             {
                 await _ledStripService.TurnOnSectorAsync(SelectedCell.Id);
+                await _ledStripService.SetGPIOAsync(SelectedCell.Id, 1);
             }
             catch (Exception ex)
             {
@@ -378,6 +379,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             try
             {
                 await _ledStripService.TurnOffSectorAsync(cellId);
+                await _ledStripService.SetGPIOAsync(cellId, 0);
             }
             catch (Exception ex)
             {

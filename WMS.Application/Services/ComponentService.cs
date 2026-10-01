@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
@@ -20,52 +21,7 @@ namespace WMS.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result<IReadOnlyList<ComponentDTO>>> GetAllAsync()
-        {
-            try
-            {
-                var components = await _componentRepo.GetAllAsync();
-                var dtos = components.Select(c => new ComponentDTO(
-                    c.Id, c.Article, c.Name, c.Manufacturer,c.ExpirationDate, c.MinQuantity
-                )).ToList();
-
-                return Result<IReadOnlyList<ComponentDTO>>.Success(dtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Критическая ошибка при получении списка компонентов из базы данных.");
-                throw;
-            }
-        }
-
-        public async Task<ComponentDTO?> GetByIdAsync(Guid id)
-        {
-            var result = await _componentRepo.GetByIdAsync(id);
-
-            return MappingExtensions.ToComponentDTO(result);
-        }
-
-        public async Task<Result> AddAsync(string article, string name, string manufacturer, DateOnly? expirationDate, int minQuantity)
-        {
-            try
-            {
-                var component = Domain.Component.Create(article, name, manufacturer, expirationDate, minQuantity);
-                await _componentRepo.AddAsync(component);
-
-                return Result.Success();
-            }
-            catch (BusinessException domainEx)
-            {
-                return Result.Failure(domainEx.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Критическая ошибка при добавлении компонента в БД");
-                throw;
-            }
-        }
-
-        public async Task<Result> UpdateAsync(ComponentDTO dto)
+        public async Task<Result> UpdateAsync(ComponentEditDto dto)
         {
             try
             {
@@ -77,7 +33,7 @@ namespace WMS.Application.Services
                 if (!string.Equals(component.Article, dto.Article, StringComparison.OrdinalIgnoreCase))
                 {
                     var existing = await _componentRepo.GetByArticleAsync(dto.Article);
-                    if (existing is not null && existing.Id != dto.Id)
+                    if (existing is not null)
                         return Result.Failure($"Артикул '{dto.Article}' уже используется другим компонентом.");
                 }
 
@@ -88,13 +44,37 @@ namespace WMS.Application.Services
                     dto.ExpirationDate,
                     dto.MinQuantity);
 
-                await _componentRepo.UpdateAsync(component);
+                await _componentRepo.SaveChangesAsync();
 
                 return Result.Success();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {dto.Id} в БД");
+                throw;
+            }
+        }
+
+        public async Task<Result> AddAsync(ComponentEditDto dto)
+        {
+            try
+            {
+                var existing = await _componentRepo.GetByArticleAsync(dto.Article);
+                if (existing is not null)
+                    return Result.Failure($"Артикул '{dto.Article}' уже используется.");
+
+                var component = Domain.Component.Create(dto.Article, dto.Name, dto.Manufacturer, dto.ExpirationDate, dto.MinQuantity);
+                await _componentRepo.AddAsync(component);
+                await _componentRepo.SaveChangesAsync();
+                return Result.Success();
+            }
+            catch (BusinessException domainEx)
+            {
+                return Result.Failure(domainEx.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при добавлении компонента в БД");
                 throw;
             }
         }
@@ -115,7 +95,9 @@ namespace WMS.Application.Services
                     return Result.Failure("Существуют остатки с этим компонентом");
                 }
 
-                await _componentRepo.RemoveAsync(component);
+                component.Delete();
+
+                await _componentRepo.SaveChangesAsync();
 
                 _logger.LogInformation($"Компонент с ID {id} успешно удален.");
 
@@ -128,11 +110,30 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<IReadOnlyList<ComponentDTO>> GetFilteredAsync (string searchText,int maxCount, CancellationToken token)
+        public async Task<IReadOnlyList<ComponentViewDto>> GetViewFilterAsync(string searchText, int maxCount, CancellationToken token)
         {
-            var components = await _componentRepo.GetFilteredComponentAsync(searchText, maxCount, token);
+            try
+            {
+                return await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
+                throw;
+            }
+        }
 
-            return components.Select(MappingExtensions.ToComponentDTO).ToList();
+        public async Task<IReadOnlyList<ComponentEditDto>> GetEditFilterAsync (string searchText,int maxCount, CancellationToken token)
+        {
+            try
+            {
+                return await _componentRepo.GetEditFilterAsync(searchText, maxCount, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
+                throw;
+            }
         }
     }
 }

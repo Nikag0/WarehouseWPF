@@ -19,8 +19,9 @@ namespace WMS.Infrastructure.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.HasIndex(x => x.Article)
-                .IsUnique();
+            builder.HasIndex(c => c.Article)
+                .IsUnique()
+                .HasFilter("\"IsDeleted\" = false");
 
             builder.Property(x => x.Name)
                 .IsRequired()

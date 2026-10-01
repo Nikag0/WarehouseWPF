@@ -36,7 +36,7 @@ namespace WMS.Desktop
                 .Build();
 
             services.AddDbContextFactory<AppDbContext>(opt =>
-                opt.UseNpgsql(config.GetConnectionString("Warehouse")));
+                opt.UseNpgsql(config.GetConnectionString("Warehouse")), ServiceLifetime.Scoped);
 
             // репозитории
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -47,6 +47,9 @@ namespace WMS.Desktop
             services.AddScoped<IRackRepository, RackRepository>();
             services.AddScoped<IHistoryRepository, HistoryRepository>();
             services.AddScoped<ISectorRepository, SectorRepository>();
+
+            // Один сервис т.к. другие не работают с несколькими репо.
+            services.AddScoped<IStockService, StockService>();
 
             // application services
             services.AddScoped<ComponentService>();
@@ -81,7 +84,6 @@ namespace WMS.Desktop
             services.AddTransient<Func<Views.WarehouseView>>(provider => () => provider.GetRequiredService<Views.WarehouseView>());
 
             Services = services.BuildServiceProvider();
-
 
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

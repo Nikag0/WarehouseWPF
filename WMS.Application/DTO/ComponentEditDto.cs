@@ -1,4 +1,4 @@
-﻿public record ComponentDTO(
+﻿public record ComponentEditDto(
     Guid Id,
     string Article,
     string Name,

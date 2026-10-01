@@ -21,17 +21,44 @@ namespace WMS.Infrastructure
             _logger = logger;
         }
 
-        public async Task<IReadOnlyList<Component>> GetAllAsync(CancellationToken ct = default)
+        public async Task<IReadOnlyList<ComponentViewDto>> GetViewFilterAsync(string searchText, int maxCount, CancellationToken ct)
         {
-            var result = await _db.Components.ToListAsync(ct);
+            var query = ApplyFilters(_db.Components.AsNoTracking(), searchText);
 
-            _logger.LogInformation("Loaded {Count} componetns", result.Count);
-            return result;
+            return await query
+                .OrderByDescending(s => s.CreatedAt)
+                .Take(maxCount)
+                .Select(x => new ComponentViewDto(x.Id, x.Article, x.Name, x.Manufacturer))
+                .ToListAsync(ct);
         }
 
-        public async Task<Component?> GetByIdAsync(Guid id, CancellationToken ct = default)
+        public async Task<IReadOnlyList<ComponentEditDto>> GetEditFilterAsync(string searchText, int maxCount, CancellationToken ct)
         {
-            var result = await _db.Components.FindAsync(new object[] { id }, ct);
+            var query = ApplyFilters(_db.Components.AsNoTracking(), searchText);
+
+            return await query
+                .OrderByDescending(s => s.CreatedAt)
+                .Take(maxCount)
+                .Select(x => new ComponentEditDto(x.Id, x.Article, x.Name, x.Manufacturer, x.ExpirationDate, x.MinQuantity))
+                .ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<ComponentViewDto>> GetAllAsync()
+        {
+            return await _db.Components.
+                AsNoTracking()
+                .Select(c => new ComponentViewDto(
+                    c.Id,
+                    c.Article,
+                    c.Name,
+                    c.Manufacturer
+                ))
+                .ToListAsync();
+        }
+
+        public async Task<Component?> GetByIdAsync(Guid id)
+        {
+            var result = await _db.Components.FindAsync(id);
 
             if (result is null)
                 _logger.LogWarning("Component for id {id} not found", id);
@@ -39,11 +66,23 @@ namespace WMS.Infrastructure
             return result;
         }
 
-        public async Task AddAsync(Component component, CancellationToken ct = default)
+        public async Task<Component?> GetByArticleAsync(string article)
+        {
+            var result = await _db.Components.
+                AsNoTracking().
+                FirstOrDefaultAsync(c => c.Article.ToLower() == article.ToLower());
+
+            if (result is null)
+                _logger.LogWarning("Component for article {article} not found", article);
+
+            return result;
+        }
+
+        public async Task AddAsync(Component component)
         {
             try
             {
-                _db.Components.Add(component);
+                await _db.Components.AddAsync(component);
             }
             catch (DbUpdateException ex)
             {
@@ -52,59 +91,16 @@ namespace WMS.Infrastructure
             }
         }
 
-        public async Task UpdateAsync(Component component, CancellationToken ct = default)
+        public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
+
+        private IQueryable<Component> ApplyFilters(IQueryable<Component> query, string searchText)
         {
-            try
-            {
-                _db.Components.Update(component);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Failed to update component {Id}", component.Id);
-                throw;
-            }
-        }
-
-        public async Task RemoveAsync(Component component, CancellationToken ct = default)
-        {
-
-            try
-            {
-                _db.Components.Attach(component);
-                component.Delete();
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Failed to remove component {Id}", component.Id);
-                throw;
-            }
-        }
-
-        public async Task<IReadOnlyList<Component>> GetFilteredComponentAsync(
-            string searchText, 
-            int maxCount, 
-            CancellationToken ct = default)
-        {
-            IQueryable<Component> query = _db.Components.AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                var text = searchText.Trim();
-
-                query = query.Where(x =>
-                   EF.Functions.ILike(x.Name, $"%{text}%") ||
-                   EF.Functions.ILike(x.Article, $"%{text}%") ||
-                   EF.Functions.ILike(x.Manufacturer, $"%{text}%"));
-            }
-
-            var result = await query
-                .OrderByDescending(s => s.CreatedAt)
-                .Take(maxCount)
-                .ToListAsync(ct)
-                .ConfigureAwait(false);
-
-            _logger.LogDebug("Found {Count} components by filter", result.Count);
-            return result;
+            if (string.IsNullOrWhiteSpace(searchText)) return query;
+            var text = searchText.Trim();
+            return query.Where(x =>
+                EF.Functions.ILike(x.Name, $"%{text}%") ||
+                EF.Functions.ILike(x.Article, $"%{text}%") ||
+                EF.Functions.ILike(x.Manufacturer, $"%{text}%"));
         }
     }
 }

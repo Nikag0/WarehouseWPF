@@ -14,9 +14,10 @@ namespace WMS.Application.Abstractions
         Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default);
         Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default);
         Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default);
+        Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct);
         void Add(Stock stock, CancellationToken ct = default);
         void Update(Stock stock, CancellationToken ct = default);
-        void Delet(Stock stock, CancellationToken ct = default);
+        void Delete(Stock stock, CancellationToken ct = default);
 
         //Можно подумать над реалзацией.
         Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default);

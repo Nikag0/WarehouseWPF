@@ -29,7 +29,6 @@ namespace WMS.Infrastructure
             try
             {
                 var stock = await _db.Stocks
-                    .AsNoTracking()
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
                     .Include(s => s.Cell)
@@ -52,7 +51,6 @@ namespace WMS.Infrastructure
             try
             {
                 return await _db.Stocks
-                    .AsNoTracking()
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
                     .Include(s => s.Cell)
@@ -80,9 +78,15 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
+        public async Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
+        {
+            return await _db.Stocks
+                .Where(s => ids.Contains(s.Id))
+                .ToListAsync(ct);
+        }
+
         public void Add(Stock stock, CancellationToken ct = default)
         {
-
             try
             {
                 _db.Stocks.Add(stock);
@@ -99,7 +103,7 @@ namespace WMS.Infrastructure
             _db.Stocks.Update(stock);
         }
 
-        public void Delet(Stock stock, CancellationToken ct = default)
+        public void Delete(Stock stock, CancellationToken ct = default)
         {
             _db.Stocks.Remove(stock);
         }
@@ -130,7 +134,6 @@ namespace WMS.Infrastructure
                 .ToListAsync();
         }
 
-
         public async Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default)
         {
             // Экранируем кавычки для PostgreSQL, чтобы сохранить оригинальный регистр EF Core
@@ -160,8 +163,8 @@ namespace WMS.Infrastructure
         public async Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default)
         {
             return await _db.Stocks
+                .AsNoTracking()
                 .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
         }
-
     }
 }

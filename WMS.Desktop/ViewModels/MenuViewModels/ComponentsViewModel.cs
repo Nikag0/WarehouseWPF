@@ -8,7 +8,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class ComponentsViewModel : ObservableObject
     {
-        public ObservableCollection<ComponentDTO> FilteredComponents { get; } = new();
+        public ObservableCollection<ComponentViewDto> FilteredComponents { get; } = new();
         [ObservableProperty] private string _searchComponent = string.Empty;
 
         private readonly ComponentService _componentService;
@@ -46,7 +46,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, _cts.Token);
 
-                    var result = await _componentService.GetFilteredAsync(searchText: value, maxCount: 100, _cts.Token);
+                    var result = await _componentService.GetViewFilterAsync(searchText: value, maxCount: 100, _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {

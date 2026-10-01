@@ -41,10 +41,10 @@ public class StockServiceIntegrationTests : IntegrationTestBase
             .Throws(new InvalidOperationException("History DB is down"));
 
         var uow = new UnitOfWork(context, compRepo, stockRepo, historyMock.Object, opRepo);
+
         var service = new StockService(
             compRepo,
             stockRepo,
-            historyMock.Object,
             Mock.Of<ILogger<StockService>>(),
             uow);
 
@@ -92,7 +92,6 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         var service = new StockService(
             compRepo,
             stockRepo,
-            historyMock.Object,
             Mock.Of<ILogger<StockService>>(),
             uow);
 
@@ -142,7 +141,6 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         var service = new StockService(
             compRepo,
             stockRepo,
-            historyMock.Object,
             Mock.Of<ILogger<StockService>>(),
             uow);
 

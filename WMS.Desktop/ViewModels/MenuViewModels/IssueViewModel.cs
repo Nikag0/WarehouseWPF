@@ -1,27 +1,23 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json;
-using System.Windows;
-using System.Windows.Automation;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+using WMS.Application.Abstractions;
+using WMS.Application.DTO;
 using WMS.Application.Services;
+using WMS.Desktop.Models;
+using WMS.Desktop.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
-using CommunityToolkit.Mvvm.ComponentModel;
-using WMS.Application.DTO;
-using WMS.Desktop.Services;
-using WMS.Desktop.Models;
 
 namespace WMS.Desktop.ViewModels.MenuViewModels
 {
     public partial class IssueViewModel : ObservableObject
     {
+        private readonly IStockService _stockService;
+
         public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
         public ObservableCollection<CellViewModel> CellsGrid { get; } = new();
@@ -59,7 +55,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         }
 
         private readonly DialogService _dialogService;
-        private readonly StockService _stockService;
         private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
         private readonly WarehouseVisualizationService _warehouseVisualizationService;
@@ -77,7 +72,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private CellViewModel _selectedCell;
 
         public IssueViewModel(
-            StockService stockService,
+            IStockService stockService,
             DialogService dialogService,
             OperatorService operatorService,
             WarehouseService warehouseService,
@@ -104,6 +99,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public async Task IssueAsync()
         {
+            // Проверка нехвати остатков.
             var invalidItems = IssueItems
                               .Where(x => x.OperationQuantity <= 0)
                               .ToList();
@@ -124,12 +120,21 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            var shortagedItems = IssueItems.Where(x => x.Quantity < x.OperationQuantity).ToList();
+            if (shortagedItems.Any())
+            {
+                var firstShort = shortagedItems.First();
+                _dialogService.ShowWarning($"{firstShort.ComponentName} не хватает. Осталось: {firstShort.Quantity}. В выдаче: {firstShort.OperationQuantity}");
+                return;
+            }
+
             if (OperatorName == null)
             {
                 _dialogService.ShowWarning("Оператор не указан");
                 return;
             }
 
+            // Интерактивный обход стеллажей.
             var itemsToReview = IssueItems.ToList();
 
             RacksGrid.All(r => r.ItemInCell = false);
@@ -144,7 +149,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedCell.IsSelected = true;
 
                 var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+                
                 await _ledStripService.TurnOnSectorAsync(item.CellId);
+                await _ledStripService.SetGPIOAsync(item.CellId, 1);
+
+
                 if (!_dialogService.ShowConfirmation(question))
                 {
                     IssueItems.Remove(item);
@@ -153,13 +162,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     SelectedCell.ItemInCell = false;
                     SelectedCell.IsSelected = false;
                 }
-                else if (item.Quantity < item.OperationQuantity)
-                {
-                    _dialogService.ShowWarning($"{item.ComponentName} не хватает. Осталось товара {item.Quantity}. В выдаче {item.OperationQuantity}");
-                    return;
-                }
 
                 await _ledStripService.TurnOffSectorAsync(item.CellId);
+                await _ledStripService.SetGPIOAsync(item.CellId, 0);
             }
 
             if (!IssueItems.Any())
@@ -169,6 +174,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            // Регистрируем выдачу.
             try
             {
                 var issueOperation = IssueItems

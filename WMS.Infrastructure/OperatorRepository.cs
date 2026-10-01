@@ -13,7 +13,7 @@ namespace WMS.Infrastructure.Migrations
             _db = db;
         }
 
-        public async Task<List<Operator>> GetAllAsync()
+        public async Task<IReadOnlyList<Operator>> GetAllAsync()
         {
             return await _db.Operators.ToListAsync();
         }
@@ -25,21 +25,9 @@ namespace WMS.Infrastructure.Migrations
 
         public async Task AddAsync(Operator operatorr)
         {
-            _db.Operators.Add(operatorr);
-            await _db.SaveChangesAsync();
+            await _db.Operators.AddAsync(operatorr);
         }
 
-        public async Task UpdateAsync(Operator operatorr)
-        {
-            _db.Entry(operatorr).State = EntityState.Modified;
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(Operator operatorr)
-        {
-            operatorr.Delete();
-            _db.Entry(operatorr).Property(o => o.IsDeleted).IsModified = true;
-            await _db.SaveChangesAsync();
-        }
+        public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
     }
 }

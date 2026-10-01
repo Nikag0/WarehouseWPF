@@ -28,7 +28,7 @@ namespace WMS.Application
             );
         }
 
-        public static ViewItemDTO ToViewItemDto(this Component c)
+        public static ViewItemDTO ComponentViewtoItemView(this ComponentViewDto c)
         {
             return new ViewItemDTO(
                 c.Id,
@@ -46,9 +46,10 @@ namespace WMS.Application
                 0
             );
         }
-        public static ComponentDTO ToComponentDTO(this Component c)
+
+        public static ComponentEditDto ToComponentDTO(this Component c)
         {
-            return new ComponentDTO(
+            return new ComponentEditDto(
                 c.Id,
                 c.Article,
                 c.Name,
@@ -75,7 +76,7 @@ namespace WMS.Application
                 o.Operation.OccurredAt,
                 o.Operation.Operator,
                 LocationFormatter.OperationToStr(o.Operation.Type),
-                o.Component.Name,
+                o.Component?.Name ?? "[Удаленный компонент]",
                 o.QuantityBefore,
                 o.QuantityAfter
             );

@@ -39,7 +39,7 @@ public class StockServiceTests
             .SetValue(component, componentId);
 
         compRepo
-            .Setup(r => r.GetByIdAsync(componentId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdAsync(componentId))
             .ReturnsAsync(component);
 
         stockRepo
@@ -53,7 +53,6 @@ public class StockServiceTests
         var service = new StockService(
             compRepo.Object,
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 
@@ -79,7 +78,7 @@ public class StockServiceTests
         var compRepo = new Mock<IComponentRepository>();
 
         compRepo
-            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync((Component)null);
 
         uowMock.SetupGet(u => u.Components).Returns(compRepo.Object);
@@ -87,7 +86,6 @@ public class StockServiceTests
         var service = new StockService(
             compRepo.Object,
             Mock.Of<IStockRepository>(),
-            Mock.Of<IHistoryRepository>(),
             Mock.Of<ILogger<StockService>>(),
             uowMock.Object);
 
@@ -105,7 +103,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             Mock.Of<IStockRepository>(),
-            Mock.Of<IHistoryRepository>(),
             Mock.Of<ILogger<StockService>>(),
             Mock.Of<IUnitOfWork>());
 
@@ -141,7 +138,7 @@ public class StockServiceTests
         var existingStock = Stock.Create(componentId, rackId, cellId, 50);
 
         compRepo
-            .Setup(r => r.GetByIdAsync(componentId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdAsync(componentId))
             .ReturnsAsync(component);
 
         stockRepo
@@ -155,7 +152,6 @@ public class StockServiceTests
         var service = new StockService(
             compRepo.Object,
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 
@@ -200,7 +196,7 @@ public class StockServiceTests
             .SetValue(component, componentId);
 
         compRepo
-            .Setup(r => r.GetByIdAsync(componentId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdAsync(componentId))
             .ReturnsAsync(component);
 
         stockRepo
@@ -214,7 +210,6 @@ public class StockServiceTests
         var service = new StockService(
             compRepo.Object,
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 
@@ -246,7 +241,7 @@ public class StockServiceTests
         typeof(Component).GetProperty(nameof(Component.Id))!.SetValue(component, componentId);
 
         compRepo
-            .Setup(r => r.GetByIdAsync(componentId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdAsync(componentId))
             .ReturnsAsync(component);
 
         stockRepo
@@ -260,7 +255,6 @@ public class StockServiceTests
         var service = new StockService(
             compRepo.Object,
             stockRepo.Object,
-            historyRepo.Object,
             Mock.Of<ILogger<StockService>>(),
             uowMock.Object);
 
@@ -306,7 +300,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 
@@ -354,7 +347,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 
@@ -364,7 +356,7 @@ public class StockServiceTests
         await service.IssueAsync(items, "Dispatcher");
 
         // Assert
-        stockRepo.Verify(r => r.Delet(
+        stockRepo.Verify(r => r.Delete(
             It.Is<Stock>(s => s.Quantity == 0 && s.Id == stockId),
             It.IsAny<CancellationToken>()), Times.Once);
 
@@ -390,7 +382,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             stockRepo.Object,
-            Mock.Of<IHistoryRepository>(),
             loggerMock.Object,
             uowMock.Object);
 
@@ -409,7 +400,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             Mock.Of<IStockRepository>(),
-            Mock.Of<IHistoryRepository>(),
             Mock.Of<ILogger<StockService>>(),
             Mock.Of<IUnitOfWork>());
 
@@ -456,7 +446,6 @@ public class StockServiceTests
         var service = new StockService(
             Mock.Of<IComponentRepository>(),
             stockRepo.Object,
-            historyRepo.Object,
             loggerMock.Object,
             uowMock.Object);
 

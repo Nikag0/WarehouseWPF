@@ -30,6 +30,7 @@ namespace WMS.Infrastructure
         {
             IQueryable<HistoryItem> query = _db.HistoryItems
                    .AsNoTracking()
+                   .IgnoreQueryFilters()
                    .Include(x => x.Component)
                    .Include(x => x.Operation);
 

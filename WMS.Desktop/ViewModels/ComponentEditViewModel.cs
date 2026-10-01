@@ -12,7 +12,7 @@ namespace WMS.Desktop.ViewModels
     {
         private readonly ComponentService _componentService;
         private readonly DialogService _dialogService;
-        private readonly ComponentDTO _currentComponentDto;
+        private readonly ComponentEditDto _currentComponentDto;
         private readonly bool _isEditMode;
 
         [ObservableProperty] private string _windowTitle;
@@ -25,7 +25,7 @@ namespace WMS.Desktop.ViewModels
         public ComponentEditViewModel(
             ComponentService componentService, 
             DialogService dialogService,
-            ComponentDTO componentDto = null)
+            ComponentEditDto componentDto = null)
         {
             _componentService = componentService;
             _currentComponentDto = componentDto;
@@ -54,7 +54,7 @@ namespace WMS.Desktop.ViewModels
                 if (_isEditMode)
                 {
                     result = await _componentService.UpdateAsync(
-                    new ComponentDTO(
+                    new ComponentEditDto(
                         _currentComponentDto.Id,
                         Article,
                         Name,
@@ -65,13 +65,14 @@ namespace WMS.Desktop.ViewModels
                 }
                 else
                 {
-                    result = await _componentService.AddAsync(
+                    result = await _componentService.AddAsync(new ComponentEditDto(
+                        Guid.Empty,
                         Article,
                         Name,
                         Manufacturer,
                         null, /*DateOnly.FromDateTime(ExpirationDate)*/
                         MinQuantity
-                    );
+                    ));
                 }
 
                 if (result.IsSuccess)

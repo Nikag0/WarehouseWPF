@@ -85,8 +85,8 @@ namespace WMS.Desktop.Services
 
         public async Task<Dictionary<string, RackLayout>> LoadRackLayoutsAsync()
         {
-            //var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RackDescription.json");
-            var path = @"D:\WarehouseWPF\WMS.Desktop\VisualizationResources\RackDescription.json";
+            //var path = @"D:\WarehouseWPF\WMS.Desktop\VisualizationResources\RackDescription.json";
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VisualizationResources", "RackDescription.json");
 
             if (!File.Exists(path))
                 throw new FileNotFoundException("JSON-файл конфигурации стеллажей не найден.", path);
@@ -99,7 +99,8 @@ namespace WMS.Desktop.Services
 
         public async Task<Dictionary<RackType, Dictionary<string, CellLayout>>> LoadCellLayoutsAsync()
         {
-            var path = @"D:\WarehouseWPF\WMS.Desktop\VisualizationResources\CellDescription.json";
+            //var path = @"D:\WarehouseWPF\WMS.Desktop\VisualizationResources\CellDescription.json";
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VisualizationResources", "CellDescription.json");
 
             if (!File.Exists(path))
                 throw new FileNotFoundException("JSON-файл конфигурации ячеек не найден.", path);
