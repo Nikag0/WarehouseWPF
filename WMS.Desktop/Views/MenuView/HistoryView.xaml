@@ -95,17 +95,18 @@
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
                       FontSize="15"
+                      RowHeight="30"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       ScrollViewer.CanContentScroll="True">
                 
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*"/>
-                    <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="200*"/>
-                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="100*"/>
-                    <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="100*"/>
-                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="100*"/>
-                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="100*"/>
+                    <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="200*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

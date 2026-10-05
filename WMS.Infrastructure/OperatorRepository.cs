@@ -23,6 +23,15 @@ namespace WMS.Infrastructure.Migrations
             return await _db.Operators.FindAsync(id);
         }
 
+        public bool IsOperatorUniqueAsync(string surname, string name, string patronymic)
+        {
+            return _db.Operators
+                .Any(o =>
+                    o.Surname.ToLower() == surname &&
+                    o.Name.ToLower() == name &&
+                    o.Patronymic.ToLower() == patronymic);
+        }
+
         public async Task AddAsync(Operator operatorr)
         {
             await _db.Operators.AddAsync(operatorr);

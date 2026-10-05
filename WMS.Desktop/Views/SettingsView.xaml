@@ -94,10 +94,10 @@
                               Margin="0,5,0,0" 
                               AutoGenerateColumns="False" IsReadOnly="True" FontSize="15" RowHeight="40">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*"/>
-                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*"/>
-                            <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*"/>
-                            <DataGridTextColumn Header="Минимальный остаток" Binding="{Binding MinQuantity}" Width="300*"/>
+                            <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                            <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                            <DataGridTextColumn Header="Минимальный остаток" Binding="{Binding MinQuantity}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             
                             <DataGridTemplateColumn Width="150" IsReadOnly="False">
                                 <DataGridTemplateColumn.CellTemplate>

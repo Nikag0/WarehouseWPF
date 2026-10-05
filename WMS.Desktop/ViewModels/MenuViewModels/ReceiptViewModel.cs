@@ -70,6 +70,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         OnPropertyChanged(nameof(SearchRacks));
                         FilterRacks(_searchRacks);
                     }
+
+                    SelectedCell = null;
+                    SearchCell = string.Empty;
                     // Загрузка ячеек в CellsGrid.
                     LoadCells();
                     // Обновляем фильтр.
@@ -180,6 +183,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             if (SelectedRack == null || SelectedCell == null)
             {
                 _dialogService.ShowWarning("Стеллаж или ячейка не выбраны.");
+                return;
+            }
+
+            if (!SelectedRack.Cells.Contains(SelectedCell))
+            {
+                _dialogService.ShowWarning("Ошибка выбора места хранение. Попробуйте ещё раз.");
                 return;
             }
 

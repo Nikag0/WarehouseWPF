@@ -103,7 +103,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBox Grid.Row="0"
-                             Style="{StaticResource InputTextBoxStyle}"
+                             Style="{StaticResource InputTextBoxStockStyle}"
                              Text="{Binding ReceiptItem.Article}" 
                              AcceptsReturn="True" 
                              Tag="Артикул:"
@@ -118,7 +118,7 @@
                              FontSize="20"/>
 
                     <TextBox Grid.Row="1"
-                             Style="{StaticResource InputTextBoxStyle}"
+                             Style="{StaticResource InputTextBoxStockStyle}"
                              Text="{Binding ReceiptItem.ComponentName}" 
                              AcceptsReturn="True" 
                              Tag="Название:"
@@ -133,7 +133,7 @@
                              FontSize="20"/>
                              
                      <TextBox Grid.Row="2"
-                              Style="{StaticResource InputTextBoxStyle}"
+                              Style="{StaticResource InputTextBoxStockStyle}"
                               Text="{Binding ReceiptItem.Manufacturer}" 
                               AcceptsReturn="True" 
                               Tag="Производитель:"

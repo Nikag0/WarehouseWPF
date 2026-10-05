@@ -41,10 +41,6 @@ namespace WMS.Application.Services
             if (items.Count == 0)
                 throw new BusinessException("Список выдачи пуст");
 
-            _logger.LogInformation(
-                "Starting issue operation. ItemCount:{ItemCount}, Operator:{Operator}",
-                items.Count, operatorName);
-
             try
             {
                 var operation = History.Create(OperationType.Issue, operatorName, comment);
@@ -65,15 +61,11 @@ namespace WMS.Application.Services
 
                     var before = stock.Quantity;
 
-                    _logger.LogInformation(
-                        "Processing stock {StockId}: Quantity {Before}, Issue {Quantity}",
-                        stock.Id, before, item.Quantity);
 
                     stock.Issue(item.Quantity);
 
                     if (stock.Quantity == 0)
                     {
-                        _logger.LogInformation("Stock {StockId} quantity is 0, marking for deletion", stock.Id);
                         _uow.Stocks.Delete(stock, ct);
                     }
                     else
@@ -120,10 +112,6 @@ namespace WMS.Application.Services
                 throw new ArgumentNullException(nameof(item));
             }
 
-            _logger.LogInformation(
-                "Starting receipt. Component:{ComponentId}, Rack:{RackId}, Cell:{CellId}, Qty:{Quantity}, Operator:{Operator}",
-                item.ComponentId, item.RackId, item.CellId, item.Quantity, operatorName);
-
             try
             {
                 var component = await _uow.Components.GetByIdAsync(item.ComponentId);
@@ -142,10 +130,6 @@ namespace WMS.Application.Services
 
                 if (stock is null)
                 {
-                    _logger.LogInformation(
-                        "Creating new stock at Rack:{RackId} Cell:{CellId}",
-                        item.RackId, item.CellId);
-
                     stock = Stock.Create(item.ComponentId, item.RackId, item.CellId, 0);
                     before = 0;
                     stock.Receive(item.Quantity);
@@ -157,10 +141,6 @@ namespace WMS.Application.Services
                     before = stock.Quantity;
                     stock.Receive(item.Quantity);
                     after = stock.Quantity;
-
-                    _logger.LogInformation(
-                        "Updating stock {StockId}: {Before} -> {After}",
-                        stock.Id, before, after);
                 }
 
                 var operation = History.Create(OperationType.Receipt, operatorName, comment);

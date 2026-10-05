@@ -103,7 +103,7 @@ namespace WMS.Desktop.ViewModels
         [RelayCommand]
         private void AddOperator()
         {
-            var vm = new OperatorEditViewModel(_operatorService);
+            var vm = new OperatorEditViewModel(_operatorService, _dialogService);
             var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
 
             if (window.ShowDialog() == true)
@@ -117,7 +117,7 @@ namespace WMS.Desktop.ViewModels
         {
             if (op == null) return;
 
-            var vm = new OperatorEditViewModel(_operatorService, op);
+            var vm = new OperatorEditViewModel(_operatorService, _dialogService, op);
             var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
 
             if (window.ShowDialog() == true)

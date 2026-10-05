@@ -38,12 +38,21 @@ namespace WMS.Application.Services
             return MappingExtensions.ToOperatorDTO(result);
         }
 
-        public async Task AddAsync(string surname, string name, string patronymic)
+        public Result AddAsync(string surname, string name, string patronymic)
         {
-            var @operator = Operator.Create(surname, name, patronymic);
-            await _operatorRepo.AddAsync(@operator);
+            var isAdd = _operatorRepo.IsOperatorUniqueAsync(
+                surname.Trim().ToLower(),
+                name.Trim().ToLower(),
+                patronymic.Trim().ToLower());
 
-            await _operatorRepo.SaveChangesAsync();
+            if (isAdd)
+                return Result.Failure("Оператор c таким именем уже зарегистрирован.");
+
+            var newOperator = Operator.Create(surname, name, patronymic);
+            _operatorRepo.AddAsync(newOperator);
+
+            _operatorRepo.SaveChangesAsync();
+            return Result.Success();
         }
 
         public async Task<Result> UpdateAsync(OperatorDTO dto)
@@ -51,6 +60,14 @@ namespace WMS.Application.Services
             var @operator = await _operatorRepo.GetByIdAsync(dto.Id);
             if (@operator is null)
                 return Result.Failure("Оператор не найден.");
+
+            var isAdd = _operatorRepo.IsOperatorUniqueAsync(
+                dto.Surname.Trim().ToLower(),
+                dto.Name.Trim().ToLower(),
+                dto.Patronymic.Trim().ToLower());
+
+            if (isAdd)
+                return Result.Failure("Оператор c таким именем уже зарегистрирован.");
 
             @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
 

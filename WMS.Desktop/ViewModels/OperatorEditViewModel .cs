@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 using WMS.Application.Services;
+using WMS.Desktop.Services;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 
@@ -16,6 +17,7 @@ namespace WMS.Desktop.ViewModels
     public partial class OperatorEditViewModel : ObservableObject
     {
         private readonly OperatorService _operatorService;
+        private readonly DialogService _dialogService;
         private readonly Operator _currentOperator;
         private readonly bool _isEditMode;
 
@@ -24,10 +26,14 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private string _name;
         [ObservableProperty] private string _patronymic;
 
-        public OperatorEditViewModel(OperatorService operatorService, Operator op = null)
+        public OperatorEditViewModel(
+            OperatorService operatorService,
+            DialogService dialogService, 
+            Operator op = null)
         {
             _operatorService = operatorService;
             _currentOperator = op;
+            _dialogService = dialogService;
             _isEditMode = op != null;
 
             WindowTitle = _isEditMode ? "Редактирование оператора" : "Добавление оператора";
@@ -45,9 +51,11 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
+                Result result;
+
                 if (_isEditMode)
                 {
-                    await _operatorService.UpdateAsync(
+                    result =  await _operatorService.UpdateAsync(
                         new OperatorDTO(
                             _currentOperator.Id,
                             Surname,
@@ -58,17 +66,25 @@ namespace WMS.Desktop.ViewModels
                 }
                 else
                 {
-                    await _operatorService.AddAsync(
+                    result = _operatorService.AddAsync(
                         Surname,
                         Name,
                         Patronymic
                     );
                 }
 
-                if (window != null)
+                if (result.IsSuccess)
                 {
-                    window.DialogResult = true;
-                    window.Close();
+                    _dialogService.ShowInfo("Данные успешно сохранены.");
+                    if (window != null)
+                    {
+                        window.DialogResult = true;
+                        window.Close();
+                    }
+                }
+                else
+                {
+                    _dialogService.ShowWarning(result.Error, "Предупреждение");
                 }
             }
             catch (BusinessException domainEx)

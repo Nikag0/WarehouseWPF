@@ -11,6 +11,7 @@ namespace WMS.Application.Abstractions
     {
         Task<IReadOnlyList<Operator>> GetAllAsync();
         Task<Operator?> GetByIdAsync(Guid id);
+        bool IsOperatorUniqueAsync(string surname, string name, string patronymic);
         Task AddAsync(Operator operatorr);
 
         Task SaveChangesAsync();

@@ -102,6 +102,49 @@
         </Setter>
     </Style>
 
+    <Style x:Key="InputTextBoxStockStyle" TargetType="TextBox">
+        <Setter Property="Padding" Value="8,5"/>
+        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="VerticalContentAlignment" Value="Top"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                     Background="{TemplateBinding Background}"
+                     BorderBrush="{TemplateBinding BorderBrush}"
+                     BorderThickness="{TemplateBinding BorderThickness}"
+                     CornerRadius="4">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock x:Name="Watermark"
+                                Grid.Column="0"
+                                Text="{TemplateBinding Tag}" 
+                                Foreground="white"
+                                FontSize="15"
+                                Margin="8,0,0,0" 
+                                VerticalAlignment="Center"
+                                IsHitTestVisible="False"/>
+
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                   Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   Foreground="Black"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style TargetType="{x:Type DataGridColumnHeader}">
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
