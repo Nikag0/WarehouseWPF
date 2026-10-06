@@ -7,19 +7,22 @@ using System.Text;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
 {
     public class ComponentRepository : IComponentRepository
     {
-        private readonly AppDbContext _db;
+        private readonly IDbContextAccessor _contextAccessor;
         private readonly ILogger<ComponentRepository> _logger;
 
-        public ComponentRepository(AppDbContext db, ILogger<ComponentRepository> logger)
+        public ComponentRepository(IDbContextAccessor contextAccessor, ILogger<ComponentRepository> logger)
         {
-            _db = db;
+            _contextAccessor = contextAccessor;
             _logger = logger;
         }
+
+        private AppDbContext _db => _contextAccessor.CurrentContext;
 
         public async Task<IReadOnlyList<ComponentViewDto>> GetViewFilterAsync(string searchText, int maxCount, CancellationToken ct)
         {
@@ -90,8 +93,6 @@ namespace WMS.Infrastructure
                 throw;
             }
         }
-
-        public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
 
         private IQueryable<Component> ApplyFilters(IQueryable<Component> query, string searchText)
         {

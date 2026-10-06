@@ -7,21 +7,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
 {
     public class RackRepository : IRackRepository
     {
-        private readonly IDbContextFactory<AppDbContext> _factory;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
         public RackRepository(IDbContextFactory<AppDbContext> factory)
         {
-            _factory = factory;
+            _contextFactory = factory;
         }
 
         public async Task<IReadOnlyList<Rack>> GetAllAsync()
         {
-            using var db = _factory.CreateDbContext();
+            using var db = _contextFactory.CreateDbContext();
 
             return await db.Racks
                 .Include(r => r.Cells)
@@ -31,7 +32,7 @@ namespace WMS.Infrastructure
 
         public async Task<Rack?> GetRackAsync(Guid id)
         {
-            using var db = _factory.CreateDbContext();
+            using var db = _contextFactory.CreateDbContext();
 
             return await db.Racks
                  .Include(r => r.Cells)

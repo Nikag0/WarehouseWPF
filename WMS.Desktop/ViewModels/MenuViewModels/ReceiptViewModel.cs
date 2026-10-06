@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Desktop.Models;
 using WMS.Desktop.Services;
@@ -136,6 +138,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [ObservableProperty] private Operator _operatorName;
         [ObservableProperty] private string _commentText;
         [ObservableProperty] private string _searchStockOrComponent;
+        [ObservableProperty] private bool _isActiveTab;
+
 
         private string _searchRacks;
         private string _searchCell;
@@ -143,7 +147,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private CellViewModel _selectedCell;
         private CancellationTokenSource? _cts;
         private readonly SemaphoreSlim _lock = new(1, 1);
-        private readonly StockService _stockService;
+        private readonly IStockService _stockService;
         private readonly DialogService _dialogService;
         private readonly OperatorService _operatorrService;
         private readonly WarehouseService _warehouseService;
@@ -151,9 +155,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly LedStripService _ledStripService;
         private readonly ILogger<ReceiptViewModel> _logger;
 
-
         public ReceiptViewModel(
-            StockService stockService,
+            IStockService stockService,
             DialogService dialogService,
             OperatorService operatorrService,
             WarehouseService warehouseService,
@@ -168,6 +171,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             _warehouseVisualizationService = warehouseVisualizationService;
             _ledStripService = ledStripService;
             _logger = logger;
+
+            WeakReferenceMessenger.Default.Register<MessageService>(this, async (r, m) =>
+            {
+                if (IsActiveTab)
+                {
+                    await LoadDataAsync();
+                }
+            });
         }
 
         [RelayCommand]

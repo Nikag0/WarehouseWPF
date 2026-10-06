@@ -41,7 +41,7 @@ namespace WMS.Desktop.ViewModels
                     ReceiptViewModel receipt,
                     HistoryViewModel history,
                     Func<SettingsView> settingsWindowFactory,
-                    Func<WarehouseView> WarehouseFactory)
+                    Func<WarehouseView> warehouseFactory)
         {
             Notification = notification;
             Components = components;
@@ -49,36 +49,46 @@ namespace WMS.Desktop.ViewModels
             Receipt = receipt;
             History = history;
 
-            CurrentView = Components;
+            _currentView = Components;
+            Components.IsActiveTab = true;
 
-            ShowNotificationCommand =
-                new RelayCommand(_ => CurrentView = Notification);
-
-            ShowComponentsCommand =
-                new RelayCommand(_ => CurrentView = Components);
-
-            ShowIssueCommand =
-                new RelayCommand(_ => CurrentView = Issue);
-
-            ShowReceiptCommand =
-                new RelayCommand(_ => CurrentView = Receipt);
-
-            ShowHistoryCommand =
-                new RelayCommand(_ => CurrentView = History);
+            ShowNotificationCommand = new RelayCommand(_ => ChangeView(Notification));
+            ShowComponentsCommand = new RelayCommand(_ => ChangeView(Components));
+            ShowIssueCommand = new RelayCommand(_ => ChangeView(Issue));
+            ShowReceiptCommand = new RelayCommand(_ => ChangeView(Receipt));
+            ShowHistoryCommand = new RelayCommand(_ => ChangeView(History));
 
             ShowSettingsCommand = new RelayCommand(_ =>
             {
                 var window = settingsWindowFactory();
-
                 window.ShowDialog();
             });
 
             ShowWarehouseCommand = new RelayCommand(_ =>
             {
-                var window = WarehouseFactory();
-
+                var window = warehouseFactory();
                 window.ShowDialog();
             });
+        }
+
+        private void ChangeView(object newView)
+        {
+            // 1. Сначала жестко гасим флаги активности у ВСЕХ вкладок
+            Notification.IsActiveTab = false;
+            Components.IsActiveTab = false;
+            Issue.IsActiveTab = false;
+            Receipt.IsActiveTab = false;
+            History.IsActiveTab = false;
+
+            // 2. Включаем флаг только у той ViewModel, которую открываем
+            if (newView is NotificationViewModel n) n.IsActiveTab = true;
+            else if (newView is ComponentsViewModel c) c.IsActiveTab = true;
+            else if (newView is IssueViewModel i) i.IsActiveTab = true;
+            else if (newView is ReceiptViewModel r) r.IsActiveTab = true;
+            else if (newView is HistoryViewModel h) h.IsActiveTab = true;
+
+            // 3. Обновляем текущий View на экране
+            CurrentView = newView;
         }
     }
 }

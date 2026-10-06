@@ -12,14 +12,19 @@ namespace WMS.Application.Services
     public class NotificationService
     {
         private readonly IStockRepository _stockRepository;
+        private readonly IUnitOfWorkFactory _uowFactory;
 
-        public NotificationService(IStockRepository stockRepository)
+
+        public NotificationService(IStockRepository stockRepository, IUnitOfWorkFactory uowFactory)
         {
             _stockRepository = stockRepository;
+            _uowFactory = uowFactory;
         }
 
         public async Task<IReadOnlyList<NotificationItem>> GetStockWithMinQuantity()
         {
+            await using var uow = _uowFactory.Create();
+
             var deficitStocks = await _stockRepository.GetMinQuantityAsync();
 
             var notifications = deficitStocks

@@ -8,7 +8,7 @@ using WMS.Domain;
 using WMS.Domain.LedStrip;
 using Component = WMS.Domain.Component;
 
-namespace WMS.Infrastructure
+namespace WMS.Infrastructure.Context
 {
     public class AppDbContext : DbContext
     {

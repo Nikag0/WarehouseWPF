@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using WMS.Infrastructure;
+using WMS.Infrastructure.Context;
 using Xunit;
 
 namespace WMS.Test;

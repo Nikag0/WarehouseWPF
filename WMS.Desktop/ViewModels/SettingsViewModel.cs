@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -91,6 +92,7 @@ namespace WMS.Desktop.ViewModels
                 if (result.IsSuccess)
                 {
                     FilteredComponents.Remove(component);
+                    WeakReferenceMessenger.Default.Send(new MessageService(true));
                     _dialogService.ShowInfo("Компонент успешно удален.");
                 }
                 else
@@ -138,6 +140,7 @@ namespace WMS.Desktop.ViewModels
                 if (result.IsSuccess)
                 {
                     FilteredOperators.Remove(op);
+                    WeakReferenceMessenger.Default.Send(new MessageService(true));
                     _dialogService.ShowInfo("Оператор успешно удален.");
                 }
                 else

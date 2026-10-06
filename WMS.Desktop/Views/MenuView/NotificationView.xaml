@@ -104,7 +104,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <TextBlock Text="Ноых уведомлений нет"
+        <TextBlock Text="Новых уведомлений нет"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                FontSize="25"

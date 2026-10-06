@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -67,10 +68,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [ObservableProperty] private bool _isIssuePopupOpen;
         [ObservableProperty] private Operator? _operatorName;
         [ObservableProperty] private string _searchStock = string.Empty;
+        [ObservableProperty] private bool _isActiveTab;
 
         private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
-
         public IssueViewModel(
             IStockService stockService,
             DialogService dialogService,
@@ -85,6 +86,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             _warehouseService = warehouseService;
             _warehouseVisualizationService = warehouseVisualizationService;
             _ledStripService = ledStripService;
+
+            WeakReferenceMessenger.Default.Register<MessageService>(this, async (r, m) =>
+            {
+                if (IsActiveTab)
+                {
+                    await LoadDataAsync();
+                }
+            });
         }
 
         [RelayCommand]

@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using WMS.Application.Services;
@@ -10,6 +11,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
     {
         public ObservableCollection<ComponentViewDto> FilteredComponents { get; } = new();
         [ObservableProperty] private string _searchComponent = string.Empty;
+        [ObservableProperty] private bool _isActiveTab;
 
         private readonly ComponentService _componentService;
         private readonly DialogService _dialogService;
@@ -21,6 +23,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             _componentService = componentService;
             _dialogService = dialogService;
+
+            WeakReferenceMessenger.Default.Register<MessageService>(this, async (r, m) =>
+            {
+                if (IsActiveTab)
+                {
+                    await LoadDataAsync();
+                }
+            });
         }
 
         public async Task LoadDataAsync()

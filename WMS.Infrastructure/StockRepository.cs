@@ -10,19 +10,22 @@ using System.Threading.Tasks;
 using WMS.Application;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
 {
     public class StockRepository : IStockRepository
     {
-        private readonly AppDbContext _db;
+        private readonly IDbContextAccessor _contextAccessor;
         private readonly ILogger<StockRepository> _logger;
 
-        public StockRepository(AppDbContext db, ILogger<StockRepository> logger)
+        public StockRepository(IDbContextAccessor contextAccessor, ILogger<StockRepository> logger)
         {
-            _db = db;
+            _contextAccessor = contextAccessor;
             _logger = logger;
         }
+
+        private AppDbContext _db => _contextAccessor.CurrentContext;
 
         public async Task<Stock?> GetByIdAsync(Guid stockId, CancellationToken ct = default)
         {

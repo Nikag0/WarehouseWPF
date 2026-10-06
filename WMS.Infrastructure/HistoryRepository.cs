@@ -1,19 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Threading;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Domain;
+using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
 {
     public class HistoryRepository : IHistoryRepository
     {
-        private readonly AppDbContext _db;
 
-        public HistoryRepository(AppDbContext db)
+        private readonly IDbContextAccessor _contextAccessor;
+
+        public HistoryRepository(IDbContextAccessor contextAccessor)
         {
-            _db = db;
+            _contextAccessor = contextAccessor;
         }
+
+        private AppDbContext _db => _contextAccessor.CurrentContext;
 
         public void Add(History op, CancellationToken ct = default)
         {

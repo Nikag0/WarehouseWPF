@@ -2,23 +2,25 @@
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using Microsoft.Extensions.Logging;
+using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
 {
     public class SectorRepository : ISectorRepository
     {
-        private readonly IDbContextFactory<AppDbContext> _factory;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly ILogger<SectorRepository> _logger;
 
         public SectorRepository(IDbContextFactory<AppDbContext> factory, ILogger<SectorRepository> logger)
         {
-            _factory = factory;
+            _contextFactory = factory;
             _logger = logger;
         }
+
         
         public async Task<IReadOnlyList<SectorInitDTO>> GetAllSectorsForInitializationAsync(CancellationToken ct = default)
         {
-            await using var db =  await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            await using var db =  await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
             var result = await db.Sectors
                 .AsNoTracking()
                 .Include(s => s.Strip)
@@ -40,7 +42,7 @@ namespace WMS.Infrastructure
 
         public async Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default)
         {
-            await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
             var dto = await db.Sectors
                 .AsNoTracking()
                 .Include(s => s.Strip)
@@ -67,15 +69,10 @@ namespace WMS.Infrastructure
         {
             try
             {
-                await using var db = await _factory.CreateDbContextAsync(ct).ConfigureAwait(false);
+                await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
                 var sector = await db.Sectors.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
 
-                if (sector is null)
-                {
-                    _logger.LogWarning("Cannot set color: sector for CellId {CellId} not found", cellId);
-                    return false;
-                }
-
+                await db.SaveChangesAsync(ct);
                 return true;
             }
             catch (DbUpdateException ex)

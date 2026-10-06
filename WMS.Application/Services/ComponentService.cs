@@ -11,13 +11,16 @@ namespace WMS.Application.Services
         private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepository;
         private readonly ILogger<ComponentService> _logger;
+        private readonly IUnitOfWorkFactory _uowFactory;
 
         public ComponentService(IComponentRepository componentRepo,
                                 IStockRepository stockRepository,
+                                IUnitOfWorkFactory uowFactory,
                                 ILogger<ComponentService> logger)
         {
             _componentRepo = componentRepo;
             _stockRepository = stockRepository;
+            _uowFactory = uowFactory;
             _logger = logger;
         }
 
@@ -25,6 +28,8 @@ namespace WMS.Application.Services
         {
             try
             {
+                await using var uow = _uowFactory.Create();
+
                 var component = await _componentRepo.GetByIdAsync(dto.Id);
 
                 if (component is null)
@@ -44,7 +49,7 @@ namespace WMS.Application.Services
                     dto.ExpirationDate,
                     dto.MinQuantity);
 
-                await _componentRepo.SaveChangesAsync();
+                await uow.CommitAsync();
 
                 return Result.Success();
             }
@@ -59,13 +64,15 @@ namespace WMS.Application.Services
         {
             try
             {
+                await using var uow = _uowFactory.Create();
+
                 var existing = await _componentRepo.GetByArticleAsync(dto.Article);
                 if (existing is not null)
                     return Result.Failure($"Артикул '{dto.Article}' уже используется.");
 
                 var component = Domain.Component.Create(dto.Article, dto.Name, dto.Manufacturer, dto.ExpirationDate, dto.MinQuantity);
                 await _componentRepo.AddAsync(component);
-                await _componentRepo.SaveChangesAsync();
+                await uow.CommitAsync();
                 return Result.Success();
             }
             catch (BusinessException domainEx)
@@ -83,6 +90,8 @@ namespace WMS.Application.Services
         {
             try
             {
+                await using var uow = _uowFactory.Create();
+
                 var component = await _componentRepo.GetByIdAsync(id);
                 if (component is null)
                 {
@@ -97,7 +106,7 @@ namespace WMS.Application.Services
 
                 component.Delete();
 
-                await _componentRepo.SaveChangesAsync();
+                await uow.CommitAsync();
 
                 _logger.LogInformation($"Компонент с ID {id} успешно удален.");
 
@@ -114,6 +123,7 @@ namespace WMS.Application.Services
         {
             try
             {
+                await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
             }
             catch (Exception ex)
@@ -127,6 +137,7 @@ namespace WMS.Application.Services
         {
             try
             {
+                await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetEditFilterAsync(searchText, maxCount, token);
             }
             catch (Exception ex)

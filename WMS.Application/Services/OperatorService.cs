@@ -51,7 +51,6 @@ namespace WMS.Application.Services
             var newOperator = Operator.Create(surname, name, patronymic);
             _operatorRepo.AddAsync(newOperator);
 
-            _operatorRepo.SaveChangesAsync();
             return Result.Success();
         }
 
@@ -71,8 +70,6 @@ namespace WMS.Application.Services
 
             @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
 
-            await _operatorRepo.SaveChangesAsync();
-
             return Result.Success();
         }
 
@@ -88,7 +85,7 @@ namespace WMS.Application.Services
 
                 op.Delete();
 
-                await _operatorRepo.SaveChangesAsync();
+                await _operatorRepo.UpdateAsync(op);
 
                 _logger.LogInformation($"Оператор с ID {id} удален.");
 

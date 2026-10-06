@@ -8,12 +8,14 @@ namespace WMS.Application.Abstractions
 {
     public interface IUnitOfWork : IAsyncDisposable
     {
-        IComponentRepository Components { get; }
-        IStockRepository Stocks { get; }
-        IHistoryRepository History { get; }
-        IOperatorRepository Operator { get; }
+        //IComponentRepository Components { get; }
+        //IStockRepository Stocks { get; }
+        //IHistoryRepository History { get; }
+        //IOperatorRepository Operator { get; }
 
+        //Task<int> SaveChangesAsync(CancellationToken ct = default);
 
-        Task<int> SaveChangesAsync(CancellationToken ct = default);
+        // новая реализация
+        Task CommitAsync(CancellationToken cancellationToken = default);
     }
 }

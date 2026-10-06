@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using WMS.Application.Services;
 using WMS.Desktop.Services;
@@ -80,6 +81,7 @@ namespace WMS.Desktop.ViewModels
                     _dialogService.ShowInfo("Данные успешно сохранены.");
                     if (window != null)
                     {
+                        WeakReferenceMessenger.Default.Send(new MessageService(true));
                         window.DialogResult = true;
                         window.Close();
                     }

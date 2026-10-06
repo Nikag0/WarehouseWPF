@@ -12,6 +12,7 @@ using WMS.Desktop.ViewModels.MenuViewModels;
 using WMS.Application;
 using System;
 using WMS.Desktop.Services;
+using WMS.Infrastructure.Context;
 
 
 namespace WMS.Desktop
@@ -26,82 +27,114 @@ namespace WMS.Desktop
 
             var services = new ServiceCollection();
 
+            // Логирование
             services.AddLogging(builder =>
             {
-                builder.AddDebug(); // Логи будут сыпаться во вкладку Output (Вывод) в Visual Studio
+                builder.AddDebug();
             });
 
+            // Файл конфигурации
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            // Создаём контекст через фабрику
             services.AddDbContextFactory<AppDbContext>(opt =>
-                opt.UseNpgsql(config.GetConnectionString("Warehouse")), ServiceLifetime.Scoped);
+               opt.UseNpgsql(config.GetConnectionString("Warehouse")));
 
-            // репозитории
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IStockRepository, StockRepository>();
-            services.AddScoped<IComponentRepository, ComponentRepository>();
-            services.AddScoped<IHistoryRepository, HistoryRepository>();
-            services.AddScoped<IOperatorRepository, OperatorRepository>();
-            services.AddScoped<IRackRepository, RackRepository>();
-            services.AddScoped<IHistoryRepository, HistoryRepository>();
-            services.AddScoped<ISectorRepository, SectorRepository>();
+            var dbContextHolder = new DbContextHolder();
+            services.AddSingleton<IDbContextAccessor>(dbContextHolder);
+            services.AddSingleton(dbContextHolder);
 
-            // Один сервис т.к. другие не работают с несколькими репо.
-            services.AddScoped<IStockService, StockService>();
+            // Ипользование фабрики контекста и IUnitOfWork
+            services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
-            // application services
-            services.AddScoped<ComponentService>();
-            services.AddScoped<StockService>();
-            services.AddScoped<DialogService>();
-            services.AddScoped<OperatorService>();
-            services.AddScoped<WarehouseService>();
-            services.AddScoped<WarehouseVisualizationService>();
-            services.AddScoped<HistoryService>();
-            services.AddScoped<NotificationService>();
-            services.AddScoped<LedStripService>();
+            // Репозитории
+            services.AddTransient<IStockRepository, StockRepository>();
+            services.AddTransient<IComponentRepository, ComponentRepository>();
+            services.AddTransient<IHistoryRepository, HistoryRepository>();
+            services.AddTransient<IOperatorRepository, OperatorRepository>();
+            services.AddTransient<IRackRepository, RackRepository>();
+            services.AddTransient<ISectorRepository, SectorRepository>();
+
+            // Сервисы
+            services.AddTransient<IStockService, StockService>();
+            services.AddTransient<ComponentService>();
+            services.AddTransient<DialogService>();
+            services.AddTransient<OperatorService>();
+            services.AddTransient<WarehouseService>();
+            services.AddTransient<WarehouseVisualizationService>();
+            services.AddTransient<HistoryService>();
+            services.AddTransient<NotificationService>();
+            services.AddTransient<LedStripService>();
 
             services.AddSingleton<ITcpPacketSender>(new TcpPacketSender(TimeSpan.FromSeconds(3)));
 
-            // view models
-            services.AddSingleton<MainViewModel>();
-            services.AddTransient<ComponentsViewModel>(); 
-            services.AddTransient<ReceiptViewModel>();    
-            services.AddTransient<IssueViewModel>();      
+            /// 5. View Models и Views
+            services.AddSingleton<MainViewModel>(); // Главная
+            services.AddTransient<ComponentsViewModel>();
+            services.AddTransient<ReceiptViewModel>();
+            services.AddTransient<IssueViewModel>();
             services.AddTransient<SettingsViewModel>();
             services.AddTransient<ComponentEditViewModel>();
             services.AddTransient<OperatorEditViewModel>();
             services.AddTransient<HistoryViewModel>();
             services.AddTransient<NotificationViewModel>();
 
-            // views
             services.AddTransient<Views.SettingsView>();
             services.AddTransient<Views.WarehouseView>();
 
-            // Func
             services.AddTransient<Func<Views.SettingsView>>(provider => () => provider.GetRequiredService<Views.SettingsView>());
             services.AddTransient<Func<Views.WarehouseView>>(provider => () => provider.GetRequiredService<Views.WarehouseView>());
 
+            // Сборка DI контейнера
             Services = services.BuildServiceProvider();
 
-            using var scope = Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            await db.Database.MigrateAsync();
-
-            var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
-            var success = await ledService.InitializeSectorsAsync();
-
-            if (!success)
+            try
             {
+                using (var scope = Services.CreateScope())
+                {
+                    // Получаем фабрику контекстов для проверки подключения и миграций
+                    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+                    using var db = contextFactory.CreateDbContext();
+
+                    // Проверяем, доступ к серверу БД
+                    if (!await db.Database.CanConnectAsync())
+                    {
+                        throw new Exception("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
+                    }
+
+                    // Накатываем миграции при старте
+                    await db.Database.MigrateAsync();
+
+                    // Инициализируем светодиодные ленты
+                    var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
+                    var success = await ledService.InitializeSectorsAsync();
+
+                    if (!success)
+                    {
+                        MessageBox.Show(
+                            "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
+                            "Ошибка LED",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Показываем красивое и информативное окно пользователю
                 MessageBox.Show(
-                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
-                    "Ошибка LED",
+                    $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
+                    "Ошибка инициализации",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    MessageBoxImage.Error);
+
+                Shutdown(-1);
+                return;
             }
 
+            // Запуск интерфейса
             var window = new Views.MainWindow();
             window.DataContext = Services.GetRequiredService<MainViewModel>();
             window.Show();

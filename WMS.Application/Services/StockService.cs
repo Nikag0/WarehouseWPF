@@ -15,20 +15,24 @@ namespace WMS.Application.Services
 {
     public class StockService : IStockService
     {
-        private readonly IComponentRepository _componentRepo;
         private readonly IStockRepository _stockRepo;
+        private readonly IComponentRepository _componentRepo;
+        private readonly IHistoryRepository _historyRepo;
         private readonly ILogger<StockService> _logger;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWorkFactory _uowFactory;
+
         public StockService(
             IComponentRepository componentRepo,
             IStockRepository stockRepo,
+            IHistoryRepository historyRepo,
             ILogger<StockService> logger,
-            IUnitOfWork uow)
+            IUnitOfWorkFactory uowFactory)
         {
             _componentRepo = componentRepo;
             _stockRepo = stockRepo;
+            _historyRepo = historyRepo;
             _logger = logger;
-            _uow = uow;
+            _uowFactory = uowFactory;
         }
 
         public async Task IssueAsync(
@@ -43,11 +47,13 @@ namespace WMS.Application.Services
 
             try
             {
+                await using var uow = _uowFactory.Create();
+
                 var operation = History.Create(OperationType.Issue, operatorName, comment);
 
                 var stockIds = items.Select(x => x.StockId).ToList();
 
-                var stocks = await _uow.Stocks.GetByIdsAsync(stockIds, ct);
+                var stocks = await _stockRepo.GetByIdsAsync(stockIds, ct);
 
                 var stocksDictionary = stocks.ToDictionary(x => x.Id);
 
@@ -66,11 +72,11 @@ namespace WMS.Application.Services
 
                     if (stock.Quantity == 0)
                     {
-                        _uow.Stocks.Delete(stock, ct);
+                        _stockRepo.Delete(stock, ct);
                     }
                     else
                     {
-                        _uow.Stocks.Update(stock, ct);
+                        _stockRepo.Update(stock, ct);
                     }
 
                     operation.AddItem(
@@ -82,9 +88,9 @@ namespace WMS.Application.Services
                 }
 
                 operation.Validate();
-                _uow.History.Add(operation, ct);
+                _historyRepo.Add(operation, ct);
 
-                await _uow.SaveChangesAsync(ct);
+                await uow.CommitAsync();
 
                 _logger.LogInformation(
                     "Issue operation completed successfully. ItemCount:{ItemCount}",
@@ -114,7 +120,9 @@ namespace WMS.Application.Services
 
             try
             {
-                var component = await _uow.Components.GetByIdAsync(item.ComponentId);
+                await using var uow = _uowFactory.Create();
+
+                var component = await _componentRepo.GetByIdAsync(item.ComponentId);
 
                 if (component is null)
                 {
@@ -123,7 +131,7 @@ namespace WMS.Application.Services
                     throw new BusinessException($"Компонент {item.ComponentId} не найден");
                 }
 
-                var stock = await _uow.Stocks.GetByLocationAsync(item.ComponentId, item.RackId, item.CellId, ct);
+                var stock = await _stockRepo.GetByLocationAsync(item.ComponentId, item.RackId, item.CellId, ct);
 
                 int before;
                 int after;
@@ -134,7 +142,7 @@ namespace WMS.Application.Services
                     before = 0;
                     stock.Receive(item.Quantity);
                     after = stock.Quantity;
-                    _uow.Stocks.Add(stock, ct);
+                    _stockRepo.Add(stock, ct);
                 }
                 else
                 {
@@ -147,9 +155,9 @@ namespace WMS.Application.Services
                 operation.AddItem(item.ComponentId, item.RackId, item.CellId, before, after);
                 operation.Validate();
 
-                _uow.History.Add(operation, ct);
+                _historyRepo.Add(operation, ct);
 
-                await _uow.SaveChangesAsync(ct);
+                await uow.CommitAsync();
 
                 _logger.LogInformation(
                     "Receipt completed. Component:{ComponentId}, Change:{Before}->{After}",
@@ -167,6 +175,8 @@ namespace WMS.Application.Services
 
         public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
         {
+            await using var uow = _uowFactory.Create();
+            
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
             var components = await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
@@ -191,6 +201,8 @@ namespace WMS.Application.Services
 
         public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount)
         {
+            await using var uow = _uowFactory.Create();
+
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
 
             return stocks.Select(MappingExtensions.ToViewItemDto).ToList();
@@ -198,6 +210,8 @@ namespace WMS.Application.Services
 
         public async Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId)
         {
+            await using var uow = _uowFactory.Create();
+
             var result = await _stockRepo.GetByRackAsync(rackId);
 
             return result.Select(MappingExtensions.ToViewItemDto).ToList();
@@ -205,6 +219,8 @@ namespace WMS.Application.Services
 
         public async Task<ViewItemDTO> GetStockByIdAsync(Guid stokId)
         {
+            await using var uow = _uowFactory.Create();
+
             var result = await _stockRepo.GetByIdAsync(stokId);
 
             return MappingExtensions.ToViewItemDto(result);

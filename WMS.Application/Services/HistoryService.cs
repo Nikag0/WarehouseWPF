@@ -7,10 +7,12 @@ namespace WMS.Application.Services
     public class HistoryService
     {
         private readonly IHistoryRepository _historyRepository;
+        private readonly IUnitOfWorkFactory _uowFactory;
 
-        public HistoryService(IHistoryRepository historyRepository)
+        public HistoryService(IHistoryRepository historyRepository, IUnitOfWorkFactory uowFactory)
         {
             _historyRepository = historyRepository;
+            _uowFactory = uowFactory;
         }
 
         public async Task<IReadOnlyList<HistoryDto>> GetFilteredAsync(
@@ -21,6 +23,8 @@ namespace WMS.Application.Services
             int maxCount,
             CancellationToken token)
         {
+            await using var uow = _uowFactory.Create();
+
             var operationItem = await _historyRepository.GetFilteredAsync(
                 searchText,
                 dateFrom,

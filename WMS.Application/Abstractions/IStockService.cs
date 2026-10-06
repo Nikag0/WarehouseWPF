@@ -12,6 +12,7 @@ namespace WMS.Application.Abstractions
         Task IssueAsync(IReadOnlyCollection<IssueItemDto> items, string operatorName, string? comment = null, CancellationToken ct = default);
         Task ReceiveAsync(ReceiptItemDto item, string operatorName, string? comment = null, CancellationToken ct = default);
         Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount);
+        Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token);
         Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId);
         Task<ViewItemDTO> GetStockByIdAsync(Guid stokId);
     }
