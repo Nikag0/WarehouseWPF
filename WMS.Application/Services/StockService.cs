@@ -1,15 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
+using System.Linq;
+
 
 namespace WMS.Application.Services
 {
@@ -224,6 +223,26 @@ namespace WMS.Application.Services
             var result = await _stockRepo.GetByIdAsync(stokId);
 
             return MappingExtensions.ToViewItemDto(result);
+        }
+
+        public async Task ExportCsvAsync(string filePath, CancellationToken ct = default)
+        {
+            var config = new CsvConfiguration(CultureInfo.CurrentCulture)
+            {
+                Delimiter = ";", 
+                HasHeaderRecord = true
+            };
+
+            using var writer = new StreamWriter(filePath, false, Encoding.UTF8);
+            using var csv = new CsvWriter(writer, config);
+
+            await using var uow = _uowFactory.Create();
+
+            IAsyncEnumerable<Stock> stocksStream = _stockRepo.GetAllForExportAsync(ct);
+
+            IAsyncEnumerable<StockCsvDto> dtoStream = stocksStream.Select(stock => stock.StockToCsv());
+
+            await csv.WriteRecordsAsync(dtoStream, ct);
         }
     }
 }

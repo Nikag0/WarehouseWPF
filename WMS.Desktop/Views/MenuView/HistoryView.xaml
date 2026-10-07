@@ -103,10 +103,27 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="200*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Кол-во до" Binding="{Binding QuantityBefore}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Кол-во после" Binding="{Binding QuantityAfter}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Комментарий" Binding="{Binding Comment}" Width="100*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <!-- Обрезка текста в самой таблице, если он не влезает -->
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+
+                                <!-- Настройка всплывающей подсказки -->
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip MaxWidth="400">
+                                            <TextBlock Text="{Binding Comment}" TextWrapping="Wrap"/>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

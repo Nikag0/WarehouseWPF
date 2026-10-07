@@ -15,5 +15,6 @@ namespace WMS.Application.Abstractions
         Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token);
         Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId);
         Task<ViewItemDTO> GetStockByIdAsync(Guid stokId);
+        Task ExportCsvAsync(string filepath, CancellationToken ct = default);
     }
 }

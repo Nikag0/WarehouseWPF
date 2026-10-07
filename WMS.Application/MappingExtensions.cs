@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WMS.Application.DTO;
 using WMS.Domain;
 
 namespace WMS.Application
@@ -25,6 +26,19 @@ namespace WMS.Application
                 LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity,
                 0
+            );
+        }
+
+        public static StockCsvDto StockToCsv(this Stock s)
+        {
+            return new StockCsvDto(
+                s.Id,
+                s.Component.Article,
+                s.Component.Name,
+                s.Component.Manufacturer,
+                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
+                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
+                s.Quantity
             );
         }
 
@@ -74,11 +88,12 @@ namespace WMS.Application
         {
             return new HistoryDto(
                 o.Operation.OccurredAt,
-                o.Operation.Operator,
+                o.Operation.Operator ?? "[Удаленный компонент]",
                 LocationFormatter.OperationToStr(o.Operation.Type),
                 o.Component?.Name ?? "[Удаленный компонент]",
                 o.QuantityBefore,
-                o.QuantityAfter
+                o.QuantityAfter,
+                o.Operation.Comment ?? string.Empty
             );
         }
     }

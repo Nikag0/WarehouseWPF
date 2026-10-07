@@ -18,6 +18,7 @@ namespace WMS.Application.Abstractions
         void Add(Stock stock, CancellationToken ct = default);
         void Update(Stock stock, CancellationToken ct = default);
         void Delete(Stock stock, CancellationToken ct = default);
+        IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default);
 
         //Можно подумать над реалзацией.
         Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default);

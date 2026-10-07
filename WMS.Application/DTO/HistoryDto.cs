@@ -7,4 +7,5 @@ public record HistoryDto(
     string Type, 
     string ComponentName, 
     int QuantityBefore, 
-    int QuantityAfter);
+    int QuantityAfter,
+    string Comment);

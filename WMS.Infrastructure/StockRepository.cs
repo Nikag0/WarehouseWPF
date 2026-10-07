@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using WMS.Application;
@@ -159,6 +160,24 @@ namespace WMS.Infrastructure
                 .Include(s => s.Rack)
                 .Include(s => s.Cell)
                 .ToListAsync();
+        }
+
+        public IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                return _db.Stocks
+                    .AsNoTracking() // Отключаем отслеживание сущностей ради экономии памяти
+                    .Include(s => s.Component)
+                    .Include(s => s.Rack)
+                    .Include(s => s.Cell)
+                    .AsAsyncEnumerable(); // Переводим в асинхронный поток (стриминг)
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Database error fetching all stocks for export");
+                throw;
+            }
         }
 
         //Можно подумать над реалзацией.
