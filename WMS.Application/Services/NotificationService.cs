@@ -36,8 +36,8 @@ namespace WMS.Application.Services
                 int totalQuantity = group.Sum(s => s.Quantity);
 
                 var locations = group.Select(s =>
-                    $"ст. {LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row)} " +
-                    $"яч. {LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({s.Quantity} шт.)");
+                    $"ст. {MappingExtensions.CodeToDisplay(s.Rack.Column, s.Rack.Row)} " +
+                    $"яч. {MappingExtensions.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({s.Quantity} шт.)");
 
                 return new NotificationItem(
                     title: $"Критический остаток: {firstStock.Component.Name}.",

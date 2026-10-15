@@ -20,55 +20,67 @@ namespace WMS.Infrastructure
 
         private AppDbContext _db => _contextAccessor.CurrentContext;
 
-        public void Add(History op, CancellationToken ct = default)
+        public void Add(OperationHistory op, CancellationToken ct = default)
         {
-            _db.History.Add(op);
+            _db.OperationHistory.Add(op);
         }
 
-        public async Task<IReadOnlyList<HistoryItem>> GetFilteredAsync(
-             string? searchText,
-             DateTime? dateFrom,
-             DateTime? dateTo,
-             OperationType operationType,
-             int maxCount,
-             CancellationToken ct = default)
+        public async Task<IReadOnlyList<OperationHistory>> GetFilteredAsync(
+            string? searchText,
+            DateTime? dateFrom,
+            DateTime? dateTo,
+            OperationType operationType,
+            int maxCount,
+            CancellationToken ct = default)
         {
-            IQueryable<HistoryItem> query = _db.HistoryItems
+            IQueryable<OperationHistory> query = _db.OperationHistory
                    .AsNoTracking()
-                   .IgnoreQueryFilters()
-                   .Include(x => x.Component)
-                   .Include(x => x.Operation);
+                   .IgnoreQueryFilters();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 searchText = searchText.Trim();
 
                 query = query.Where(x =>
-                    x.Component.Name.Contains(searchText) ||
-                    x.Operation.Operator.Contains(searchText));
+                    x.ComponentName.Contains(searchText) ||
+                    x.Operator.Contains(searchText) ||
+                    x.CellName.Contains(searchText) ||
+                    x.RackName.Contains(searchText));
             }
 
             if (dateFrom.HasValue)
             {
                 var utcFrom = DateTime.SpecifyKind(dateFrom.Value.Date, DateTimeKind.Utc);
-                query = query.Where(x => x.Operation.OccurredAt >= utcFrom);
+                query = query.Where(x => x.OccurredAt >= utcFrom);
             }
 
             if (dateTo.HasValue)
             {
                 var utcTo = DateTime.SpecifyKind(dateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
-                query = query.Where(x => x.Operation.OccurredAt < utcTo);
+                query = query.Where(x => x.OccurredAt < utcTo);
             }
 
             if (operationType != OperationType.All)
             {
-                query = query.Where(x => x.Operation.Type == operationType);
+                query = query.Where(x => x.Type == operationType);
             }
 
             return await query
-                 .OrderByDescending(o => o.Operation.OccurredAt)
+                 .OrderByDescending(o => o.OccurredAt)
                  .Take(maxCount)
                  .ToListAsync(ct);
+        }
+
+        public async Task DeleteHistoryAsync(
+            DateTime? dateFrom,
+            DateTime? dateTo,
+            CancellationToken ct = default)
+        {
+            var utcFrom = DateTime.SpecifyKind(dateFrom.Value.Date, DateTimeKind.Utc);
+            var utcTo = DateTime.SpecifyKind(dateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
+
+            var query = _db.OperationHistory.Where(h => h.OccurredAt >= utcFrom && h.OccurredAt < utcTo);
+            await query.ExecuteDeleteAsync(ct);
         }
     }
 }

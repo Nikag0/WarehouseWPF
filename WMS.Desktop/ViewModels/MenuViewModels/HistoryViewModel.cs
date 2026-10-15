@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using GalaSoft.MvvmLight.Views;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using WMS.Application;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Desktop.Services;
@@ -82,7 +82,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
         }
 
-        public ObservableCollection<HistoryDto> History { get; } = [];
+        public ObservableCollection<OperationHystoryViewDto> History { get; } = [];
         public ObservableCollection<string> Type { get; set; } = new();
 
         private readonly DialogService _dialogService;
@@ -133,7 +133,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         SearchHistory,
                         DateFrom,
                         DateTo,
-                        LocationFormatter.StrToOperation(SelectedOperationType),
+                        MappingExtensions.StrToOperation(SelectedOperationType),
                         100,
                         _cts.Token);
 
@@ -159,9 +159,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private void LoadType()
         {
             Type.Clear();
-            Type.Add(LocationFormatter.OperationToStr(OperationType.All));     
-            Type.Add(LocationFormatter.OperationToStr(OperationType.Receipt)); 
-            Type.Add(LocationFormatter.OperationToStr(OperationType.Issue));   
+            Type.Add(MappingExtensions.OperationToStr(OperationType.All));     
+            Type.Add(MappingExtensions.OperationToStr(OperationType.Receipt)); 
+            Type.Add(MappingExtensions.OperationToStr(OperationType.Issue));   
 
             SelectedOperationType = Type[0];
         }

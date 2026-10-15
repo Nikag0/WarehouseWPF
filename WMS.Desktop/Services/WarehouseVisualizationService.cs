@@ -47,7 +47,7 @@ namespace WMS.Desktop.Services
                 var rackDto = new RackViewModel
                 (
                     id: rack.Id,
-                    code: LocationFormatter.CodeToDisplay(rack.Column, rack.Row),
+                    code: MappingExtensions.CodeToDisplay(rack.Column, rack.Row),
                     rackType: rack.Type,
                     cells: rack.Cells
                         .Select(cell =>
@@ -63,7 +63,7 @@ namespace WMS.Desktop.Services
                             return new CellViewModel
                             (
                                 id: cell.Id,
-                                code: LocationFormatter.CodeToDisplay(cell.Column, cell.Row),
+                                code: MappingExtensions.CodeToDisplay(cell.Column, cell.Row),
                                 x: cellLayout.X,
                                 y: cellLayout.Y,
                                 width: cellLayout.Width,

@@ -15,7 +15,7 @@ namespace WMS.Application.Services
             _uowFactory = uowFactory;
         }
 
-        public async Task<IReadOnlyList<HistoryDto>> GetFilteredAsync(
+        public async Task<IReadOnlyList<OperationHystoryViewDto>> GetFilteredAsync(
             string? searchText,
             DateTime? dateFrom,
             DateTime? dateTo,
@@ -33,7 +33,17 @@ namespace WMS.Application.Services
                 maxCount,
                 token);
 
-            return operationItem.Select(MappingExtensions.ToHistoryDTO).ToList();
+            return operationItem.Select(MappingExtensions.OperationHystoryToViewDTO).ToList();
+        }
+
+        public async Task DeleteHistoryAsync(
+           DateTime? dateFrom,
+           DateTime? dateTo,
+           CancellationToken ct = default)
+        {
+            await using var uow = _uowFactory.Create();
+
+            await _historyRepository.DeleteHistoryAsync(dateFrom, dateTo, ct);
         }
     }
 }

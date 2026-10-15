@@ -45,18 +45,27 @@ namespace WMS.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "operations",
+                name: "operationhistory",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     OccurredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Operator = table.Column<string>(type: "text", nullable: false),
-                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ComponentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ComponentName = table.Column<string>(type: "text", nullable: false),
+                    RackId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RackName = table.Column<string>(type: "text", nullable: false),
+                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CellName = table.Column<string>(type: "text", nullable: false),
+                    PreviousQuantity = table.Column<int>(type: "integer", nullable: false),
+                    QuantityChanged = table.Column<int>(type: "integer", nullable: false),
+                    NewQuantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_operations", x => x.Id);
+                    table.PrimaryKey("PK_operationhistory", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -96,7 +105,7 @@ namespace WMS.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MicrocontrollerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StripNumber = table.Column<int>(type: "integer", nullable: false)
+                    StripNumber = table.Column<byte>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,35 +114,6 @@ namespace WMS.Infrastructure.Migrations
                         name: "FK_strip_microcontroller_MicrocontrollerId",
                         column: x => x.MicrocontrollerId,
                         principalTable: "microcontroller",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "operation_items",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OperationId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ComponentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CellId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RackId = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuantityBefore = table.Column<int>(type: "integer", nullable: false),
-                    QuantityAfter = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_operation_items", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_operation_items_components_ComponentId",
-                        column: x => x.ComponentId,
-                        principalTable: "components",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_operation_items_operations_OperationId",
-                        column: x => x.OperationId,
-                        principalTable: "operations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -165,12 +145,13 @@ namespace WMS.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     StripId = table.Column<Guid>(type: "uuid", nullable: false),
                     CellId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Index = table.Column<int>(type: "integer", nullable: false),
+                    Index = table.Column<byte>(type: "smallint", nullable: false),
                     StartDiode = table.Column<int>(type: "integer", nullable: false),
                     EndDiode = table.Column<int>(type: "integer", nullable: false),
                     R = table.Column<byte>(type: "smallint", nullable: false),
                     G = table.Column<byte>(type: "smallint", nullable: false),
-                    B = table.Column<byte>(type: "smallint", nullable: false)
+                    B = table.Column<byte>(type: "smallint", nullable: false),
+                    Bright = table.Column<byte>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -233,17 +214,8 @@ namespace WMS.Infrastructure.Migrations
                 name: "IX_components_Article",
                 table: "components",
                 column: "Article",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_operation_items_ComponentId",
-                table: "operation_items",
-                column: "ComponentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_operation_items_OperationId",
-                table: "operation_items",
-                column: "OperationId");
+                unique: true,
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_operators_Surname_Name_Patronymic",
@@ -296,7 +268,7 @@ namespace WMS.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "operation_items");
+                name: "operationhistory");
 
             migrationBuilder.DropTable(
                 name: "operators");
@@ -306,9 +278,6 @@ namespace WMS.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "stocks");
-
-            migrationBuilder.DropTable(
-                name: "operations");
 
             migrationBuilder.DropTable(
                 name: "strip");

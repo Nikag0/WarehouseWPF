@@ -9,12 +9,12 @@ namespace WMS.Application.Abstractions
 {
     public interface IStockService
     {
-        Task IssueAsync(IReadOnlyCollection<IssueItemDto> items, string operatorName, string? comment = null, CancellationToken ct = default);
+        Task IssueAsync(IReadOnlyCollection<IssueStockDto> items, string operatorName, string? comment = null, CancellationToken ct = default);
         Task ReceiveAsync(ReceiptItemDto item, string operatorName, string? comment = null, CancellationToken ct = default);
-        Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount);
-        Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token);
-        Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId);
-        Task<ViewItemDTO> GetStockByIdAsync(Guid stokId);
+        Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount);
+        Task<IReadOnlyList<StockViewDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token);
+        Task<IReadOnlyList<StockViewDTO>> GetStocksInRackAsync(Guid rackId);
+        Task<StockViewDTO> GetStockByIdAsync(Guid stokId);
         Task ExportCsvAsync(string filepath, CancellationToken ct = default);
     }
 }

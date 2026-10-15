@@ -32,7 +32,7 @@ namespace WMS.Infrastructure
         {
             try
             {
-                var stock = await _db.Stocks
+                var stock = await _db.Stock
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
                     .Include(s => s.Cell)
@@ -54,7 +54,7 @@ namespace WMS.Infrastructure
         {
             try
             {
-                return await _db.Stocks
+                return await _db.Stock
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
                     .Include(s => s.Cell)
@@ -73,7 +73,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default)
         {
-            return await _db.Stocks
+            return await _db.Stock
                 .AsNoTracking()
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
@@ -84,7 +84,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
         {
-            return await _db.Stocks
+            return await _db.Stock
                 .Where(s => ids.Contains(s.Id))
                 .ToListAsync(ct);
         }
@@ -93,7 +93,7 @@ namespace WMS.Infrastructure
         {
             try
             {
-                _db.Stocks.Add(stock);
+                _db.Stock.Add(stock);
             }
             catch (DbUpdateException ex)
             {
@@ -104,17 +104,17 @@ namespace WMS.Infrastructure
 
         public void Update(Stock stock, CancellationToken ct = default)
         {
-            _db.Stocks.Update(stock);
+            _db.Stock.Update(stock);
         }
 
         public void Delete(Stock stock, CancellationToken ct = default)
         {
-            _db.Stocks.Remove(stock);
+            _db.Stock.Remove(stock);
         }
 
         public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default)
         {
-            var query = _db.Stocks
+            var query = _db.Stock
                 .AsNoTracking()
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
@@ -153,7 +153,7 @@ namespace WMS.Infrastructure
                     AND s.""TotalComponentQuantity"" <= c.""MinQuantity""";
 
 
-            return await _db.Stocks
+            return await _db.Stock
                 .FromSqlRaw(query)
                 .AsNoTracking()
                 .Include(s => s.Component)
@@ -166,7 +166,7 @@ namespace WMS.Infrastructure
         {
             try
             {
-                return _db.Stocks
+                return _db.Stock
                     .AsNoTracking() // Отключаем отслеживание сущностей ради экономии памяти
                     .Include(s => s.Component)
                     .Include(s => s.Rack)
@@ -184,7 +184,7 @@ namespace WMS.Infrastructure
 
         public async Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default)
         {
-            return await _db.Stocks
+            return await _db.Stock
                 .AsNoTracking()
                 .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
         }

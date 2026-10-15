@@ -15,9 +15,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
     public partial class ReceiptViewModel : ObservableObject
     {
         // Список при поиске отсатков или компонентов.
-        public ObservableCollection<ViewItemDTO> FilteredStocksOrComponents { get; } = new();
+        public ObservableCollection<StockViewDTO> FilteredStocksOrComponents { get; } = new();
         // Список остатков в выбранном стеллаже
-        public ObservableCollection<ViewItemDTO> FilteredItemsInRacks { get; } = new();
+        public ObservableCollection<StockViewDTO> FilteredItemsInRacks { get; } = new();
         // Выпадающий список при вводе стеллажа.
         public ObservableCollection<RackViewModel> FilteredRacks { get; } = new();
         // Выпадающий список при вводе ячейки.
@@ -257,7 +257,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 var receiptDto = new ReceiptItemDto(
                     ReceiptItem.ComponentId,
                     SelectedRack.Id,
+                    SelectedRack.Code,
                     SelectedCell.Id,
+                    SelectedCell.Code,
                     ReceiptItem.OperationQuantity);
 
                 await _stockService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText, cts.Token);
@@ -326,7 +328,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             try
             {
-                if (obj is not ViewItemDTO stock)
+                if (obj is not StockViewDTO stock)
                     return;
 
                 ReceiptItem.Id = stock.StockId;
@@ -527,7 +529,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             ReplaceCollection(FilteredCells, sortedQuery);
         }
 
-        private void UpdateCellHighlights(IEnumerable<ViewItemDTO> stocks)
+        private void UpdateCellHighlights(IEnumerable<StockViewDTO> stocks)
         {
             var occupiedCellIds = stocks
                 .Select(x => x.CellId)

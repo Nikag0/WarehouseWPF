@@ -12,16 +12,17 @@ namespace WMS.Infrastructure.Context
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<Component> Components => Set<Component>();
-        public DbSet<Stock> Stocks => Set<Stock>();
-        public DbSet<History> History => Set<History>();
-        public DbSet<HistoryItem> HistoryItems => Set<HistoryItem>();
-        public DbSet<Cell> Cells => Set<Cell>();
-        public DbSet<Rack> Racks => Set<Rack>();
-        public DbSet<Operator> Operators => Set<Operator>();
-        public DbSet<Microcontroller> Microcontrollers => Set<Microcontroller>();
-        public DbSet<Strip> Strips => Set<Strip>();
-        public DbSet<Sector> Sectors => Set<Sector>();
+        public DbSet<Component> Component => Set<Component>();
+        public DbSet<Stock> Stock => Set<Stock>();
+        //public DbSet<History> History => Set<History>();
+        //public DbSet<HistoryItem> HistoryItems => Set<HistoryItem>();
+        public DbSet<OperationHistory> OperationHistory => Set<OperationHistory>();
+        public DbSet<Cell> Cell => Set<Cell>();
+        public DbSet<Rack> Rack => Set<Rack>();
+        public DbSet<Operator> Operator => Set<Operator>();
+        public DbSet<Microcontroller> Microcontroller => Set<Microcontroller>();
+        public DbSet<Strip> Strip => Set<Strip>();
+        public DbSet<Sector> Sector => Set<Sector>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }

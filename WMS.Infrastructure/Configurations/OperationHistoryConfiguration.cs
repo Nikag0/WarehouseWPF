@@ -9,12 +9,11 @@ using WMS.Domain;
 
 namespace WMS.Infrastructure.Configurations
 {
-    public class HistoryConfiguration
-     : IEntityTypeConfiguration<History>
+    public class OperationHistoryConfiguration : IEntityTypeConfiguration<OperationHistory>
     {
-        public void Configure(EntityTypeBuilder<History> builder)
+        public void Configure(EntityTypeBuilder<OperationHistory> builder)
         {
-            builder.ToTable("operations");
+            builder.ToTable("operationhistory");
 
             builder.HasKey(x => x.Id);
 
@@ -26,16 +25,6 @@ namespace WMS.Infrastructure.Configurations
 
             builder.Property(x => x.Comment)
                 .HasMaxLength(500);
-
-            builder
-                 .HasMany(x => x.Items)
-                 .WithOne(x => x.Operation)
-                 .HasForeignKey(x => x.OperationId)
-                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder
-                .Navigation(x => x.Items)
-                .HasField("_items");
         }
     }
 }

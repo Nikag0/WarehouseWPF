@@ -173,12 +173,39 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <Button Grid.Row="1" Content="Экспорт таблицы остатков в csv" 
+                    <Button Grid.Row="0" Content="Экспорт таблицы остатков в csv" 
                        Command="{Binding ExportCsvCommand}" 
                        HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+
+                    <Grid Grid.Row="1">
+                        
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="105*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="100*"/>
+                            <ColumnDefinition Width="25*"/>
+                            <ColumnDefinition Width="100*"/>
+                            <ColumnDefinition Width="300*"/>
+                        </Grid.ColumnDefinitions>
+                    
+                        <Button Grid.Column="0" Content="Очистить историю" 
+                            Command="{Binding DeleteHistoryCommand}" 
+                            HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="От:" Style="{StaticResource WindowNames}"/>
+
+                        <DatePicker Grid.Column="2" VerticalAlignment="Center" SelectedDate="{Binding DateFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Column="3" HorizontalAlignment="Center" Text="До:" Style="{StaticResource WindowNames}"/>
+
+                        <DatePicker Grid.Column="4" VerticalAlignment="Center" SelectedDate="{Binding DateTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+
+                    
                 </Grid>
             </TabItem>
         </TabControl>

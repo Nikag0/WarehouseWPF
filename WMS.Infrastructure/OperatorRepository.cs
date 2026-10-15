@@ -17,19 +17,19 @@ namespace WMS.Infrastructure.Migrations
         public async Task<IReadOnlyList<Operator>> GetAllAsync()
         {
             using var db = _contextFactory.CreateDbContext();
-            return await db.Operators.ToListAsync();
+            return await db.Operator.ToListAsync();
         }
 
         public async Task<Operator?> GetByIdAsync(Guid id)
         {
             using var db = _contextFactory.CreateDbContext();
-            return await db.Operators.FindAsync(id);
+            return await db.Operator.FindAsync(id);
         }
 
         public bool IsOperatorUniqueAsync(string surname, string name, string patronymic)
         {
             using var db = _contextFactory.CreateDbContext();
-            return db.Operators
+            return db.Operator
                 .Any(o =>
                     o.Surname.ToLower() == surname.ToLower() &&
                     o.Name.ToLower() == name.ToLower() &&
@@ -40,7 +40,7 @@ namespace WMS.Infrastructure.Migrations
         {
             using var db = _contextFactory.CreateDbContext();
 
-            await db.Operators.AddAsync(operatorr);
+            await db.Operator.AddAsync(operatorr);
             await db.SaveChangesAsync();
         }
 
@@ -48,7 +48,7 @@ namespace WMS.Infrastructure.Migrations
         {
             using var db = _contextFactory.CreateDbContext();
 
-            db.Operators.Update(operatorr);
+            db.Operator.Update(operatorr);
 
             await db.SaveChangesAsync();
         }

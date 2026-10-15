@@ -1,25 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
 using System.Windows;
+using WMS.Application;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
-using WMS.Desktop.ViewModels;
-using WMS.Infrastructure;
-using WMS.Infrastructure.Migrations;
-using Microsoft.Extensions.Logging;
-using WMS.Desktop.ViewModels.MenuViewModels;
-using WMS.Application;
-using System;
 using WMS.Desktop.Services;
+using WMS.Desktop.ViewModels;
+using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Infrastructure;
 using WMS.Infrastructure.Context;
+using WMS.Infrastructure.Migrations;
 
 
 namespace WMS.Desktop
 {
-    public partial class App : System.Windows.Application
+    public partial class App : System.Windows.Application, IDesignTimeDbContextFactory<AppDbContext>
     {
         public static IServiceProvider? Services { get; private set; }
+
+        public AppDbContext CreateDbContext(string[] args)
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseNpgsql(config.GetConnectionString("Warehouse"));
+
+            return new AppDbContext(optionsBuilder.Options);
+        }
 
         protected async override void OnStartup(StartupEventArgs e)
         {

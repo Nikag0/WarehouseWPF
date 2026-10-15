@@ -35,39 +35,37 @@ namespace WMS.Application.Services
         }
 
         public async Task IssueAsync(
-            IReadOnlyCollection<IssueItemDto> items,
+            IReadOnlyCollection<IssueStockDto> issueStocks,
             string operatorName,
             string? comment = null,
             CancellationToken ct = default)
         {
 
-            if (items.Count == 0)
+            if (issueStocks.Count == 0)
                 throw new BusinessException("Список выдачи пуст");
 
             try
             {
                 await using var uow = _uowFactory.Create();
 
-                var operation = History.Create(OperationType.Issue, operatorName, comment);
-
-                var stockIds = items.Select(x => x.StockId).ToList();
+                var stockIds = issueStocks.Select(x => x.StockId).ToList();
 
                 var stocks = await _stockRepo.GetByIdsAsync(stockIds, ct);
 
                 var stocksDictionary = stocks.ToDictionary(x => x.Id);
 
-                foreach (var item in items)
+                foreach (var issueStock in issueStocks)
                 {
-                    if (!stocksDictionary.TryGetValue(item.StockId, out var stock))
+                    if (!stocksDictionary.TryGetValue(issueStock.StockId, out var stock))
                     {
-                        _logger.LogWarning("Stock {StockId} not found in preloaded data", item.StockId);
+                        _logger.LogWarning("Stock {StockId} not found in preloaded data", issueStock.StockId);
                         throw new BusinessException("Товар в одной из указанных ячеек не найден");
                     }
 
-                    var before = stock.Quantity;
+                    var previousQuantity = stock.Quantity;
 
 
-                    stock.Issue(item.Quantity);
+                    stock.Issue(issueStock.QuantityChanged);
 
                     if (stock.Quantity == 0)
                     {
@@ -78,112 +76,128 @@ namespace WMS.Application.Services
                         _stockRepo.Update(stock, ct);
                     }
 
-                    operation.AddItem(
-                        stock.ComponentId,
-                        stock.RackId,
-                        stock.CellId,
-                        before,
+                    var operationHistory = OperationHistory.Create(
+                        OperationType.Issue, 
+                        operatorName, 
+                        comment,
+                        issueStock.ComponentId,
+                        issueStock.ComponentName,
+                        issueStock.RackId,
+                        issueStock.RackName,
+                        issueStock.CellId,
+                        issueStock.CellName,
+                        previousQuantity,
+                        issueStock.QuantityChanged,
                         stock.Quantity);
-                }
 
-                operation.Validate();
-                _historyRepo.Add(operation, ct);
+                    _historyRepo.Add(operationHistory, ct);
+                }
 
                 await uow.CommitAsync();
 
                 _logger.LogInformation(
                     "Issue operation completed successfully. ItemCount:{ItemCount}",
-                    items.Count);
+                    issueStocks.Count);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
                     "Issue operation FAILED. ItemCount:{ItemCount}, Operator:{Operator}",
-                    items.Count, operatorName);
+                    issueStocks.Count, operatorName);
 
                 throw;
             }
         }
 
         public async Task ReceiveAsync(
-            ReceiptItemDto item,
+            ReceiptItemDto receiptStock,
             string operatorName,
             string? comment = null,
             CancellationToken ct = default)
         {
-            if (item is null)
+            if (receiptStock is null)
             {
                 _logger.LogWarning("ReceiveAsync called with null item by {Operator}", operatorName);
-                throw new ArgumentNullException(nameof(item));
+                throw new ArgumentNullException(nameof(receiptStock));
             }
 
             try
             {
                 await using var uow = _uowFactory.Create();
 
-                var component = await _componentRepo.GetByIdAsync(item.ComponentId);
+                var component = await _componentRepo.GetByIdAsync(receiptStock.ComponentId);
 
                 if (component is null)
                 {
-                    _logger.LogWarning("Component {ComponentId} not found", item.ComponentId);
+                    _logger.LogWarning("Component {ComponentId} not found", receiptStock.ComponentId);
 
-                    throw new BusinessException($"Компонент {item.ComponentId} не найден");
+                    throw new BusinessException($"Компонент {receiptStock.ComponentId} не найден");
                 }
 
-                var stock = await _stockRepo.GetByLocationAsync(item.ComponentId, item.RackId, item.CellId, ct);
+                var stock = await _stockRepo.GetByLocationAsync(receiptStock.ComponentId, receiptStock.RackId, receiptStock.CellId, ct);
 
-                int before;
-                int after;
+                int previousQuantity;
+                int newQuantity;
 
                 if (stock is null)
                 {
-                    stock = Stock.Create(item.ComponentId, item.RackId, item.CellId, 0);
-                    before = 0;
-                    stock.Receive(item.Quantity);
-                    after = stock.Quantity;
+                    stock = Stock.Create(receiptStock.ComponentId, receiptStock.RackId, receiptStock.CellId, 0);
+                    previousQuantity = 0;
+                    stock.Receive(receiptStock.Quantity);
+                    newQuantity = stock.Quantity;
                     _stockRepo.Add(stock, ct);
                 }
                 else
                 {
-                    before = stock.Quantity;
-                    stock.Receive(item.Quantity);
-                    after = stock.Quantity;
+                    previousQuantity = stock.Quantity;
+                    stock.Receive(receiptStock.Quantity);
+                    newQuantity = stock.Quantity;
                 }
 
-                var operation = History.Create(OperationType.Receipt, operatorName, comment);
-                operation.AddItem(item.ComponentId, item.RackId, item.CellId, before, after);
-                operation.Validate();
+                var operationHistory = OperationHistory.Create(
+                        OperationType.Receipt,
+                        operatorName,
+                        comment,
+                        stock.ComponentId,
+                        stock.Component.Name,
+                        receiptStock.RackId,
+                        receiptStock.RackName,
+                        receiptStock.CellId,
+                        receiptStock.CellName,
+                        previousQuantity,
+                        receiptStock.Quantity,
+                        newQuantity);
 
-                _historyRepo.Add(operation, ct);
+                _historyRepo.Add(operationHistory, ct);
 
                 await uow.CommitAsync();
 
                 _logger.LogInformation(
                     "Receipt completed. Component:{ComponentId}, Change:{Before}->{After}",
-                    item.ComponentId, before, after);
+                    receiptStock.ComponentId, previousQuantity, newQuantity);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
                     "Receipt FAILED for Component:{ComponentId}, Operator:{Operator}",
-                    item.ComponentId, operatorName);
+                    receiptStock.ComponentId, operatorName);
 
                 throw;
             }
         }
 
-        public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
         {
             await using var uow = _uowFactory.Create();
             
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
             var components = await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
-            var result = new List<ViewItemDTO>();
+            var result = new List<StockViewDTO>();
 
             foreach (var stock in stocks)
             {
-                result.Add(MappingExtensions.ToViewItemDto(stock));
+                result.Add(MappingExtensions.StockToView(stock));
             }
             var existingComponentIds = result.Select(x => x.ComponentId).ToHashSet();
 
@@ -192,37 +206,37 @@ namespace WMS.Application.Services
                 if (existingComponentIds.Contains(component.Id))
                     continue; // Пропускаем, так как Stock для этого компонента уже добавлен
 
-                result.Add(MappingExtensions.ComponentViewtoItemView(component));
+                result.Add(MappingExtensions.ComponentViewtoStockView(component));
             }
 
             return result.Take(maxCount).ToList();
         }
 
-        public async Task<IReadOnlyList<ViewItemDTO>> GetFilteredStockAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount)
         {
             await using var uow = _uowFactory.Create();
 
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
 
-            return stocks.Select(MappingExtensions.ToViewItemDto).ToList();
+            return stocks.Select(MappingExtensions.StockToView).ToList();
         }
 
-        public async Task<IReadOnlyList<ViewItemDTO>> GetStocksInRackAsync(Guid rackId)
+        public async Task<IReadOnlyList<StockViewDTO>> GetStocksInRackAsync(Guid rackId)
         {
             await using var uow = _uowFactory.Create();
 
             var result = await _stockRepo.GetByRackAsync(rackId);
 
-            return result.Select(MappingExtensions.ToViewItemDto).ToList();
+            return result.Select(MappingExtensions.StockToView).ToList();
         }
 
-        public async Task<ViewItemDTO> GetStockByIdAsync(Guid stokId)
+        public async Task<StockViewDTO> GetStockByIdAsync(Guid stokId)
         {
             await using var uow = _uowFactory.Create();
 
             var result = await _stockRepo.GetByIdAsync(stokId);
 
-            return MappingExtensions.ToViewItemDto(result);
+            return MappingExtensions.StockToView(result);
         }
 
         public async Task ExportCsvAsync(string filePath, CancellationToken ct = default)

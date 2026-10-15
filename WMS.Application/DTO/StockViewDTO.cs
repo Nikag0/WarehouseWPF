@@ -1,4 +1,4 @@
-﻿public record ViewItemDTO(
+﻿public record StockViewDTO(
         Guid ComponentId,
         string Article,
         string ComponentName,

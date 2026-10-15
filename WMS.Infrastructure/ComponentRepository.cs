@@ -26,7 +26,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<ComponentViewDto>> GetViewFilterAsync(string searchText, int maxCount, CancellationToken ct)
         {
-            var query = ApplyFilters(_db.Components.AsNoTracking(), searchText);
+            var query = ApplyFilters(_db.Component.AsNoTracking(), searchText);
 
             return await query
                 .OrderByDescending(s => s.CreatedAt)
@@ -37,7 +37,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<ComponentEditDto>> GetEditFilterAsync(string searchText, int maxCount, CancellationToken ct)
         {
-            var query = ApplyFilters(_db.Components.AsNoTracking(), searchText);
+            var query = ApplyFilters(_db.Component.AsNoTracking(), searchText);
 
             return await query
                 .OrderByDescending(s => s.CreatedAt)
@@ -48,7 +48,7 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<ComponentViewDto>> GetAllAsync()
         {
-            return await _db.Components.
+            return await _db.Component.
                 AsNoTracking()
                 .Select(c => new ComponentViewDto(
                     c.Id,
@@ -61,7 +61,7 @@ namespace WMS.Infrastructure
 
         public async Task<Component?> GetByIdAsync(Guid id)
         {
-            var result = await _db.Components.FindAsync(id);
+            var result = await _db.Component.FindAsync(id);
 
             if (result is null)
                 _logger.LogWarning("Component for id {id} not found", id);
@@ -71,7 +71,7 @@ namespace WMS.Infrastructure
 
         public async Task<Component?> GetByArticleAsync(string article)
         {
-            var result = await _db.Components.
+            var result = await _db.Component.
                 AsNoTracking().
                 FirstOrDefaultAsync(c => c.Article.ToLower() == article.ToLower());
 
@@ -85,7 +85,7 @@ namespace WMS.Infrastructure
         {
             try
             {
-                await _db.Components.AddAsync(component);
+                await _db.Component.AddAsync(component);
             }
             catch (DbUpdateException ex)
             {

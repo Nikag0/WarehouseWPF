@@ -10,9 +10,9 @@ namespace WMS.Application
 {
     public static class MappingExtensions
     {
-        public static ViewItemDTO ToViewItemDto(this Stock s)
+        public static StockViewDTO StockToView(this Stock s)
         {
-            return new ViewItemDTO(
+            return new StockViewDTO(
                 s.ComponentId,
                 s.Component.Article,
                 s.Component.Name,
@@ -20,10 +20,10 @@ namespace WMS.Application
                 s.Id,
                 s.RackId,
                 $"{s.Rack.Column}-{s.Rack.Row}",
-                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
+                CodeToDisplay(s.Rack.Column, s.Rack.Row),
                 s.CellId,
                 $"{s.Cell.Column}-{s.Cell.Row}",
-                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
+                CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity,
                 0
             );
@@ -36,15 +36,15 @@ namespace WMS.Application
                 s.Component.Article,
                 s.Component.Name,
                 s.Component.Manufacturer,
-                LocationFormatter.CodeToDisplay(s.Rack.Column, s.Rack.Row),
-                LocationFormatter.CodeToDisplay(s.Cell.Column, s.Cell.Row),
+                CodeToDisplay(s.Rack.Column, s.Rack.Row),
+                CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity
             );
         }
 
-        public static ViewItemDTO ComponentViewtoItemView(this ComponentViewDto c)
+        public static StockViewDTO ComponentViewtoStockView(this ComponentViewDto c)
         {
-            return new ViewItemDTO(
+            return new StockViewDTO(
                 c.Id,
                 c.Article,
                 c.Name,
@@ -61,18 +61,6 @@ namespace WMS.Application
             );
         }
 
-        public static ComponentEditDto ToComponentDTO(this Component c)
-        {
-            return new ComponentEditDto(
-                c.Id,
-                c.Article,
-                c.Name,
-                c.Manufacturer,
-                c.ExpirationDate,
-                c.MinQuantity
-            );
-        }
-
         public static OperatorDTO ToOperatorDTO(this Operator o)
         {
             return new OperatorDTO(
@@ -84,17 +72,61 @@ namespace WMS.Application
             );
         }
 
-        public static HistoryDto ToHistoryDTO(this HistoryItem o)
+        public static OperationHystoryViewDto OperationHystoryToViewDTO(this OperationHistory o)
         {
-            return new HistoryDto(
-                o.Operation.OccurredAt,
-                o.Operation.Operator ?? "[Удаленный компонент]",
-                LocationFormatter.OperationToStr(o.Operation.Type),
-                o.Component?.Name ?? "[Удаленный компонент]",
-                o.QuantityBefore,
-                o.QuantityAfter,
-                o.Operation.Comment ?? string.Empty
+            return new OperationHystoryViewDto(
+                o.OccurredAt,
+                OperationToStr(o.Type),
+                o.ComponentName,
+                $"Стеллаж {o.RackName} Ячейка {o.CellName}",
+                o.PreviousQuantity,
+                o.Type == OperationType.Receipt ? $"+{o.QuantityChanged}" : $"-{Math.Abs(o.QuantityChanged)}",
+                o.NewQuantity,
+                o.Operator,
+                o.Comment ?? string.Empty
             );
+        }
+
+        public static OperationType StrToOperation(string operationName)
+        {
+            return operationName switch
+            {
+                "Приёмка" => OperationType.Receipt,
+                "Выдача" => OperationType.Issue,
+                _ => OperationType.All
+            };
+        }
+
+        public static string OperationToStr(OperationType operationType)
+        {
+            return operationType switch
+            {
+                OperationType.All => "Все типы",
+                OperationType.Receipt => "Приёмка",
+                OperationType.Issue => "Выдача",
+                _ => operationType.ToString(),
+            };
+        }
+
+        public static string CodeToDisplay(int column, int row)
+        {
+            return $"{NumToLetter(row)}-{column}";
+        }
+
+        public static string NumToLetter(int number)
+        {
+            return number switch
+            {
+                1 => "А",
+                2 => "Б",
+                3 => "В",
+                4 => "Г",
+                5 => "Д",
+                6 => "Е",
+                7 => "Ж",
+                8 => "З",
+                _ => number.ToString()
+            };
         }
     }
 }

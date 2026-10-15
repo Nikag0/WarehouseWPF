@@ -9,13 +9,19 @@ namespace WMS.Application.Abstractions
 {
     public interface IHistoryRepository
     {
-        void Add(History operation, CancellationToken ct = default);
-        Task<IReadOnlyList<HistoryItem>> GetFilteredAsync(
+        void Add(OperationHistory operation, CancellationToken ct = default);
+        
+        Task<IReadOnlyList<OperationHistory>> GetFilteredAsync(
             string searchText,
             DateTime? dateFrom,
             DateTime? dateTo,
             OperationType operationType,
             int maxCount,
+            CancellationToken ct = default);
+
+        Task DeleteHistoryAsync(
+            DateTime? dateFrom,
+            DateTime? dateTo,
             CancellationToken ct = default);
     }
 }

@@ -19,11 +19,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
     {
         private readonly IStockService _stockService;
 
-        public ObservableCollection<ViewItemDTO> FilteredStocks { get; } = new();
+        public ObservableCollection<StockViewDTO> FilteredStocks { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
         public ObservableCollection<CellViewModel> CellsGrid { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
-        public ObservableCollection<ViewItemDTO> IssueItems { get; } = new();
+        public ObservableCollection<StockViewDTO> IssueItems { get; } = new();
         public RackViewModel SelectedRack 
         {
             get => _selectedRack;
@@ -187,9 +187,15 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             try
             {
                 var issueOperation = IssueItems
-                    .Select(item => new IssueItemDto(
+                    .Select(item => new IssueStockDto(
                         item.StockId,
-                        item.OperationQuantity))
+                        item.OperationQuantity,
+                        item.RackId,
+                        item.RackCodeDisplay,
+                        item.CellId,
+                        item.CellCodeDisplay,
+                        item.ComponentId,
+                        item.ComponentName))
                     .ToList();
 
                 await _stockService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
@@ -232,7 +238,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public void RemoveIssueItem(object obj)
         {
-            if (obj is not ViewItemDTO item)
+            if (obj is not StockViewDTO item)
                 return;
 
             IssueItems.Remove(item);
@@ -258,7 +264,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         private async Task AddIssueItem(object obj)
         {
-            if (obj is not ViewItemDTO item)
+            if (obj is not StockViewDTO item)
                 return;
 
             if (IssueItems.Any(x => x.StockId == item.StockId))
@@ -386,7 +392,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async void UpdateItemToReceipt()
         {
-            if (IssueItems.Count == 0) return;
+            if (IssueItems.Count == 0 || IsIssue) return;
 
             for (int i = 0; i < IssueItems.Count; i++)
             {

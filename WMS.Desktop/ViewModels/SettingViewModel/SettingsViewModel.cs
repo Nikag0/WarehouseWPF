@@ -14,8 +14,11 @@ using System.Windows;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Desktop.Services;
+using WMS.Desktop.ViewModels.SettingViewModel;
 using WMS.Desktop.Views;
+using WMS.Desktop.Views.Settings;
 using WMS.Domain;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WMS.Desktop.ViewModels
 {
@@ -25,12 +28,21 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
         [ObservableProperty] private string _searchComponent = string.Empty;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
+        private DateTime? _dateFrom = DateTime.Today.AddDays(-7);
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
+        private DateTime? _dateTo = DateTime.Today;
+
         private CancellationTokenSource? _cts;
 
 
         private readonly ComponentService _componentService;
         private readonly OperatorService _operatorService;
         private readonly DialogService _dialogService;
+        private readonly HistoryService _historyService;
         private readonly IStockService _stockService;
 
 
@@ -38,11 +50,13 @@ namespace WMS.Desktop.ViewModels
             ComponentService componentService,
             OperatorService operatorService,
             DialogService dialogService,
+            HistoryService historyService,
             IStockService stockService)
         {
             _componentService = componentService;
             _operatorService = operatorService;
             _dialogService = dialogService;
+            _historyService = historyService;
             _stockService = stockService;
         }
 
@@ -87,7 +101,7 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanDeleteHistory))]
         private async Task DeleteComponent(ComponentEditDto component)
         {
             if (component == null) return;
@@ -203,6 +217,41 @@ namespace WMS.Desktop.ViewModels
                     }
                 });
             }
+        }
+
+        [RelayCommand]
+        private async Task DeleteHistory()
+        {
+            try
+            {
+
+                var confirmVm = new DeleteConfirmationViewModel(
+                DateFrom.Value,
+                DateTo.Value,
+                onSuccessAsync: async () =>
+                {
+                    await _historyService.DeleteHistoryAsync(DateFrom, DateTo);
+                });
+
+                var dialog = new DeleteConfirmationWindow { DataContext = confirmVm };
+                
+                if (dialog.ShowDialog() == true)
+                {
+                    _dialogService.ShowInfo("История успешно очищена.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _dialogService.ShowWarning($"Ошибка удаления {ex.Message}", "Предупреждение");
+                });
+            }
+        }
+
+        private bool CanDeleteHistory()
+        {
+            return DateFrom.HasValue && DateTo.HasValue && DateFrom <= DateTo;
         }
 
         partial void OnSearchComponentChanged(string value)

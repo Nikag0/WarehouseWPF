@@ -5,7 +5,7 @@
     <Compile Update="Views\CellsGridControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\ComponentEditWindow.xaml.cs">
+    <Compile Update="Views\Settings\ComponentEditWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\MenuView\HistoryView.xaml.cs">
@@ -20,7 +20,10 @@
     <Compile Update="Views\MenuView\NotificationView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\OperatorEditWindow.xaml.cs">
+    <Compile Update="Views\Settings\DeleteConfirmationWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Settings\OperatorEditWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\RacksGridControl.xaml.cs">
@@ -29,7 +32,7 @@
     <Compile Update="Views\MenuView\ReceiptView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\SettingsView.xaml.cs">
+    <Compile Update="Views\Settings\SettingsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\WarehouseView.xaml.cs">
@@ -46,7 +49,7 @@
     <Page Update="Views\MenuView\NotificationView.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\SettingsView.xaml">
+    <Page Update="Views\Settings\SettingsView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

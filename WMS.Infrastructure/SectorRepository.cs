@@ -21,7 +21,7 @@ namespace WMS.Infrastructure
         public async Task<IReadOnlyList<SectorInitDTO>> GetAllSectorsForInitializationAsync(CancellationToken ct = default)
         {
             await using var db =  await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var result = await db.Sectors
+            var result = await db.Sector
                 .AsNoTracking()
                 .Include(s => s.Strip)
                     .ThenInclude(strip =>  strip.Microcontroller)
@@ -43,7 +43,7 @@ namespace WMS.Infrastructure
         public async Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default)
         {
             await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var dto = await db.Sectors
+            var dto = await db.Sector
                 .AsNoTracking()
                 .Include(s => s.Strip)
                     .ThenInclude(strip => strip.Microcontroller)
@@ -70,7 +70,7 @@ namespace WMS.Infrastructure
             try
             {
                 await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-                var sector = await db.Sectors.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
+                var sector = await db.Sector.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
 
                 await db.SaveChangesAsync(ct);
                 return true;
