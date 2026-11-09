@@ -45,10 +45,10 @@ namespace WMS.Application.Services
             return true;
         }
 
-        public async Task TurnOnSectorAsync(Guid cellId, CancellationToken ct = default)
+        public async Task<bool> TurnOnSectorAsync(Guid cellId, CancellationToken ct = default)
         {
             var sector = await _repository.GetByCellIdAsync(cellId, ct);
-            if (sector is null) return;
+            if (sector is null) return true; // Для ячейки не настроена подсветка — это не ошибка
 
             var packet = BuildColorPacket(
               sector.DeviceAddress,
@@ -58,7 +58,7 @@ namespace WMS.Application.Services
               sector.Brightness
             );
 
-            var success = await _packetSender.SendAsync(
+            return await _packetSender.SendAsync(
                     sector.Ip,
                     sector.Port,
                     packet,
@@ -66,10 +66,10 @@ namespace WMS.Application.Services
                 );
         }
 
-        public async Task TurnOffSectorAsync(Guid cellId, CancellationToken ct = default)
+        public async Task<bool> TurnOffSectorAsync(Guid cellId, CancellationToken ct = default)
         {
             var sector = await _repository.GetByCellIdAsync(cellId, ct);
-            if (sector is null) return;
+            if (sector is null) return true; // Для ячейки не настроена подсветка — это не ошибка
 
             var packet = BuildColorPacket(
               sector.DeviceAddress,
@@ -79,7 +79,7 @@ namespace WMS.Application.Services
               sector.Brightness
             );
 
-            var success = await _packetSender.SendAsync(
+            return await _packetSender.SendAsync(
                     sector.Ip,
                     sector.Port,
                     packet,
@@ -107,14 +107,14 @@ namespace WMS.Application.Services
             );
         }
 
-        public async Task SetGPIOAsync(Guid cellId, int active, CancellationToken ct = default)
+        public async Task<bool> SetGPIOAsync(Guid cellId, int active, CancellationToken ct = default)
         {
             var sector = await _repository.GetByCellIdAsync(cellId, ct);
-            if (sector is null) return;
+            if (sector is null) return true; // Для ячейки не настроена подсветка — это не ошибка
 
             var packet = BuildSetGPIO(sector.DeviceAddress, active, active, active, active);
 
-            var success = await _packetSender.SendAsync(
+            return await _packetSender.SendAsync(
                     sector.Ip,
                     sector.Port,
                     packet,

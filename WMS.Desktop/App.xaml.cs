@@ -6,12 +6,14 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using WMS.Application;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
 using WMS.Desktop.Services;
 using WMS.Desktop.ViewModels;
 using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Domain.ExceptionControl;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Context;
 using WMS.Infrastructure.Migrations;
@@ -36,9 +38,17 @@ namespace WMS.Desktop
             return new AppDbContext(optionsBuilder.Options);
         }
 
+        // Защита от повторного показа окна ошибки, пока предыдущее ещё открыто
+        private bool _isShowingError;
+
         protected async override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Глобальные обработчики ошибок: приложение не должно закрываться из-за необработанного исключения
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
+            TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+            AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
             var services = new ServiceCollection();
 
@@ -153,6 +163,56 @@ namespace WMS.Desktop
             var window = new Views.MainWindow();
             window.DataContext = Services.GetRequiredService<MainViewModel>();
             window.Show();
+        }
+
+        // Ошибка в потоке интерфейса (команды, обработчики событий, async void). Её можно погасить и продолжить работу.
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+
+            if (_isShowingError)
+                return;
+
+            _isShowingError = true;
+            try
+            {
+                if (e.Exception is BusinessException businessEx)
+                {
+                    MessageBox.Show(businessEx.Message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"Произошла непредвиденная ошибка:\n\n{e.Exception.Message}\n\n" +
+                        "Последняя операция могла не выполниться. Проверьте результат перед повтором.",
+                        "Ошибка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                _isShowingError = false;
+            }
+        }
+
+        // Ошибка в фоновой задаче, результат которой никто не дождался (например, Task.Run в поиске)
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            e.SetObserved();
+            System.Diagnostics.Debug.WriteLine($"Необработанная ошибка фоновой задачи: {e.Exception}");
+        }
+
+        // Ошибка в фоновом потоке. Здесь .NET всё равно завершит процесс, можно только сообщить пользователю.
+        private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var message = (e.ExceptionObject as Exception)?.Message ?? e.ExceptionObject?.ToString();
+
+            MessageBox.Show(
+                $"Критическая ошибка, приложение будет закрыто:\n\n{message}",
+                "Критическая ошибка",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 }

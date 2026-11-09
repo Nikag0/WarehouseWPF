@@ -230,13 +230,14 @@ namespace WMS.Application.Services
             return result.Select(MappingExtensions.StockToView).ToList();
         }
 
-        public async Task<StockViewDTO> GetStockByIdAsync(Guid stokId)
+        public async Task<StockViewDTO?> GetStockByIdAsync(Guid stokId)
         {
             await using var uow = _uowFactory.Create();
 
             var result = await _stockRepo.GetByIdAsync(stokId);
 
-            return MappingExtensions.StockToView(result);
+            // Остаток удаляется из БД, когда товар выдан полностью
+            return result is null ? null : MappingExtensions.StockToView(result);
         }
 
         public async Task ExportCsvAsync(string filePath, CancellationToken ct = default)

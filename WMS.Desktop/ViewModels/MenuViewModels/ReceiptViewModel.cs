@@ -215,29 +215,38 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            // Если подсветка не включилась, выключать её не нужно — это сэкономит ожидание таймаута
+            var isLedAvailable = true;
+
             try
             {
-                await _ledStripService.TurnOnSectorAsync(SelectedCell.Id);
-                await _ledStripService.SetGPIOAsync(SelectedCell.Id, 1);
+                isLedAvailable = await _ledStripService.TurnOnSectorAsync(SelectedCell.Id)
+                              && await _ledStripService.SetGPIOAsync(SelectedCell.Id, 1);
             }
             catch (Exception ex)
             {
+                isLedAvailable = false;
                 _logger.LogError(ex, "LED turn-on failed for cell {CellId}", SelectedCell.Id);
-                _dialogService.ShowWarning("При включении подсветки ячейки произошла ошибка.");
             }
 
+            if (!isLedAvailable)
+            {
+                _dialogService.ShowWarning(
+                    "Подсветка ячейки не сработала: контроллер не отвечает.\n\n" +
+                    "Приёмка продолжится без подсветки. Находите ячейку по номеру стеллажа и ячейки.");
+            }
 
-            if (!_dialogService.ShowConfirmation("Товар принят? \n" +
+            var isAccepted = _dialogService.ShowConfirmation("Товар принят? \n" +
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
                 $"Количество: {ReceiptItem.OperationQuantity}\n" +
-                $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}"))
-            {
-                await SectorTurnOffAsync(SelectedCell.Id);
-                return;
-            }
+                $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}");
 
-            await SectorTurnOffAsync(SelectedCell.Id);
+            if (isLedAvailable)
+                await SectorTurnOffAsync(SelectedCell.Id);
+
+            if (!isAccepted)
+                return;
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
@@ -400,8 +409,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             try
             {
-                await _ledStripService.TurnOffSectorAsync(cellId);
-                await _ledStripService.SetGPIOAsync(cellId, 0);
+                var isOff = await _ledStripService.TurnOffSectorAsync(cellId)
+                         && await _ledStripService.SetGPIOAsync(cellId, 0);
+
+                if (!isOff)
+                    _dialogService.ShowWarning("Не удалось выключить подсветку ячейки: контроллер не отвечает.");
             }
             catch (Exception ex)
             {

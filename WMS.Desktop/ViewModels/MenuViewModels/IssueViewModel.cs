@@ -144,36 +144,45 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
 
             // Интерактивный обход стеллажей.
+            // На схеме: рамка (IsSelected) — текущий товар обхода, заливка (ItemInCell) — все товары в списке выдачи.
             var itemsToReview = IssueItems.ToList();
 
-            RacksGrid.All(r => r.ItemInCell = false);
-            CellsGrid.All(r => r.ItemInCell = false);
+            // Если контроллер подсветки не ответил один раз, дальше выдача идёт без подсветки,
+            // чтобы не ждать таймаут на каждой ячейке.
+            var isLedAvailable = true;
 
             foreach (var item in itemsToReview)
             {
-                SelectedRack = RacksGrid.First(r => r.Id == item.RackId);
-
-                SelectedCell = CellsGrid.First(c => c.Id == item.CellId);
-                SelectedCell.ItemInCell = true;
-                SelectedCell.IsSelected = true;
+                // Переносим рамку на стеллаж и ячейку текущего товара. Если их нет в схеме,
+                // рамка снимается, чтобы не указывать на место предыдущего товара.
+                SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == item.RackId);
+                SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == item.CellId);
 
                 var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
-                
-                await _ledStripService.TurnOnSectorAsync(item.CellId);
-                await _ledStripService.SetGPIOAsync(item.CellId, 1);
 
+                if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: true))
+                {
+                    isLedAvailable = false;
+                    _dialogService.ShowWarning(
+                        "Подсветка ячейки не сработала: контроллер не отвечает.\n\n" +
+                        "Выдача продолжится без подсветки. Находите ячейки по номеру стеллажа и ячейки.");
+                }
 
                 if (!_dialogService.ShowConfirmation(question))
                 {
+                    // Товар не найден — убираем его из выдачи и снимаем заливку с его ячейки и стеллажа
                     IssueItems.Remove(item);
-                    if (!IssueItems.Any(i => i.RackId == SelectedRack.Id))
-                        SelectedRack.ItemInCell = false;
-                    SelectedCell.ItemInCell = false;
-                    SelectedCell.IsSelected = false;
+                    UpdateRackHighlights();
+                    UpdateCellHighlights();
                 }
 
-                await _ledStripService.TurnOffSectorAsync(item.CellId);
-                await _ledStripService.SetGPIOAsync(item.CellId, 0);
+                if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: false))
+                {
+                    isLedAvailable = false;
+                    _dialogService.ShowWarning(
+                        $"Не удалось выключить подсветку ячейки {item.CellCodeDisplay}: контроллер не отвечает.\n\n" +
+                        "Выдача продолжится без подсветки.");
+                }
             }
 
             if (!IssueItems.Any())
@@ -209,6 +218,33 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 _dialogService.ShowWarning(ex.Message);
             }
+            catch (Exception ex)
+            {
+                // Все изменения сохраняются одной транзакцией, поэтому при ошибке остатки не меняются
+                _dialogService.ShowError(
+                    "Выдача не выполнена: не удалось сохранить данные в базе.\n" +
+                    "Остатки не изменились, список выдачи сохранён — можно повторить попытку.\n\n" +
+                    $"Подробности: {ex.Message}");
+            }
+        }
+
+        // Включает или выключает подсветку и GPIO ячейки. Возвращает false, если контроллер не ответил.
+        private async Task<bool> SwitchCellLightAsync(Guid cellId, bool isOn)
+        {
+            try
+            {
+                var isLightOk = isOn
+                    ? await _ledStripService.TurnOnSectorAsync(cellId)
+                    : await _ledStripService.TurnOffSectorAsync(cellId);
+
+                var isGpioOk = await _ledStripService.SetGPIOAsync(cellId, isOn ? 1 : 0);
+
+                return isLightOk && isGpioOk;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public async Task LoadDataAsync()
@@ -223,7 +259,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 OnSearchStockChanged(SearchStock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
-                UpdateItemToReceipt();
+                await RefreshIssueItemsAsync();
             }
             catch (BusinessException ex)
             {
@@ -273,6 +309,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             try
             {
                 var stock = await _stockService.GetStockByIdAsync(item.StockId);
+                if (stock is null)
+                {
+                    _dialogService.ShowWarning($"{item.ComponentName}: товара больше нет в этой ячейке.");
+                    return;
+                }
+
                 IssueItems.Add(stock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
@@ -280,6 +322,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             catch (BusinessException ex)
             {
                 _dialogService.ShowWarning(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Не удалось добавить товар в выдачу: {ex.Message}");
             }
         }
 
@@ -390,14 +436,35 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
         }
 
-        private async void UpdateItemToReceipt()
+        // Обновляет остатки в списке выдачи. Позиции, которых больше нет на складе, убираются из списка.
+        private async Task RefreshIssueItemsAsync()
         {
             if (IssueItems.Count == 0 || IsIssue) return;
 
-            for (int i = 0; i < IssueItems.Count; i++)
+            var removedNames = new List<string>();
+
+            for (int i = IssueItems.Count - 1; i >= 0; i--)
             {
-                var updated = await _stockService.GetStockByIdAsync(IssueItems[i].StockId);
-                IssueItems[i] = updated;  
+                var current = IssueItems[i];
+                var updated = await _stockService.GetStockByIdAsync(current.StockId);
+
+                if (updated is null)
+                {
+                    removedNames.Add(current.ComponentName);
+                    IssueItems.RemoveAt(i);
+                    continue;
+                }
+
+                // Сохраняем количество, которое оператор уже ввёл для выдачи
+                IssueItems[i] = updated with { OperationQuantity = current.OperationQuantity };
+            }
+
+            if (removedNames.Count > 0)
+            {
+                UpdateRackHighlights();
+                UpdateCellHighlights();
+                _dialogService.ShowWarning(
+                    "Эти товары закончились и убраны из списка выдачи:\n\n• " + string.Join("\n• ", removedNames));
             }
         }
     }
