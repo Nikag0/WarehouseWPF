@@ -185,7 +185,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         public async Task ReceiveAsync()
         {
 
-            if (ReceiptItem == null)
+            if (ReceiptItem == null || ReceiptItem.ComponentId == Guid.Empty)
             {
                 _dialogService.ShowWarning("Компонент не выбран.");
                 return;
@@ -261,6 +261,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            var isSaved = false;
+
             try
             {
                 var receiptDto = new ReceiptItemDto(
@@ -272,13 +274,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     ReceiptItem.OperationQuantity);
 
                 await _stockService.ReceiveAsync(receiptDto, OperatorName.FullName, CommentText, cts.Token);
-
-                await LoadWarehouseAsync();
-
-                ResetReceiptState();
-
-                _dialogService.ShowInfo("Приём товаров успешно выполнен.");
-
+                isSaved = true;
             }
             catch (BusinessException ex)
             {
@@ -290,12 +286,45 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError("Произошла непредвиденная ошибка.");
                 _logger.LogError(ex, "Receipt failed unexpectedly");
+                _dialogService.ShowError(
+                    "Приёмка не выполнена: не удалось сохранить данные в базе.\n" +
+                    "Остатки не изменились — можно повторить попытку.\n\n" +
+                    $"Подробности: {ex.Message}");
             }
             finally
             {
                 _lock.Release();
+            }
+
+            if (!isSaved)
+                return;
+
+            // Приёмка уже записана в БД. Дальше только обновление экрана: его ошибка не должна
+            // выглядеть как неудачная приёмка, иначе оператор повторит её и товар задвоится.
+            var isRefreshed = true;
+            try
+            {
+                await LoadWarehouseAsync();
+            }
+            catch (Exception ex)
+            {
+                isRefreshed = false;
+                _logger.LogError(ex, "Warehouse refresh after receipt failed");
+            }
+
+            // Сбрасываем форму в любом случае, чтобы ту же приёмку нельзя было отправить повторно
+            ResetReceiptState();
+
+            if (isRefreshed)
+            {
+                _dialogService.ShowInfo("Приём товаров успешно выполнен.");
+            }
+            else
+            {
+                _dialogService.ShowWarning(
+                    "Приём товаров выполнен и сохранён, но схему склада не удалось обновить.\n\n" +
+                    "Не повторяйте приёмку. Чтобы обновить схему, переключитесь на другую вкладку и вернитесь.");
             }
         }
 
@@ -395,6 +424,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
             SearchCell = string.Empty;
 
+            // Сбрасываем и идентификаторы: по пустому ComponentId форма блокирует выбор места
+            // и не даёт принять предыдущий компонент повторно
+            ReceiptItem.Id = Guid.Empty;
+            ReceiptItem.ComponentId = Guid.Empty;
             ReceiptItem.Article = string.Empty;
             ReceiptItem.ComponentName = string.Empty;
             ReceiptItem.Manufacturer = string.Empty;
