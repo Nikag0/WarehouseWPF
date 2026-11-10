@@ -32,13 +32,29 @@ namespace WMS.Application
         public static StockCsvDto StockToCsv(this Stock s)
         {
             return new StockCsvDto(
-                s.Id,
                 s.Component.Article,
                 s.Component.Name,
                 s.Component.Manufacturer,
                 CodeToDisplay(s.Rack.Column, s.Rack.Row),
                 CodeToDisplay(s.Cell.Column, s.Cell.Row),
                 s.Quantity
+            );
+        }
+
+        public static HistoryCsvDto HistoryToCsv(this OperationHistory o)
+        {
+            return new HistoryCsvDto(
+                // В БД время хранится в UTC, в файл выгружаем местное
+                o.OccurredAt.ToLocalTime(),
+                OperationToStr(o.Type),
+                o.ComponentName,
+                o.RackName,
+                o.CellName,
+                o.PreviousQuantity,
+                o.QuantityChanged,
+                o.NewQuantity,
+                o.Operator,
+                o.Comment ?? string.Empty
             );
         }
 

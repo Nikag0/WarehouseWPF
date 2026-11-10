@@ -11,7 +11,8 @@ namespace WMS.Application.Abstractions
     {
         Task<IReadOnlyList<Operator>> GetAllAsync();
         Task<Operator?> GetByIdAsync(Guid id);
-        bool IsOperatorUniqueAsync(string surname, string name, string patronymic);
+        // Возвращает true, если оператор с таким ФИО уже есть. excludeId — оператор, которого не учитывать (при редактировании).
+        Task<bool> IsOperatorExistsAsync(string surname, string name, string patronymic, Guid? excludeId = null);
         Task AddAsync(Operator operatorr);
         Task UpdateAsync(Operator operatorr);
     }

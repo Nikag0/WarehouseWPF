@@ -26,11 +26,12 @@ namespace WMS.Infrastructure.Migrations
             return await db.Operator.FindAsync(id);
         }
 
-        public bool IsOperatorUniqueAsync(string surname, string name, string patronymic)
+        public async Task<bool> IsOperatorExistsAsync(string surname, string name, string patronymic, Guid? excludeId = null)
         {
-            using var db = _contextFactory.CreateDbContext();
-            return db.Operator
-                .Any(o =>
+            await using var db = await _contextFactory.CreateDbContextAsync();
+            return await db.Operator
+                .AnyAsync(o =>
+                    (excludeId == null || o.Id != excludeId) &&
                     o.Surname.ToLower() == surname.ToLower() &&
                     o.Name.ToLower() == name.ToLower() &&
                     o.Patronymic.ToLower() == patronymic.ToLower());

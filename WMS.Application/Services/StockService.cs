@@ -1,8 +1,4 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Globalization;
-using System.Text;
+﻿using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using WMS.Domain;
@@ -76,16 +72,18 @@ namespace WMS.Application.Services
                         _stockRepo.Update(stock, ct);
                     }
 
+                    // Данные для истории берём из остатка, загруженного в этой же транзакции,
+                    // а не из DTO интерфейса — так история всегда совпадает с реально изменённой записью
                     var operationHistory = OperationHistory.Create(
-                        OperationType.Issue, 
-                        operatorName, 
+                        OperationType.Issue,
+                        operatorName,
                         comment,
-                        issueStock.ComponentId,
-                        issueStock.ComponentName,
-                        issueStock.RackId,
-                        issueStock.RackName,
-                        issueStock.CellId,
-                        issueStock.CellName,
+                        stock.ComponentId,
+                        stock.Component.Name,
+                        stock.RackId,
+                        MappingExtensions.CodeToDisplay(stock.Rack.Column, stock.Rack.Row),
+                        stock.CellId,
+                        MappingExtensions.CodeToDisplay(stock.Cell.Column, stock.Cell.Row),
                         previousQuantity,
                         issueStock.QuantityChanged,
                         stock.Quantity);
@@ -242,22 +240,13 @@ namespace WMS.Application.Services
 
         public async Task ExportCsvAsync(string filePath, CancellationToken ct = default)
         {
-            var config = new CsvConfiguration(CultureInfo.CurrentCulture)
-            {
-                Delimiter = ";", 
-                HasHeaderRecord = true
-            };
-
-            using var writer = new StreamWriter(filePath, false, Encoding.UTF8);
-            using var csv = new CsvWriter(writer, config);
-
             await using var uow = _uowFactory.Create();
 
-            IAsyncEnumerable<Stock> stocksStream = _stockRepo.GetAllForExportAsync(ct);
+            var dtoStream = _stockRepo
+                .GetAllForExportAsync(ct)
+                .Select(stock => stock.StockToCsv());
 
-            IAsyncEnumerable<StockCsvDto> dtoStream = stocksStream.Select(stock => stock.StockToCsv());
-
-            await csv.WriteRecordsAsync(dtoStream, ct);
+            await CsvExporter.WriteAsync(filePath, dtoStream, ct);
         }
     }
 }
