@@ -18,10 +18,14 @@ namespace WMS.Desktop.ViewModels.SettingViewModel
 {
     public partial class DeleteConfirmationViewModel : ObservableObject
     {
-        private readonly Func<Task> _onSuccessAsync;
+        // Принимает флаг «сохранить в CSV». Возвращает false, если пользователь передумал (например, закрыл окно выбора файла).
+        private readonly Func<bool, Task<bool>> _onConfirmAsync;
 
         [ObservableProperty]
         private string _expectedConfirmationText;
+
+        [ObservableProperty]
+        private bool _isExportBeforeDelete;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
@@ -31,10 +35,10 @@ namespace WMS.Desktop.ViewModels.SettingViewModel
         [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
         private bool _isBusy;
 
-        public DeleteConfirmationViewModel(DateTime from, DateTime to, Func<Task> onSuccessAsync)
+        public DeleteConfirmationViewModel(DateTime from, DateTime to, Func<bool, Task<bool>> onConfirmAsync)
         {
             _expectedConfirmationText = $"{from:dd.MM.yyyy}-{to:dd.MM.yyyy}";
-            _onSuccessAsync = onSuccessAsync;
+            _onConfirmAsync = onConfirmAsync;
         }
 
         [RelayCommand(CanExecute = nameof(CanConfirm))]
@@ -44,10 +48,8 @@ namespace WMS.Desktop.ViewModels.SettingViewModel
             {
                 IsBusy = true;
 
-                if (_onSuccessAsync != null)
-                {
-                    await _onSuccessAsync.Invoke();
-                }
+                if (_onConfirmAsync != null && !await _onConfirmAsync.Invoke(IsExportBeforeDelete))
+                    return;
 
                 if (window != null)
                 {

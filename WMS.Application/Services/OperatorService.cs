@@ -38,18 +38,18 @@ namespace WMS.Application.Services
             return MappingExtensions.ToOperatorDTO(result);
         }
 
-        public Result AddAsync(string surname, string name, string patronymic)
+        public async Task<Result> AddAsync(string surname, string name, string patronymic)
         {
-            var isAdd = _operatorRepo.IsOperatorUniqueAsync(
+            var isExists = await _operatorRepo.IsOperatorExistsAsync(
                 surname.Trim().ToLower(),
                 name.Trim().ToLower(),
                 patronymic.Trim().ToLower());
 
-            if (isAdd)
+            if (isExists)
                 return Result.Failure("Оператор c таким именем уже зарегистрирован.");
 
             var newOperator = Operator.Create(surname, name, patronymic);
-            _operatorRepo.AddAsync(newOperator);
+            await _operatorRepo.AddAsync(newOperator);
 
             return Result.Success();
         }
@@ -60,15 +60,20 @@ namespace WMS.Application.Services
             if (@operator is null)
                 return Result.Failure("Оператор не найден.");
 
-            var isAdd = _operatorRepo.IsOperatorUniqueAsync(
+            // Самого редактируемого оператора не учитываем, иначе сохранение без изменений ФИО считалось бы дублем
+            var isExists = await _operatorRepo.IsOperatorExistsAsync(
                 dto.Surname.Trim().ToLower(),
                 dto.Name.Trim().ToLower(),
-                dto.Patronymic.Trim().ToLower());
+                dto.Patronymic.Trim().ToLower(),
+                excludeId: dto.Id);
 
-            if (isAdd)
+            if (isExists)
                 return Result.Failure("Оператор c таким именем уже зарегистрирован.");
 
             @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
+
+            // Объект загружен в уже закрытом контексте, поэтому сохраняем его через репозиторий
+            await _operatorRepo.UpdateAsync(@operator);
 
             return Result.Success();
         }

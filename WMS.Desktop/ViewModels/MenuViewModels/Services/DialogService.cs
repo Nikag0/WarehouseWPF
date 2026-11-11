@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Win32;
 using WMS.Application.Abstractions;
 
 namespace WMS.Desktop.Services
@@ -30,6 +31,19 @@ namespace WMS.Desktop.Services
             var result = MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             return result == MessageBoxResult.Yes;
+        }
+
+        public string? ShowSaveCsvDialog(string title, string defaultFileName)
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                Title = title,
+                Filter = "CSV файлы (*.csv)|*.csv",
+                DefaultExt = "csv",
+                FileName = defaultFileName
+            };
+
+            return saveFileDialog.ShowDialog() == true ? saveFileDialog.FileName : null;
         }
     }
 }

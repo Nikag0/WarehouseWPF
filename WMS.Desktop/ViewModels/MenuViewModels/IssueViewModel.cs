@@ -108,6 +108,20 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public async Task IssueAsync()
         {
+            // После успешной выдачи список остаётся на экране. Повторный запуск выдал бы те же товары второй раз,
+            // поэтому не полагаемся только на блокировку кнопки в разметке.
+            if (IsIssue)
+            {
+                _dialogService.ShowInfo("Эта выдача уже выполнена. Очистите список, чтобы начать новую.");
+                return;
+            }
+
+            if (IssueItems.Count == 0)
+            {
+                _dialogService.ShowWarning("Список выдачи пуст.");
+                return;
+            }
+
             // Проверка нехвати остатков.
             var invalidItems = IssueItems
                               .Where(x => x.OperationQuantity <= 0)

@@ -37,13 +37,28 @@ namespace WMS.Application.Services
         }
 
         public async Task DeleteHistoryAsync(
-           DateTime? dateFrom,
-           DateTime? dateTo,
+           DateTime dateFrom,
+           DateTime dateTo,
            CancellationToken ct = default)
         {
             await using var uow = _uowFactory.Create();
 
             await _historyRepository.DeleteHistoryAsync(dateFrom, dateTo, ct);
+        }
+
+        public async Task ExportCsvAsync(
+            string filePath,
+            DateTime dateFrom,
+            DateTime dateTo,
+            CancellationToken ct = default)
+        {
+            await using var uow = _uowFactory.Create();
+
+            var dtoStream = _historyRepository
+                .GetForPeriodAsync(dateFrom, dateTo)
+                .Select(operation => operation.HistoryToCsv());
+
+            await CsvExporter.WriteAsync(filePath, dtoStream, ct);
         }
     }
 }

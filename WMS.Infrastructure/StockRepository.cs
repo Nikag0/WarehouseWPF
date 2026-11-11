@@ -85,6 +85,9 @@ namespace WMS.Infrastructure
         public async Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
         {
             return await _db.Stock
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
                 .Where(s => ids.Contains(s.Id))
                 .ToListAsync(ct);
         }

@@ -5,11 +5,12 @@ using Xunit;
 
 namespace WMS.Test;
 
+// Каждый тест получает свою пустую БД SQLite в памяти. Она живёт, пока открыто соединение.
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
-    private SqliteConnection _connection;
+    private SqliteConnection _connection = null!;
 
-    protected DbContextOptions<AppDbContext> DbOptions { get; private set; }
+    protected DbContextOptions<AppDbContext> DbOptions { get; private set; } = null!;
 
     public async Task InitializeAsync()
     {
@@ -27,5 +28,20 @@ public abstract class IntegrationTestBase : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _connection.DisposeAsync();
+    }
+
+    // Отдельный контекст для подготовки и проверки данных, чтобы не видеть объекты из памяти сервиса
+    protected AppDbContext CreateContext() => new(DbOptions);
+
+    protected sealed class TestDbContextFactory : IDbContextFactory<AppDbContext>
+    {
+        private readonly DbContextOptions<AppDbContext> _options;
+
+        public TestDbContextFactory(DbContextOptions<AppDbContext> options)
+        {
+            _options = options;
+        }
+
+        public AppDbContext CreateDbContext() => new(_options);
     }
 }

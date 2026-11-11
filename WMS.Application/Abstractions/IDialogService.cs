@@ -12,5 +12,8 @@ namespace WMS.Application.Abstractions
         void ShowWarning(string message, string title = "Предупреждение");
         void ShowError(string message, string title = "Ошибка");
         bool ShowConfirmation(string message, string title = "Подтверждение");
+
+        // Возвращает выбранный путь или null, если пользователь закрыл окно
+        string? ShowSaveCsvDialog(string title, string defaultFileName);
     }
 }

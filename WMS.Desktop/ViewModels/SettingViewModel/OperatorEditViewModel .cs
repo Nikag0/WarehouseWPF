@@ -67,7 +67,7 @@ namespace WMS.Desktop.ViewModels
                 }
                 else
                 {
-                    result = _operatorService.AddAsync(
+                    result = await _operatorService.AddAsync(
                         Surname,
                         Name,
                         Patronymic

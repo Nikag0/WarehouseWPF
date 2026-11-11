@@ -71,16 +71,29 @@ namespace WMS.Infrastructure
                  .ToListAsync(ct);
         }
 
+        public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime dateFrom, DateTime dateTo)
+        {
+            return QueryByPeriod(dateFrom, dateTo)
+                .AsNoTracking()
+                .OrderBy(h => h.OccurredAt)
+                .AsAsyncEnumerable();
+        }
+
         public async Task DeleteHistoryAsync(
-            DateTime? dateFrom,
-            DateTime? dateTo,
+            DateTime dateFrom,
+            DateTime dateTo,
             CancellationToken ct = default)
         {
-            var utcFrom = DateTime.SpecifyKind(dateFrom.Value.Date, DateTimeKind.Utc);
-            var utcTo = DateTime.SpecifyKind(dateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
+            await QueryByPeriod(dateFrom, dateTo).ExecuteDeleteAsync(ct);
+        }
 
-            var query = _db.OperationHistory.Where(h => h.OccurredAt >= utcFrom && h.OccurredAt < utcTo);
-            await query.ExecuteDeleteAsync(ct);
+        // Общий фильтр периода для выгрузки и удаления: в CSV попадают ровно те записи, которые будут удалены
+        private IQueryable<OperationHistory> QueryByPeriod(DateTime dateFrom, DateTime dateTo)
+        {
+            var utcFrom = DateTime.SpecifyKind(dateFrom.Date, DateTimeKind.Utc);
+            var utcTo = DateTime.SpecifyKind(dateTo.Date.AddDays(1), DateTimeKind.Utc);
+
+            return _db.OperationHistory.Where(h => h.OccurredAt >= utcFrom && h.OccurredAt < utcTo);
         }
     }
 }
