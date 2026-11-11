@@ -116,6 +116,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
         }
 
+        // Поиск по истории записей.
         private void SearchHistoryChanged()
         {
             _cts?.Cancel();
@@ -130,11 +131,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     await Task.Delay(1000, token);
 
                     var data = await _historyService.GetFilteredAsync(
-                        SearchHistory,
+                        searchText: SearchHistory,
                         DateFrom,
                         DateTo,
-                        MappingExtensions.StrToOperation(SelectedOperationType),
-                        100,
+                        operationType: MappingExtensions.StrToOperation(SelectedOperationType),
+                        maxCount: 100,
                         _cts.Token);
 
                     App.Current.Dispatcher.Invoke(() =>

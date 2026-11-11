@@ -108,8 +108,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public async Task IssueAsync()
         {
-            // После успешной выдачи список остаётся на экране. Повторный запуск выдал бы те же товары второй раз,
-            // поэтому не полагаемся только на блокировку кнопки в разметке.
+            // Защита от повторной выдачи.
             if (IsIssue)
             {
                 _dialogService.ShowInfo("Эта выдача уже выполнена. Очистите список, чтобы начать новую.");
@@ -127,6 +126,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                               .Where(x => x.OperationQuantity <= 0)
                               .ToList();
 
+            // Проверка на количесвто выдачи.
             if (invalidItems.Any())
             {
                 var sb = new StringBuilder();
@@ -143,6 +143,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            // Проверка кол-ва выдачи в бд
             var shortagedItems = IssueItems.Where(x => x.Quantity < x.OperationQuantity).ToList();
             if (shortagedItems.Any())
             {
@@ -158,7 +159,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
 
             // Интерактивный обход стеллажей.
-            // На схеме: рамка (IsSelected) — текущий товар обхода, заливка (ItemInCell) — все товары в списке выдачи.
+            // На схеме: рамка IsSelected, заливка ItemInCell.
             var itemsToReview = IssueItems.ToList();
 
             // Если контроллер подсветки не ответил один раз, дальше выдача идёт без подсветки,
@@ -172,8 +173,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == item.RackId);
                 SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == item.CellId);
 
-                var question = $"Товар выдан?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+                var question = $"Товар найден?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
 
+                // Включили подсветку на ячейке.
                 if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: true))
                 {
                     isLedAvailable = false;
@@ -190,6 +192,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     UpdateCellHighlights();
                 }
 
+                // Выключили подсветку на ячейке.
                 if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: false))
                 {
                     isLedAvailable = false;
@@ -267,7 +270,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 await Task.WhenAll(
                     LoadWarehouseAsync(),
-                    LoadOperators()
+                    LoadOperatorsAsync()
                 );
 
                 OnSearchStockChanged(SearchStock);
@@ -299,11 +302,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public void SelectCell(CellViewModel cell)
         {
+            if (cell == null)
+                return;
+
             SelectedCell = cell;
         }
 
         [RelayCommand]
-        public async Task SelectRack(RackViewModel rack)
+        public void SelectRack(RackViewModel rack)
         {
             if (rack == null)
                 return;
@@ -355,6 +361,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 RacksGrid.Add(rack);
             }
         }
+
         private void LoadCells()
         {
             CellsGrid.Clear();
@@ -368,7 +375,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
         }
 
-        private async Task LoadOperators()
+        private async Task LoadOperatorsAsync()
         {
             try
             {
@@ -383,6 +390,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
         }
 
+        // Поиск по остаткам.
         partial void OnSearchStockChanged(string value)
         {
             this.token?.Cancel();

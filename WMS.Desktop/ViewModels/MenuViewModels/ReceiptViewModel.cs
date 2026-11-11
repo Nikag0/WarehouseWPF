@@ -149,7 +149,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private readonly SemaphoreSlim _lock = new(1, 1);
         private readonly IStockService _stockService;
         private readonly DialogService _dialogService;
-        private readonly OperatorService _operatorrService;
+        private readonly OperatorService _operatorService;
         private readonly WarehouseService _warehouseService;
         private readonly WarehouseVisualizationService _warehouseVisualizationService;
         private readonly LedStripService _ledStripService;
@@ -166,7 +166,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             _stockService = stockService;
             _dialogService = dialogService;
-            _operatorrService = operatorrService;
+            _operatorService = operatorrService;
             _warehouseService = warehouseService;
             _warehouseVisualizationService = warehouseVisualizationService;
             _ledStripService = ledStripService;
@@ -220,8 +220,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             try
             {
-                isLedAvailable = await _ledStripService.TurnOnSectorAsync(SelectedCell.Id)
-                              && await _ledStripService.SetGPIOAsync(SelectedCell.Id, 1);
+                isLedAvailable = await SwitchCellLightAsync(SelectedCell.Id, isOn: true);
             }
             catch (Exception ex)
             {
@@ -243,7 +242,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}");
 
             if (isLedAvailable)
-                await SectorTurnOffAsync(SelectedCell.Id);
+                await SwitchCellLightAsync(SelectedCell.Id, isOn: false);
 
             if (!isAccepted)
                 return;
@@ -257,7 +256,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             catch (OperationCanceledException)
             {
                 _logger.LogWarning("Receipt aborted: lock timeout");
-                _dialogService.ShowWarning("Операция занята. Попробуйте позже.");
+                _dialogService.ShowWarning("Программа не закончила прошлую операцию. Попробуйте позже.");
                 return;
             }
 
@@ -313,9 +312,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 _logger.LogError(ex, "Warehouse refresh after receipt failed");
             }
 
-            // Сбрасываем форму в любом случае, чтобы ту же приёмку нельзя было отправить повторно
-            ResetReceiptState();
-
             if (isRefreshed)
             {
                 _dialogService.ShowInfo("Приём товаров успешно выполнен.");
@@ -326,6 +322,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     "Приём товаров выполнен и сохранён, но схему склада не удалось обновить.\n\n" +
                     "Не повторяйте приёмку. Чтобы обновить схему, переключитесь на другую вкладку и вернитесь.");
             }
+
+            // Сбрасываем форму, чтобы ту же приёмку нельзя было отправить повторно.
+            ResetReceiptState();
         }
 
         public async Task LoadDataAsync()
@@ -350,6 +349,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public void SelectRack(RackViewModel rack)
         {
+            if (rack == null) return;
+
             SelectedRack = rack;
             IsRackPopupOpen = false;
         }
@@ -357,6 +358,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public void SelectCell(CellViewModel cell)
         {
+            if (cell == null) return;
+
             SelectedCell = cell;
             IsCellPopupOpen = false;
         }
@@ -438,20 +441,22 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             ReplaceCollection(FilteredRacks, RacksGrid);
         }
 
-        private async Task SectorTurnOffAsync(Guid cellId)
+        // Включает или выключает подсветку и GPIO ячейки. Возвращает false, если контроллер не ответил.
+        private async Task<bool> SwitchCellLightAsync(Guid cellId, bool isOn)
         {
             try
             {
-                var isOff = await _ledStripService.TurnOffSectorAsync(cellId)
-                         && await _ledStripService.SetGPIOAsync(cellId, 0);
+                var isLightOk = isOn
+                    ? await _ledStripService.TurnOnSectorAsync(cellId)
+                    : await _ledStripService.TurnOffSectorAsync(cellId);
 
-                if (!isOff)
-                    _dialogService.ShowWarning("Не удалось выключить подсветку ячейки: контроллер не отвечает.");
+                var isGpioOk = await _ledStripService.SetGPIOAsync(cellId, isOn ? 1 : 0);
+
+                return isLightOk && isGpioOk;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "LED turn-off failed for cell {CellId}", cellId);
-                _dialogService.ShowWarning("При выключении подсветки ячейки произошла ошибка.");
+                return false;
             }
         }
 
@@ -485,16 +490,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             try
             {
+                var data = await _operatorService.GetAllAsync();
                 Operators.Clear();
-                var items = await _operatorrService.GetAllAsync();
-                foreach (var item in items)
-                    Operators.Add(item);
+                foreach (var @operator in data)
+                    Operators.Add(@operator);
             }
             catch (BusinessException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
-            catch (Exception ex)
             {
                 _dialogService.ShowWarning(ex.Message);
             }
