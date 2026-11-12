@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,57 +17,31 @@ namespace WMS.Infrastructure
     public class StockRepository : IStockRepository
     {
         private readonly IDbContextAccessor _contextAccessor;
-        private readonly ILogger<StockRepository> _logger;
-
-        public StockRepository(IDbContextAccessor contextAccessor, ILogger<StockRepository> logger)
+        public StockRepository(IDbContextAccessor contextAccessor)
         {
             _contextAccessor = contextAccessor;
-            _logger = logger;
         }
 
         private AppDbContext _db => _contextAccessor.CurrentContext;
 
         public async Task<Stock?> GetByIdAsync(Guid stockId, CancellationToken ct = default)
         {
-            try
-            {
-                var stock = await _db.Stock
-                    .Include(s => s.Component)
-                    .Include(s => s.Rack)
-                    .Include(s => s.Cell)
-                    .FirstOrDefaultAsync(x => x.Id == stockId, ct);
-
-                if (stock is null)
-                    _logger.LogWarning("Stock {StockId} not found", stockId);
-
-                return stock;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Database error fetching stock {StockId}", stockId);
-                throw; 
-            }
+            return await _db.Stock
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .FirstOrDefaultAsync(x => x.Id == stockId, ct);
         }
 
         public async Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId, CancellationToken ct = default)
         {
-            try
-            {
-                return await _db.Stock
-                    .Include(s => s.Component)
-                    .Include(s => s.Rack)
-                    .Include(s => s.Cell)
-                    .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
-                                                s.RackId == rackId &&
-                                                s.CellId == cellId, ct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "Database error fetching stock by location. Component:{ComponentId}, Rack:{RackId}, Cell:{CellId}",
-                    componentId, rackId, cellId);
-                throw;
-            }
+            return await _db.Stock
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .FirstOrDefaultAsync(s => s.ComponentId == componentId &&
+                                            s.RackId == rackId &&
+                                            s.CellId == cellId, ct);
         }
 
         public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default)
@@ -94,15 +67,7 @@ namespace WMS.Infrastructure
 
         public void Add(Stock stock, CancellationToken ct = default)
         {
-            try
-            {
-                _db.Stock.Add(stock);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Failed to add stock {Name}", stock.Id);
-                throw;
-            }
+            _db.Stock.Add(stock);
         }
 
         public void Update(Stock stock, CancellationToken ct = default)
@@ -166,20 +131,12 @@ namespace WMS.Infrastructure
 
         public IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default)
         {
-            try
-            {
-                return _db.Stock
-                    .AsNoTracking() // Отключаем отслеживание сущностей ради экономии памяти
-                    .Include(s => s.Component)
-                    .Include(s => s.Rack)
-                    .Include(s => s.Cell)
-                    .AsAsyncEnumerable(); // Переводим в асинхронный поток (стриминг)
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Database error fetching all stocks for export");
-                throw;
-            }
+            return _db.Stock
+                .AsNoTracking() // Отключаем отслеживание сущностей ради экономии памяти
+                .Include(s => s.Component)
+                .Include(s => s.Rack)
+                .Include(s => s.Cell)
+                .AsAsyncEnumerable(); // Переводим в асинхронный поток (стриминг)
         }
 
         public async Task<bool> HasAnyStockAsync(Guid componentId, CancellationToken ct = default)

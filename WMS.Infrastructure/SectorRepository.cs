@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
-using Microsoft.Extensions.Logging;
 using WMS.Infrastructure.Context;
 
 namespace WMS.Infrastructure
@@ -9,22 +8,19 @@ namespace WMS.Infrastructure
     public class SectorRepository : ISectorRepository
     {
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
-        private readonly ILogger<SectorRepository> _logger;
 
-        public SectorRepository(IDbContextFactory<AppDbContext> factory, ILogger<SectorRepository> logger)
+        public SectorRepository(IDbContextFactory<AppDbContext> factory)
         {
             _contextFactory = factory;
-            _logger = logger;
         }
 
-        
         public async Task<IReadOnlyList<SectorInitDTO>> GetAllSectorsForInitializationAsync(CancellationToken ct = default)
         {
-            await using var db =  await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var result = await db.Sector
+            await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            return await db.Sector
                 .AsNoTracking()
                 .Include(s => s.Strip)
-                    .ThenInclude(strip =>  strip.Microcontroller)
+                    .ThenInclude(strip => strip.Microcontroller)
                 .Select(s => new SectorInitDTO(
                     s.Strip.Microcontroller.DeviceAddress,
                     s.Strip.StripNumber,
@@ -34,16 +30,12 @@ namespace WMS.Infrastructure
                     s.Strip.Microcontroller.Ip,
                     s.Strip.Microcontroller.Port))
                 .ToListAsync(ct);
-
-            _logger.LogInformation("Loaded {Count} sectors for initialization", result.Count);
-
-            return result;
         }
 
         public async Task<SectorColorDTO?> GetByCellIdAsync(Guid cellId, CancellationToken ct = default)
         {
             await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var dto = await db.Sector
+            return await db.Sector
                 .AsNoTracking()
                 .Include(s => s.Strip)
                     .ThenInclude(strip => strip.Microcontroller)
@@ -58,28 +50,21 @@ namespace WMS.Infrastructure
                     s.Bright
                 ))
                 .SingleOrDefaultAsync(ct);
-
-            if (dto is null)
-                _logger.LogWarning("Sector for CellId {CellId} not found", cellId);
-
-            return dto;
         }
 
+        // Возвращает false, если у ячейки нет сектора подсветки
         public async Task<bool> SetColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
         {
-            try
-            {
-                await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-                var sector = await db.Sector.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
+            await using var db = await _contextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            var sector = await db.Sector.SingleOrDefaultAsync(s => s.CellId == cellId, ct).ConfigureAwait(false);
 
-                await db.SaveChangesAsync(ct);
-                return true;
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Failed to save color for CellId {CellId}", cellId);
-                throw;
-            }
+            if (sector is null)
+                return false;
+
+            sector.SetColor(r, g, b);
+
+            await db.SaveChangesAsync(ct);
+            return true;
         }
     }
 }

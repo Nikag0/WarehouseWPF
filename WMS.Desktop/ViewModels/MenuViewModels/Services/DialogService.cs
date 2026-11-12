@@ -21,8 +21,19 @@ namespace WMS.Desktop.Services
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
+        // Можно вызывать из фонового потока (например, из Task.Run в поиске): окно всё равно покажется в потоке интерфейса
         public void ShowError(string message, string title = "Ошибка")
         {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null)
+                return; // Приложение уже закрывается
+
+            if (!dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => ShowError(message, title));
+                return;
+            }
+
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 

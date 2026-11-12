@@ -126,7 +126,7 @@ namespace WMS.Desktop
                     // Проверяем, доступ к серверу БД
                     if (!await db.Database.CanConnectAsync())
                     {
-                        throw new Exception("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
+                        throw new InvalidOperationException("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
                     }
 
                     // Накатываем миграции при старте

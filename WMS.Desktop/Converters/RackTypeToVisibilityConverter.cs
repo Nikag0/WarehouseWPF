@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -8,7 +8,7 @@ namespace WMS.Desktop.Converters
 {
     public class RackTypeToVisibilityConverter : IValueConverter
     {
-        // ConverterParameter — èìÿ enum value èëè ñïèñîê ÷åðåç çàïÿòóþ, íàïðèìåð: "RackType1" èëè "RackType1,RackType2"
+        // ConverterParameter â€” Ð¸Ð¼Ñ enum value Ð¸Ð»Ð¸ ÑÐ¿Ð¸ÑÐ¾Ðº Ñ‡ÐµÑ€ÐµÐ· Ð·Ð°Ð¿ÑÑ‚ÑƒÑŽ, Ð½Ð°Ð¿Ñ€Ð¸Ð¼ÐµÑ€: "RackType1" Ð¸Ð»Ð¸ "RackType1,RackType2"
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null || parameter == null) return Visibility.Collapsed;
@@ -25,6 +25,6 @@ namespace WMS.Desktop.Converters
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => throw new NotImplementedException();
+            => throw new NotSupportedException();
     }
 }

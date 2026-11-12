@@ -23,7 +23,7 @@ namespace WMS.Application.Services
             _logger = logger;
         }
 
-        public async Task<Result> UpdateAsync(ComponentEditDto dto)
+        public async Task UpdateAsync(ComponentEditDto dto)
         {
             try
             {
@@ -32,13 +32,13 @@ namespace WMS.Application.Services
                 var component = await _componentRepo.GetByIdAsync(dto.Id);
 
                 if (component is null)
-                    return Result.Failure("Компонент не найден.");
+                    throw new BusinessException("Компонент не найден.");
 
                 if (!string.Equals(component.Article, dto.Article, StringComparison.OrdinalIgnoreCase))
                 {
                     var existing = await _componentRepo.GetByArticleAsync(dto.Article);
                     if (existing is not null)
-                        return Result.Failure($"Артикул '{dto.Article}' уже используется другим компонентом.");
+                        throw new BusinessException($"Артикул '{dto.Article}' уже используется другим компонентом.");
                 }
 
                 component.Update(
@@ -49,17 +49,15 @@ namespace WMS.Application.Services
                     dto.MinQuantity);
 
                 await uow.CommitAsync();
-
-                return Result.Success();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
-                _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {dto.Id} в БД");
+                _logger.LogError(ex, "Критическая ошибка при обновлении компонента {ComponentId} в БД", dto.Id);
                 throw;
             }
         }
 
-        public async Task<Result> AddAsync(ComponentEditDto dto)
+        public async Task AddAsync(ComponentEditDto dto)
         {
             try
             {
@@ -67,25 +65,20 @@ namespace WMS.Application.Services
 
                 var existing = await _componentRepo.GetByArticleAsync(dto.Article);
                 if (existing is not null)
-                    return Result.Failure($"Артикул '{dto.Article}' уже используется.");
+                    throw new BusinessException($"Артикул '{dto.Article}' уже используется.");
 
                 var component = Domain.Component.Create(dto.Article, dto.Name, dto.Manufacturer, dto.ExpirationDate, dto.MinQuantity);
                 await _componentRepo.AddAsync(component);
                 await uow.CommitAsync();
-                return Result.Success();
             }
-            catch (BusinessException domainEx)
-            {
-                return Result.Failure(domainEx.Message);
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
                 _logger.LogError(ex, "Критическая ошибка при добавлении компонента в БД");
                 throw;
             }
         }
 
-        public async Task<Result> DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
             try
             {
@@ -93,27 +86,19 @@ namespace WMS.Application.Services
 
                 var component = await _componentRepo.GetByIdAsync(id);
                 if (component is null)
-                {
-                    return Result.Failure("Компонент не найден.");
-                }
+                    throw new BusinessException("Компонент не найден.");
 
                 bool hasStock = await _stockRepository.HasAnyStockAsync(id);
                 if (hasStock)
-                {
-                    return Result.Failure("Существуют остатки с этим компонентом");
-                }
+                    throw new BusinessException("Существуют остатки с этим компонентом");
 
                 _componentRepo.Delete(component);
 
                 await uow.CommitAsync();
-
-                _logger.LogInformation($"Компонент с ID {id} успешно удален.");
-
-                return Result.Success();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
-                _logger.LogError(ex, $"Ошибка при удалении компонента {id}");
+                _logger.LogError(ex, "Ошибка при удалении компонента {ComponentId}", id);
                 throw;
             }
         }
@@ -125,7 +110,7 @@ namespace WMS.Application.Services
                 await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
                 throw;
@@ -139,7 +124,7 @@ namespace WMS.Application.Services
                 await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetEditFilterAsync(searchText, maxCount, token);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
                 throw;

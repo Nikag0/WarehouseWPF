@@ -34,13 +34,13 @@ public class Stock
         int initialQuantity)
     {
         if (componentId == Guid.Empty)
-            throw new BusinessException("ComponentId не задан");
+            throw new BusinessException("Компонент не указан");
 
         if (rackId == Guid.Empty)
-            throw new BusinessException("RackId не задан");
+            throw new BusinessException("Стеллаж не указан");
 
         if (cellId == Guid.Empty)
-            throw new BusinessException("CellId не задан");
+            throw new BusinessException("Ячейка не указана");
         
 
         return new Stock(

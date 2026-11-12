@@ -44,7 +44,7 @@ namespace WMS.Domain.UnitTests
 
             // Assert
             act.Should().Throw<BusinessException>()
-               .WithMessage("ComponentId не задан");
+               .WithMessage("Компонент не указан");
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace WMS.Domain.UnitTests
 
             // Assert
             act.Should().Throw<BusinessException>()
-               .WithMessage("RackId не задан");
+               .WithMessage("Стеллаж не указан");
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace WMS.Domain.UnitTests
 
             // Assert
             act.Should().Throw<BusinessException>()
-               .WithMessage("CellId не задан");
+               .WithMessage("Ячейка не указана");
         }
 
         [Xunit.Theory]

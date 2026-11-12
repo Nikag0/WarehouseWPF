@@ -87,9 +87,9 @@ namespace WMS.Application.Services
                 );
         }
 
-        public async Task SetCellColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
+        public async Task<bool> SetCellColorAsync(Guid cellId, byte r, byte g, byte b, CancellationToken ct = default)
         {
-            await _repository.SetColorAsync(cellId, r, g, b, ct);
+            return await _repository.SetColorAsync(cellId, r, g, b, ct);
         }
 
         public async Task AskGPIOAsync(Guid cellId, CancellationToken ct = default)

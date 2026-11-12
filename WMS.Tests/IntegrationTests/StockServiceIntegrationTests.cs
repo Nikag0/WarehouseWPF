@@ -50,8 +50,8 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         var holder = new DbContextHolder();
 
         return new StockService(
-            new ComponentRepository(holder, NullLogger<ComponentRepository>.Instance),
-            new StockRepository(holder, NullLogger<StockRepository>.Instance),
+            new ComponentRepository(holder),
+            new StockRepository(holder),
             new HistoryRepository(holder),
             NullLogger<StockService>.Instance,
             new UnitOfWorkFactory(new TestDbContextFactory(DbOptions), holder));

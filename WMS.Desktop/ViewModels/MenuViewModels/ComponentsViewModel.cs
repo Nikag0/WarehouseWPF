@@ -71,6 +71,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     });
                 }
                 catch (OperationCanceledException) {}
+                catch (Exception ex)
+                {
+                    // Без этого ошибка фоновой задачи потерялась бы, и пользователь просто не увидел бы результатов
+                    _dialogService.ShowError($"Не удалось выполнить поиск: {ex.Message}");
+                }
             });
         }
     }

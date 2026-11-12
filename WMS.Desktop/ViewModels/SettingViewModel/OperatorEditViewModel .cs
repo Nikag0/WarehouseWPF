@@ -52,50 +52,41 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                Result result;
-
                 if (_isEditMode)
                 {
-                    result =  await _operatorService.UpdateAsync(
+                    await _operatorService.UpdateAsync(
                         new OperatorDTO(
                             _currentOperator.Id,
                             Surname,
                             Name,
                             Patronymic,
-                            $"{Surname} {Name[0]}. {Patronymic[0]}."
+                            string.Empty // FullName вычисляет сущность Operator, сервису оно не нужно
                         ));
                 }
                 else
                 {
-                    result = await _operatorService.AddAsync(
+                    await _operatorService.AddAsync(
                         Surname,
                         Name,
                         Patronymic
                     );
                 }
 
-                if (result.IsSuccess)
+                _dialogService.ShowInfo("Данные успешно сохранены.");
+                if (window != null)
                 {
-                    _dialogService.ShowInfo("Данные успешно сохранены.");
-                    if (window != null)
-                    {
-                        WeakReferenceMessenger.Default.Send(new MessageService(true));
-                        window.DialogResult = true;
-                        window.Close();
-                    }
-                }
-                else
-                {
-                    _dialogService.ShowWarning(result.Error, "Предупреждение");
+                    WeakReferenceMessenger.Default.Send(new MessageService(true));
+                    window.DialogResult = true;
+                    window.Close();
                 }
             }
-            catch (BusinessException domainEx)
+            catch (BusinessException ex)
             {
-                MessageBox.Show(domainEx.Message, "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _dialogService.ShowWarning(ex.Message, "Предупреждение");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Системная ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                _dialogService.ShowError($"Критическая ошибка сохранения: {ex.Message}", "Ошибка системы");
             }
         }
     }

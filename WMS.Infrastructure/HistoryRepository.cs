@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Threading;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
