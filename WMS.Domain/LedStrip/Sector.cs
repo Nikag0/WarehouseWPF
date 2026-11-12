@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain.LedStrip
 {
@@ -36,7 +32,7 @@ namespace WMS.Domain.LedStrip
             int endDiode)
         {
             if (startDiode > endDiode)
-                throw new ArgumentException("StartDiode не может быть больше EndDiode");
+                throw new BusinessException("Начальный диод сектора не может быть больше конечного");
 
             Id = id;
             StripId = stripId;

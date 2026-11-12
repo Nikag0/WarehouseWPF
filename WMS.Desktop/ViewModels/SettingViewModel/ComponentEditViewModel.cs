@@ -50,11 +50,9 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                Result result;
-
                 if (_isEditMode)
                 {
-                    result = await _componentService.UpdateAsync(
+                    await _componentService.UpdateAsync(
                     new ComponentEditDto(
                         _currentComponentDto.Id,
                         Article,
@@ -66,7 +64,7 @@ namespace WMS.Desktop.ViewModels
                 }
                 else
                 {
-                    result = await _componentService.AddAsync(new ComponentEditDto(
+                    await _componentService.AddAsync(new ComponentEditDto(
                         Guid.Empty,
                         Article,
                         Name,
@@ -76,24 +74,17 @@ namespace WMS.Desktop.ViewModels
                     ));
                 }
 
-                if (result.IsSuccess)
+                _dialogService.ShowInfo("Данные успешно сохранены.");
+                if (window != null)
                 {
-                    _dialogService.ShowInfo("Данные успешно сохранены.");
-                    if (window != null)
-                    {
-                        WeakReferenceMessenger.Default.Send(new MessageService(true));
-                        window.DialogResult = true;
-                        window.Close();
-                    }
-                }
-                else
-                {
-                    _dialogService.ShowWarning(result.Error, "Предупреждение");
+                    WeakReferenceMessenger.Default.Send(new MessageService(true));
+                    window.DialogResult = true;
+                    window.Close();
                 }
             }
-            catch (BusinessException domainEx)
+            catch (BusinessException ex)
             {
-                _dialogService.ShowWarning(domainEx.Message, "Ошибка заполнения полей");
+                _dialogService.ShowWarning(ex.Message, "Предупреждение");
             }
             catch (Exception ex)
             {

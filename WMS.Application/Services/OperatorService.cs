@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using WMS.Application.Abstractions;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 
 namespace WMS.Application.Services
 {
@@ -33,68 +34,63 @@ namespace WMS.Application.Services
         {
             var result = await _operatorRepo.GetByIdAsync(id);
             if (result is null)
-                throw new Exception("Оператор с таким Id не найден");
+                throw new BusinessException("Оператор не найден.");
 
             return MappingExtensions.ToOperatorDTO(result);
         }
 
-        public async Task<Result> AddAsync(string surname, string name, string patronymic)
+        public async Task AddAsync(string surname, string name, string patronymic)
         {
+            // Сначала доменная проверка: она обрежет пробелы и сообщит о пустых полях
+            var newOperator = Operator.Create(surname, name, patronymic);
+
             var isExists = await _operatorRepo.IsOperatorExistsAsync(
-                surname.Trim().ToLower(),
-                name.Trim().ToLower(),
-                patronymic.Trim().ToLower());
+                newOperator.Surname,
+                newOperator.Name,
+                newOperator.Patronymic);
 
             if (isExists)
-                return Result.Failure("Оператор c таким именем уже зарегистрирован.");
+                throw new BusinessException("Оператор c таким именем уже зарегистрирован.");
 
-            var newOperator = Operator.Create(surname, name, patronymic);
             await _operatorRepo.AddAsync(newOperator);
-
-            return Result.Success();
         }
 
-        public async Task<Result> UpdateAsync(OperatorDTO dto)
+        public async Task UpdateAsync(OperatorDTO dto)
         {
             var @operator = await _operatorRepo.GetByIdAsync(dto.Id);
             if (@operator is null)
-                return Result.Failure("Оператор не найден.");
+                throw new BusinessException("Оператор не найден.");
+
+            // Сначала доменная проверка. Объект загружен в закрытом контексте, поэтому до сохранения в БД изменения не попадут
+            @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
 
             // Самого редактируемого оператора не учитываем, иначе сохранение без изменений ФИО считалось бы дублем
             var isExists = await _operatorRepo.IsOperatorExistsAsync(
-                dto.Surname.Trim().ToLower(),
-                dto.Name.Trim().ToLower(),
-                dto.Patronymic.Trim().ToLower(),
+                @operator.Surname,
+                @operator.Name,
+                @operator.Patronymic,
                 excludeId: dto.Id);
 
             if (isExists)
-                return Result.Failure("Оператор c таким именем уже зарегистрирован.");
-
-            @operator.Update(dto.Surname, dto.Name, dto.Patronymic);
+                throw new BusinessException("Оператор c таким именем уже зарегистрирован.");
 
             // Объект загружен в уже закрытом контексте, поэтому сохраняем его через репозиторий
             await _operatorRepo.UpdateAsync(@operator);
-
-            return Result.Success();
         }
 
-        public async Task<Result> DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
             try
             {
                 var op = await _operatorRepo.GetByIdAsync(id);
                 if (op is null)
-                {
-                    return Result.Failure("Оператор не найден.");
-                }
+                    throw new BusinessException("Оператор не найден.");
 
                 await _operatorRepo.DeleteAsync(op);
 
                 _logger.LogInformation($"Оператор с ID {id} удален.");
-
-                return Result.Success();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
                 _logger.LogError(ex, $"Ошибка при удалении оператора {id}");
                 throw;

@@ -126,7 +126,7 @@ namespace WMS.Application.Services
                 {
                     _logger.LogWarning("Component {ComponentId} not found", receiptStock.ComponentId);
 
-                    throw new BusinessException($"Компонент {receiptStock.ComponentId} не найден");
+                    throw new BusinessException("Компонент не найден");
                 }
 
                 var stock = await _stockRepo.GetByLocationAsync(receiptStock.ComponentId, receiptStock.RackId, receiptStock.CellId, ct);

@@ -17,6 +17,7 @@ using WMS.Desktop.ViewModels.SettingViewModel;
 using WMS.Desktop.Views;
 using WMS.Desktop.Views.Settings;
 using WMS.Domain;
+using WMS.Domain.ExceptionControl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WMS.Desktop.ViewModels
@@ -110,18 +111,15 @@ namespace WMS.Desktop.ViewModels
 
             try
             {
-                var result = await _componentService.DeleteAsync(component.Id);
+                await _componentService.DeleteAsync(component.Id);
 
-                if (result.IsSuccess)
-                {
-                    FilteredComponents.Remove(component);
-                    WeakReferenceMessenger.Default.Send(new MessageService(true));
-                    _dialogService.ShowInfo("Компонент успешно удален.");
-                }
-                else
-                {
-                    _dialogService.ShowWarning(result.Error, "Предупреждение");
-                }
+                FilteredComponents.Remove(component);
+                WeakReferenceMessenger.Default.Send(new MessageService(true));
+                _dialogService.ShowInfo("Компонент успешно удален.");
+            }
+            catch (BusinessException ex)
+            {
+                _dialogService.ShowWarning(ex.Message, "Предупреждение");
             }
             catch (Exception ex)
             {
@@ -167,18 +165,15 @@ namespace WMS.Desktop.ViewModels
 
             try
             {
-                var result = await _operatorService.DeleteAsync(op.Id);
+                await _operatorService.DeleteAsync(op.Id);
 
-                if (result.IsSuccess)
-                {
-                    FilteredOperators.Remove(op);
-                    WeakReferenceMessenger.Default.Send(new MessageService(true));
-                    _dialogService.ShowInfo("Оператор успешно удален.");
-                }
-                else
-                {
-                    _dialogService.ShowWarning(result.Error, "Предупреждение");
-                }
+                FilteredOperators.Remove(op);
+                WeakReferenceMessenger.Default.Send(new MessageService(true));
+                _dialogService.ShowInfo("Оператор успешно удален.");
+            }
+            catch (BusinessException ex)
+            {
+                _dialogService.ShowWarning(ex.Message, "Предупреждение");
             }
             catch (Exception ex)
             {
