@@ -13,7 +13,7 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Operator> builder)
         {
-            builder.ToTable("operators");
+            builder.ToTable("operator");
 
             builder.HasKey(x => x.Id);
 

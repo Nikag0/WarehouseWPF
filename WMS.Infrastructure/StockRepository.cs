@@ -149,9 +149,9 @@ namespace WMS.Infrastructure
                 FROM (
                     SELECT st.*, 
                             SUM(st.""Quantity"") OVER(PARTITION BY st.""ComponentId"") as ""TotalComponentQuantity""
-                    FROM ""stocks"" st
+                    FROM ""stock"" st
                 ) s
-                INNER JOIN ""components"" c ON s.""ComponentId"" = c.""Id""
+                INNER JOIN ""component"" c ON s.""ComponentId"" = c.""Id""
                 WHERE s.""TotalComponentQuantity"" <= c.""MinQuantity""";
 
 

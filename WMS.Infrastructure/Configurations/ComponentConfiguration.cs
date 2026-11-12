@@ -9,7 +9,7 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Component> builder)
         {
-            builder.ToTable("components");
+            builder.ToTable("component");
 
             builder.HasKey(x => x.Id);
 
