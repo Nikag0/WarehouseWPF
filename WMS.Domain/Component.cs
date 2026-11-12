@@ -1,10 +1,8 @@
-﻿using System.ComponentModel;
-using WMS.Domain.ExceptionControl;
-using WMS.Domain.Interfaces;
+﻿using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain;
 
-public class Component : ISoftDeletable
+public class Component
 {
     public Guid Id { get; private set; }
     public string Article { get; private set; } = null!;
@@ -14,7 +12,6 @@ public class Component : ISoftDeletable
     public int MinQuantity { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public bool IsDeleted { get; private set; }
 
     // Для EF Core
     private Component() { }
@@ -105,29 +102,11 @@ public class Component : ISoftDeletable
         Manufacturer = manufacturer.Trim();
     }
 
-    // Не протестировано, т. к. не используется.
-    private void SetExpirationDate(DateOnly expirationDate)
-    {
-        if (expirationDate < DateOnly.FromDateTime(DateTime.UtcNow))
-        {
-            throw new BusinessException("Срок годности не может быть в прошлом");
-        }
-
-        ExpirationDate = expirationDate;
-    }
-
     private void SetMinQuantity(int minQuantity)
     {
         if (minQuantity <= 0)
             throw new BusinessException("Минимальный остаток не может быть отрицательным или равным нулю");
 
         MinQuantity = minQuantity;
-    }
-
-    public void Delete()
-    {
-        if (IsDeleted) return;
-
-        IsDeleted = true;
     }
 }

@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WMS.Domain.ExceptionControl;
-using WMS.Domain.Interfaces;
+﻿using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain
 {
-    public class Operator : ISoftDeletable
+    public class Operator
     {
         public Guid Id { get; private set; }
         public string Surname { get; private set; }
@@ -18,7 +10,6 @@ namespace WMS.Domain
         public string Patronymic { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
-        public bool IsDeleted { get; private set; } 
 
         private Operator() { } // для EF
 
@@ -75,14 +66,6 @@ namespace WMS.Domain
 
             if (string.IsNullOrWhiteSpace(patronymic))
                 throw new BusinessException("Отчество не задано");
-        }
-
-        public void Delete()
-        {
-            if (IsDeleted)
-                return;
-
-            IsDeleted = true;
         }
 
         public string FullName =>$"{Surname} {Name[0]}. {Patronymic[0]}.";

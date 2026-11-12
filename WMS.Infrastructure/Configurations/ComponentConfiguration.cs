@@ -11,8 +11,6 @@ namespace WMS.Infrastructure.Configurations
         {
             builder.ToTable("components");
 
-            builder.HasQueryFilter(c => !c.IsDeleted);
-
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Article)
@@ -20,8 +18,7 @@ namespace WMS.Infrastructure.Configurations
                 .HasMaxLength(50);
 
             builder.HasIndex(c => c.Article)
-                .IsUnique()
-                .HasFilter("\"IsDeleted\" = false");
+                .IsUnique();
 
             builder.Property(x => x.Name)
                 .IsRequired()

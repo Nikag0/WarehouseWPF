@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WMS.Application;
 using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain

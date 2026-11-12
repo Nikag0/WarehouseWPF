@@ -15,8 +15,6 @@ namespace WMS.Infrastructure.Configurations
         {
             builder.ToTable("operators");
 
-            builder.HasQueryFilter(o => !o.IsDeleted);
-
             builder.HasKey(x => x.Id);
 
             builder.Property(x => x.Surname).IsRequired();

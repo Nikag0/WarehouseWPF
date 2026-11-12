@@ -88,9 +88,7 @@ namespace WMS.Application.Services
                     return Result.Failure("Оператор не найден.");
                 }
 
-                op.Delete();
-
-                await _operatorRepo.UpdateAsync(op);
+                await _operatorRepo.DeleteAsync(op);
 
                 _logger.LogInformation($"Оператор с ID {id} удален.");
 

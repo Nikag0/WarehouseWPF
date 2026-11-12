@@ -152,8 +152,7 @@ namespace WMS.Infrastructure
                     FROM ""stocks"" st
                 ) s
                 INNER JOIN ""components"" c ON s.""ComponentId"" = c.""Id""
-                WHERE c.""IsDeleted"" = FALSE 
-                    AND s.""TotalComponentQuantity"" <= c.""MinQuantity""";
+                WHERE s.""TotalComponentQuantity"" <= c.""MinQuantity""";
 
 
             return await _db.Stock
@@ -183,13 +182,11 @@ namespace WMS.Infrastructure
             }
         }
 
-        //Можно подумать над реалзацией.
-
-        public async Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default)
+        public async Task<bool> HasAnyStockAsync(Guid componentId, CancellationToken ct = default)
         {
             return await _db.Stock
                 .AsNoTracking()
-                .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
+                .AnyAsync(s => s.ComponentId == componentId, ct);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
+using WMS.Application.DTO;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 namespace WMS.Application.Services

@@ -35,7 +35,6 @@ namespace WMS.Domain.UnitTests
             component.Manufacturer.Should().Be(ValidManufacturer);
             component.ExpirationDate.Should().Be(null);
             component.MinQuantity.Should().Be(ValidMinQuantity);
-            component.IsDeleted.Should().BeFalse();
 
             component.CreatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
             component.UpdatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
@@ -193,26 +192,5 @@ namespace WMS.Domain.UnitTests
                .WithMessage("Минимальный остаток не может быть отрицательным или равным нулю");
         }
 
-        [Fact]
-        public void Delete_WhenNotDeleted_ShouldSetIsDeletedTrue()
-        {
-            var component = CreateValidComponent();
-
-            component.Delete();
-
-            component.IsDeleted.Should().BeTrue();
-        }
-
-        [Fact]
-        public void Delete_WhenAlreadyDeleted_ShouldNotThrow()
-        {
-            var component = CreateValidComponent();
-            component.Delete();
-
-            Action act = () => component.Delete();
-
-            act.Should().NotThrow();
-            component.IsDeleted.Should().BeTrue();
-        }
     }
 }

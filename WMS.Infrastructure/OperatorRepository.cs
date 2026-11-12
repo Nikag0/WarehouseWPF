@@ -53,5 +53,14 @@ namespace WMS.Infrastructure.Migrations
 
             await db.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(Operator operatorr)
+        {
+            using var db = _contextFactory.CreateDbContext();
+
+            db.Operator.Remove(operatorr);
+
+            await db.SaveChangesAsync();
+        }
     }
 }

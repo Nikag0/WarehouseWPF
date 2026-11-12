@@ -94,6 +94,11 @@ namespace WMS.Infrastructure
             }
         }
 
+        public void Delete(Component component)
+        {
+            _db.Component.Remove(component);
+        }
+
         private IQueryable<Component> ApplyFilters(IQueryable<Component> query, string searchText)
         {
             if (string.IsNullOrWhiteSpace(searchText)) return query;

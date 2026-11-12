@@ -15,5 +15,6 @@ namespace WMS.Application.Abstractions
         Task<bool> IsOperatorExistsAsync(string surname, string name, string patronymic, Guid? excludeId = null);
         Task AddAsync(Operator operatorr);
         Task UpdateAsync(Operator operatorr);
+        Task DeleteAsync(Operator operatorr);
     }
 }

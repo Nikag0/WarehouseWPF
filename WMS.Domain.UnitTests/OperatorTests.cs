@@ -1,4 +1,4 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
 using WMS.Domain.ExceptionControl;
 
@@ -30,7 +30,6 @@ namespace WMS.Domain.UnitTests
             @operator.Surname.Should().Be(ValidSurnameName);
             @operator.Name.Should().Be(ValidName);
             @operator.Patronymic.Should().Be(ValidPatronymic);
-            @operator.IsDeleted.Should().BeFalse();
 
             @operator.CreatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
             @operator.UpdatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
@@ -158,39 +157,6 @@ namespace WMS.Domain.UnitTests
 
             act.Should().Throw<BusinessException>()
                 .WithMessage("Отчество не задано");
-        }
-
-        [Test]
-        public void Delete_ShouldMarkOperatorAsDeleted()
-        {
-            var @operator = CreateValidOperator();
-
-            @operator.Delete();
-
-            @operator.IsDeleted.Should().BeTrue();
-        }
-
-        [Test]
-        public void Delete_WhenAlreadyDeleted_ShouldNotThrowException()
-        {
-            var @operator = CreateValidOperator();
-            @operator.Delete();
-
-            var act = () => @operator.Delete();
-
-            act.Should().NotThrow();
-            @operator.IsDeleted.Should().BeTrue();
-        }
-
-        [Test]
-        public void Delete_WhenAlreadyDeleted_ShouldRemainDeleted()
-        {
-            var @operator = CreateValidOperator();
-            @operator.Delete();
-
-            @operator.Delete();
-
-            @operator.IsDeleted.Should().BeTrue();
         }
 
         [Test]

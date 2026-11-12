@@ -20,7 +20,7 @@ namespace WMS.Application.Abstractions
         void Delete(Stock stock, CancellationToken ct = default);
         IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default);
 
-        //Можно подумать над реалзацией.
-        Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default);
+        // Есть ли у компонента хотя бы одна запись остатка (удаление компонента запрещено внешним ключом)
+        Task<bool> HasAnyStockAsync(Guid componentId, CancellationToken ct = default);
     }
 }
