@@ -342,7 +342,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowWarning(ex.Message);
+                _dialogService.ShowError($"Не удалось загрузить данные: {ex.Message}");
             }
         }
 
@@ -407,7 +407,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Receipt failed unexpectedly");
-                _dialogService.ShowError($"Ошибка при выборе элемента к выдаче.");
+                _dialogService.ShowError("Ошибка при выборе товара для приёмки.");
             }
         }
 
@@ -488,17 +488,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async Task LoadOperatorsAsync()
         {
-            try
-            {
-                var data = await _operatorService.GetAllAsync();
-                Operators.Clear();
-                foreach (var @operator in data)
-                    Operators.Add(@operator);
-            }
-            catch (BusinessException ex)
-            {
-                _dialogService.ShowWarning(ex.Message);
-            }
+            var data = await _operatorService.GetAllAsync();
+            Operators.Clear();
+            foreach (var @operator in data)
+                Operators.Add(@operator);
         }
 
         private async Task RefreshStockInRackAsync()
@@ -535,6 +528,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             catch (OperationCanceledException)
             {
                 // Игнорируем отменённый запрос
+            }
+            catch (Exception ex)
+            {
+                // Метод вызывается без ожидания, поэтому без этого catch ошибка потерялась бы
+                _dialogService.ShowError($"Не удалось загрузить содержимое стеллажа: {ex.Message}");
             }
         }
 
@@ -628,6 +626,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 catch (OperationCanceledException)
                 {
                     // Задача отменена новым вводом текста — ничего не делаем
+                }
+                catch (Exception ex)
+                {
+                    // Без этого ошибка фоновой задачи потерялась бы, и пользователь просто не увидел бы результатов
+                    _dialogService.ShowError($"Не удалось выполнить поиск: {ex.Message}");
                 }
             });
         }

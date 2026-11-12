@@ -52,7 +52,7 @@ namespace WMS.Application.Services
             }
             catch (Exception ex) when (ex is not BusinessException)
             {
-                _logger.LogError(ex, $"Критическая ошибка при обновлении компонента {dto.Id} в БД");
+                _logger.LogError(ex, "Критическая ошибка при обновлении компонента {ComponentId} в БД", dto.Id);
                 throw;
             }
         }
@@ -95,12 +95,10 @@ namespace WMS.Application.Services
                 _componentRepo.Delete(component);
 
                 await uow.CommitAsync();
-
-                _logger.LogInformation($"Компонент с ID {id} успешно удален.");
             }
             catch (Exception ex) when (ex is not BusinessException)
             {
-                _logger.LogError(ex, $"Ошибка при удалении компонента {id}");
+                _logger.LogError(ex, "Ошибка при удалении компонента {ComponentId}", id);
                 throw;
             }
         }
@@ -112,7 +110,7 @@ namespace WMS.Application.Services
                 await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
                 throw;
@@ -126,7 +124,7 @@ namespace WMS.Application.Services
                 await using var uow = _uowFactory.Create();
                 return await _componentRepo.GetEditFilterAsync(searchText, maxCount, token);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "Ошибка при получении отфильтрованного списка для отображения");
                 throw;

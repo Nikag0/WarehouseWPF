@@ -54,7 +54,6 @@ namespace WMS.Application.Services
                 {
                     if (!stocksDictionary.TryGetValue(issueStock.StockId, out var stock))
                     {
-                        _logger.LogWarning("Stock {StockId} not found in preloaded data", issueStock.StockId);
                         throw new BusinessException("Товар в одной из указанных ячеек не найден");
                     }
 
@@ -89,12 +88,8 @@ namespace WMS.Application.Services
                 }
 
                 await uow.CommitAsync();
-
-                _logger.LogInformation(
-                    "Issue operation completed successfully. ItemCount:{ItemCount}",
-                    issueStocks.Count);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
                 _logger.LogError(ex,
                     "Issue operation FAILED. ItemCount:{ItemCount}, Operator:{Operator}",
@@ -111,10 +106,7 @@ namespace WMS.Application.Services
             CancellationToken ct = default)
         {
             if (receiptStock is null)
-            {
-                _logger.LogWarning("ReceiveAsync called with null item by {Operator}", operatorName);
                 throw new ArgumentNullException(nameof(receiptStock));
-            }
 
             try
             {
@@ -123,11 +115,7 @@ namespace WMS.Application.Services
                 var component = await _componentRepo.GetByIdAsync(receiptStock.ComponentId);
 
                 if (component is null)
-                {
-                    _logger.LogWarning("Component {ComponentId} not found", receiptStock.ComponentId);
-
                     throw new BusinessException("Компонент не найден");
-                }
 
                 var stock = await _stockRepo.GetByLocationAsync(receiptStock.ComponentId, receiptStock.RackId, receiptStock.CellId, ct);
 
@@ -163,12 +151,8 @@ namespace WMS.Application.Services
                 _historyRepo.Add(operationHistory, ct);
 
                 await uow.CommitAsync();
-
-                _logger.LogInformation(
-                    "Receipt completed. Component:{ComponentId}, Change:{Before}->{After}",
-                    receiptStock.ComponentId, previousQuantity, newQuantity);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not BusinessException)
             {
                 _logger.LogError(ex,
                     "Receipt FAILED for Component:{ComponentId}, Operator:{Operator}",

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +13,9 @@ namespace WMS.Infrastructure
     public class ComponentRepository : IComponentRepository
     {
         private readonly IDbContextAccessor _contextAccessor;
-        private readonly ILogger<ComponentRepository> _logger;
-
-        public ComponentRepository(IDbContextAccessor contextAccessor, ILogger<ComponentRepository> logger)
+        public ComponentRepository(IDbContextAccessor contextAccessor)
         {
             _contextAccessor = contextAccessor;
-            _logger = logger;
         }
 
         private AppDbContext _db => _contextAccessor.CurrentContext;
@@ -61,37 +57,19 @@ namespace WMS.Infrastructure
 
         public async Task<Component?> GetByIdAsync(Guid id)
         {
-            var result = await _db.Component.FindAsync(id);
-
-            if (result is null)
-                _logger.LogWarning("Component for id {id} not found", id);
-
-            return result;
+            return await _db.Component.FindAsync(id);
         }
 
         public async Task<Component?> GetByArticleAsync(string article)
         {
-            var result = await _db.Component.
+            return await _db.Component.
                 AsNoTracking().
                 FirstOrDefaultAsync(c => c.Article.ToLower() == article.ToLower());
-
-            if (result is null)
-                _logger.LogWarning("Component for article {article} not found", article);
-
-            return result;
         }
 
         public async Task AddAsync(Component component)
         {
-            try
-            {
-                await _db.Component.AddAsync(component);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "Failed to add component {Id}", component.Id);
-                throw;
-            }
+            await _db.Component.AddAsync(component);
         }
 
         public void Delete(Component component)

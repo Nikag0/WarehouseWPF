@@ -87,12 +87,10 @@ namespace WMS.Application.Services
                     throw new BusinessException("Оператор не найден.");
 
                 await _operatorRepo.DeleteAsync(op);
-
-                _logger.LogInformation($"Оператор с ID {id} удален.");
             }
             catch (Exception ex) when (ex is not BusinessException)
             {
-                _logger.LogError(ex, $"Ошибка при удалении оператора {id}");
+                _logger.LogError(ex, "Ошибка при удалении оператора {OperatorId}", id);
                 throw;
             }
         }

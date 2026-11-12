@@ -238,7 +238,7 @@ namespace WMS.Desktop.ViewModels
             }
             catch (Exception ex)
             {
-                _dialogService.ShowWarning($"Ошибка удаления {ex.Message}", "Предупреждение");
+                _dialogService.ShowError($"Не удалось очистить историю: {ex.Message}");
             }
         }
 
@@ -303,6 +303,11 @@ namespace WMS.Desktop.ViewModels
                     });
                 }
                 catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    // Без этого ошибка фоновой задачи потерялась бы, и пользователь просто не увидел бы результатов
+                    _dialogService.ShowError($"Не удалось выполнить поиск: {ex.Message}");
+                }
             });
         }
     }
