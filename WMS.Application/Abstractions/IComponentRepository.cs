@@ -14,5 +14,6 @@ namespace WMS.Application.Abstractions
         Task<IReadOnlyList<ComponentViewDto>> GetViewFilterAsync(string searchText, int maxCount, CancellationToken token);
         Task<IReadOnlyList<ComponentEditDto>> GetEditFilterAsync(string searchText, int maxCount, CancellationToken token);
         Task AddAsync(Component component);
+        void Delete(Component component);
     }
 }

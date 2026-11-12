@@ -9,7 +9,7 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Stock> builder)
         {
-            builder.ToTable("stocks");
+            builder.ToTable("stock");
 
             builder.HasKey(x => x.Id);
 

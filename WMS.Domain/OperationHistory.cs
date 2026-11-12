@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WMS.Application;
-using WMS.Domain.ExceptionControl;
+﻿using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain
 {
     public class OperationHistory
     {
+        // Ограничение длины комментария (OperationHistoryConfiguration берёт его отсюда)
+        public const int CommentMaxLength = 500;
+
         // Данные самой операции
         public Guid Id { get; private set; }
         public OperationType Type { get; private set; }
@@ -18,15 +14,9 @@ namespace WMS.Domain
         public string Operator { get; private set; } = null!;
         public string? Comment { get; private set; }
 
-        // Данные конкретного компонента
-        public Guid? ComponentId { get; private set; }
+        // Данные компонента и адресация хранятся строками, чтобы история не зависела от других сущностей
         public string ComponentName { get; private set; } = null!;
-
-        // Адресация
-        public Guid RackId { get; private set; }
         public string RackName { get; private set; } = null!;
-
-        public Guid CellId { get; private set; }
         public string CellName { get; private set; } = null!;
 
         // Какое количество было до проведения операции
@@ -40,11 +30,8 @@ namespace WMS.Domain
             OperationType type,
             string operatorName,
             string? comment,
-            Guid componentId,
             string componentName,
-            Guid rackId,
             string rackName,
-            Guid cellId,
             string cellName,
             int previousQuantity,
             int quantityChanged,
@@ -56,13 +43,8 @@ namespace WMS.Domain
             Operator = operatorName;
             Comment = comment;
 
-            ComponentId = componentId;
             ComponentName = componentName;
-
-            RackId = rackId;
             RackName = rackName;
-
-            CellId = cellId;
             CellName = cellName;
 
             PreviousQuantity = previousQuantity;
@@ -74,31 +56,76 @@ namespace WMS.Domain
             OperationType type,
             string operatorName,
             string? comment,
-            Guid Idcomponent,
             string componentName,
-            Guid rackId,
             string rackName,
-            Guid cellId,
             string cellName,
             int previousQuantity,
             int quantityChanged,
             int newQuantity)
         {
+            if (!Enum.IsDefined(type))
+                throw new BusinessException("Неизвестный тип операции");
+
+            operatorName = RequireText(operatorName, "Оператор не указан");
+            comment = NormalizeComment(comment);
+
+            componentName = RequireText(componentName, "Название компонента не указано");
+            rackName = RequireText(rackName, "Название стеллажа не указано");
+            cellName = RequireText(cellName, "Название ячейки не указано");
+
+            ValidateQuantities(type, previousQuantity, quantityChanged, newQuantity);
 
             return new OperationHistory(
                 type,
                 operatorName,
                 comment,
-                Idcomponent,
                 componentName,
-                rackId,
                 rackName,
-                cellId,
                 cellName,
                 previousQuantity,
                 quantityChanged,
                 newQuantity
             );
+        }
+
+        // -------- Business rules --------
+
+        private static string RequireText(string value, string message)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new BusinessException(message);
+
+            return value.Trim();
+        }
+
+        // Пустой комментарий храним как null
+        private static string? NormalizeComment(string? comment)
+        {
+            if (string.IsNullOrWhiteSpace(comment))
+                return null;
+
+            comment = comment.Trim();
+
+            if (comment.Length > CommentMaxLength)
+                throw new BusinessException($"Комментарий не может быть длиннее {CommentMaxLength} символов");
+
+            return comment;
+        }
+
+        private static void ValidateQuantities(OperationType type, int previousQuantity, int quantityChanged, int newQuantity)
+        {
+            if (previousQuantity < 0 || newQuantity < 0)
+                throw new BusinessException("Количество не может быть отрицательным");
+
+            if (quantityChanged <= 0)
+                throw new BusinessException("Изменение количества должно быть больше нуля");
+
+            var expectedQuantity = type == OperationType.Receipt
+                ? previousQuantity + quantityChanged
+                : previousQuantity - quantityChanged;
+
+            if (newQuantity != expectedQuantity)
+                throw new BusinessException("Количество после операции не сходится с изменением");
         }
     }
 }

@@ -160,7 +160,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private void LoadType()
         {
             Type.Clear();
-            Type.Add(MappingExtensions.OperationToStr(OperationType.All));     
+            Type.Add(MappingExtensions.AllOperationsName);     
             Type.Add(MappingExtensions.OperationToStr(OperationType.Receipt)); 
             Type.Add(MappingExtensions.OperationToStr(OperationType.Issue));   
 

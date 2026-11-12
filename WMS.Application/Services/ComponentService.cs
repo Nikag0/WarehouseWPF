@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
@@ -98,13 +97,13 @@ namespace WMS.Application.Services
                     return Result.Failure("Компонент не найден.");
                 }
 
-                bool hasActiveStock = await _stockRepository.HasStockWithQuantityAsync(id);
-                if (hasActiveStock)
+                bool hasStock = await _stockRepository.HasAnyStockAsync(id);
+                if (hasStock)
                 {
                     return Result.Failure("Существуют остатки с этим компонентом");
                 }
 
-                component.Delete();
+                _componentRepo.Delete(component);
 
                 await uow.CommitAsync();
 

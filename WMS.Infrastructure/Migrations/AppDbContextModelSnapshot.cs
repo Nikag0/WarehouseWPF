@@ -42,7 +42,7 @@ namespace WMS.Infrastructure.Migrations
                     b.HasIndex("RackId", "Column", "Row")
                         .IsUnique();
 
-                    b.ToTable("cells", (string)null);
+                    b.ToTable("cell", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Component", b =>
@@ -53,17 +53,14 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<string>("Article")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateOnly?>("ExpirationDate")
                         .HasColumnType("date");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Manufacturer")
                         .IsRequired()
@@ -75,8 +72,8 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -84,10 +81,9 @@ namespace WMS.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Article")
-                        .IsUnique()
-                        .HasFilter("\"IsDeleted\" = false");
+                        .IsUnique();
 
-                    b.ToTable("components", (string)null);
+                    b.ToTable("component", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.LedStrip.Microcontroller", b =>
@@ -185,9 +181,6 @@ namespace WMS.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CellId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("CellName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -195,9 +188,6 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<string>("Comment")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<Guid?>("ComponentId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ComponentName")
                         .IsRequired()
@@ -219,9 +209,6 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("QuantityChanged")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("RackId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("RackName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -231,7 +218,7 @@ namespace WMS.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("operationhistory", (string)null);
+                    b.ToTable("operation_history", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Operator", b =>
@@ -243,20 +230,20 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Patronymic")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -266,7 +253,7 @@ namespace WMS.Infrastructure.Migrations
                     b.HasIndex("Surname", "Name", "Patronymic")
                         .IsUnique();
 
-                    b.ToTable("operators", (string)null);
+                    b.ToTable("operator", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Rack", b =>
@@ -290,7 +277,7 @@ namespace WMS.Infrastructure.Migrations
                     b.HasIndex("Column", "Row")
                         .IsUnique();
 
-                    b.ToTable("racks", (string)null);
+                    b.ToTable("rack", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Stock", b =>
@@ -320,7 +307,7 @@ namespace WMS.Infrastructure.Migrations
                     b.HasIndex("ComponentId", "RackId", "CellId")
                         .IsUnique();
 
-                    b.ToTable("stocks", (string)null);
+                    b.ToTable("stock", (string)null);
                 });
 
             modelBuilder.Entity("WMS.Domain.Cell", b =>

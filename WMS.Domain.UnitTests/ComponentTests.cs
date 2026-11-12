@@ -35,7 +35,6 @@ namespace WMS.Domain.UnitTests
             component.Manufacturer.Should().Be(ValidManufacturer);
             component.ExpirationDate.Should().Be(null);
             component.MinQuantity.Should().Be(ValidMinQuantity);
-            component.IsDeleted.Should().BeFalse();
 
             component.CreatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
             component.UpdatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
@@ -193,26 +192,52 @@ namespace WMS.Domain.UnitTests
                .WithMessage("Минимальный остаток не может быть отрицательным или равным нулю");
         }
 
+
         [Fact]
-        public void Delete_WhenNotDeleted_ShouldSetIsDeletedTrue()
+        public void Create_WithMaxLengthValues_ShouldSucceed()
         {
-            var component = CreateValidComponent();
+            var component = Component.Create(
+                new string('A', Component.TextMaxLength),
+                new string('N', Component.TextMaxLength),
+                new string('M', Component.TextMaxLength),
+                null,
+                ValidMinQuantity);
 
-            component.Delete();
-
-            component.IsDeleted.Should().BeTrue();
+            component.Article.Length.Should().Be(Component.TextMaxLength);
+            component.Name.Length.Should().Be(Component.TextMaxLength);
+            component.Manufacturer.Length.Should().Be(Component.TextMaxLength);
         }
 
         [Fact]
-        public void Delete_WhenAlreadyDeleted_ShouldNotThrow()
+        public void Create_WithTooLongArticle_ShouldThrowBusinessException()
+        {
+            Action act = () => Component.Create(
+                new string('A', Component.TextMaxLength + 1), ValidName, ValidManufacturer, null, ValidMinQuantity);
+
+            act.Should().Throw<BusinessException>()
+               .WithMessage($"Артикул не может быть длиннее {Component.TextMaxLength} символов");
+        }
+
+        [Fact]
+        public void Create_WithTooLongName_ShouldThrowBusinessException()
+        {
+            Action act = () => Component.Create(
+                ValidArticle, new string('N', Component.TextMaxLength + 1), ValidManufacturer, null, ValidMinQuantity);
+
+            act.Should().Throw<BusinessException>()
+               .WithMessage($"Название не может быть длиннее {Component.TextMaxLength} символов");
+        }
+
+        [Fact]
+        public void Update_WithTooLongManufacturer_ShouldThrowBusinessException()
         {
             var component = CreateValidComponent();
-            component.Delete();
 
-            Action act = () => component.Delete();
+            Action act = () => component.Update(
+                ValidArticle, ValidName, new string('M', Component.TextMaxLength + 1), null, ValidMinQuantity);
 
-            act.Should().NotThrow();
-            component.IsDeleted.Should().BeTrue();
+            act.Should().Throw<BusinessException>()
+               .WithMessage($"Производитель не может быть длиннее {Component.TextMaxLength} символов");
         }
     }
 }

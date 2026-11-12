@@ -1,11 +1,12 @@
-﻿using System.ComponentModel;
-using WMS.Domain.ExceptionControl;
-using WMS.Domain.Interfaces;
+﻿using WMS.Domain.ExceptionControl;
 
 namespace WMS.Domain;
 
-public class Component : ISoftDeletable
+public class Component
 {
+    // Ограничение длины артикула, названия и производителя
+    public const int TextMaxLength = 100;
+
     public Guid Id { get; private set; }
     public string Article { get; private set; } = null!;
     public string Name { get; private set; } = null!;
@@ -14,31 +15,15 @@ public class Component : ISoftDeletable
     public int MinQuantity { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public bool IsDeleted { get; private set; }
 
     // Для EF Core
     private Component() { }
 
-    private Component(
-        Guid id,
-        string article,
-        string name,
-        string manufacturer,
-        DateOnly? expirationDate,
-        int minQuantity,
-        DateTime createdAt,
-        DateTime updatedAt)
+    private Component(Guid id, DateTime createdAt, DateTime updatedAt)
     {
         Id = id;
-
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
-
-        SetArticle(article);
-        SetName(name);
-        SetManufacturer(manufacturer);
-        ExpirationDate = expirationDate;
-        SetMinQuantity(minQuantity);
     }
 
     // Factory method
@@ -51,15 +36,10 @@ public class Component : ISoftDeletable
     {
         var now = DateTime.UtcNow;
 
-        return new Component(
-            Guid.NewGuid(),
-            article,
-            name,
-            manufacturer,
-            expirationDate,
-            minQuantity,
-            now,
-            now);
+        var component = new Component(Guid.NewGuid(), now, now);
+        component.SetFields(article, name, manufacturer, expirationDate, minQuantity);
+
+        return component;
     }
 
     public void Update(
@@ -69,65 +49,45 @@ public class Component : ISoftDeletable
        DateOnly? expirationDate,
        int minQuantity)
     {
+        SetFields(article, name, manufacturer, expirationDate, minQuantity);
+
         UpdatedAt = DateTime.UtcNow;
-
-        SetArticle(article);
-        SetName(name);
-        SetManufacturer(manufacturer);
-        ExpirationDate =  expirationDate;
-        SetMinQuantity(minQuantity);
-
     }
 
     // -------- Business rules --------
 
-    private void SetArticle(string article)
+    private void SetFields(
+        string article,
+        string name,
+        string manufacturer,
+        DateOnly? expirationDate,
+        int minQuantity)
     {
-        if (string.IsNullOrWhiteSpace(article))
-            throw new BusinessException("Артикул не может быть пустым");
+        // Сначала проверяем все поля, чтобы при ошибке объект остался без изменений
+        var normalizedArticle = Normalize(article, "Артикул не может быть пустым", "Артикул");
+        var normalizedName = Normalize(name, "Название не может быть пустым", "Название");
+        var normalizedManufacturer = Normalize(manufacturer, "Производитель не может быть пустым", "Производитель");
 
-        Article = article.Trim();
-    }
-
-    private void SetName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new BusinessException("Название не может быть пустым");
-
-        Name = name.Trim();
-    }
-
-    private void SetManufacturer(string manufacturer)
-    {
-        if (string.IsNullOrWhiteSpace(manufacturer))
-            throw new BusinessException("Производитель не может быть пустым");
-
-        Manufacturer = manufacturer.Trim();
-    }
-
-    // Не протестировано, т. к. не используется.
-    private void SetExpirationDate(DateOnly expirationDate)
-    {
-        if (expirationDate < DateOnly.FromDateTime(DateTime.UtcNow))
-        {
-            throw new BusinessException("Срок годности не может быть в прошлом");
-        }
-
-        ExpirationDate = expirationDate;
-    }
-
-    private void SetMinQuantity(int minQuantity)
-    {
         if (minQuantity <= 0)
             throw new BusinessException("Минимальный остаток не может быть отрицательным или равным нулю");
 
+        Article = normalizedArticle;
+        Name = normalizedName;
+        Manufacturer = normalizedManufacturer;
+        ExpirationDate = expirationDate;
         MinQuantity = minQuantity;
     }
 
-    public void Delete()
+    private static string Normalize(string value, string emptyMessage, string fieldName)
     {
-        if (IsDeleted) return;
+        if (string.IsNullOrWhiteSpace(value))
+            throw new BusinessException(emptyMessage);
 
-        IsDeleted = true;
+        value = value.Trim();
+
+        if (value.Length > TextMaxLength)
+            throw new BusinessException($"{fieldName} не может быть длиннее {TextMaxLength} символов");
+
+        return value;
     }
 }

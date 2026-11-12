@@ -103,13 +103,17 @@ namespace WMS.Application
             );
         }
 
-        public static OperationType StrToOperation(string operationName)
+        // Значение фильтра истории, при котором показываются операции любого типа
+        public const string AllOperationsName = "Все типы";
+
+        // null означает «все типы операций»
+        public static OperationType? StrToOperation(string operationName)
         {
             return operationName switch
             {
                 "Приёмка" => OperationType.Receipt,
                 "Выдача" => OperationType.Issue,
-                _ => OperationType.All
+                _ => null
             };
         }
 
@@ -117,7 +121,6 @@ namespace WMS.Application
         {
             return operationType switch
             {
-                OperationType.All => "Все типы",
                 OperationType.Receipt => "Приёмка",
                 OperationType.Issue => "Выдача",
                 _ => operationType.ToString(),

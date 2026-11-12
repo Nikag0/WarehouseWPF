@@ -13,7 +13,7 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Rack> builder)
         {
-            builder.ToTable("racks");
+            builder.ToTable("rack");
 
             builder.HasKey(x => x.Id);
 

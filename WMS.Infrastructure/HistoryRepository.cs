@@ -29,13 +29,12 @@ namespace WMS.Infrastructure
             string? searchText,
             DateTime? dateFrom,
             DateTime? dateTo,
-            OperationType operationType,
+            OperationType? operationType,
             int maxCount,
             CancellationToken ct = default)
         {
             IQueryable<OperationHistory> query = _db.OperationHistory
-                   .AsNoTracking()
-                   .IgnoreQueryFilters();
+                   .AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
@@ -60,9 +59,9 @@ namespace WMS.Infrastructure
                 query = query.Where(x => x.OccurredAt < utcTo);
             }
 
-            if (operationType != OperationType.All)
+            if (operationType.HasValue)
             {
-                query = query.Where(x => x.Type == operationType);
+                query = query.Where(x => x.Type == operationType.Value);
             }
 
             return await query

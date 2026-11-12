@@ -13,15 +13,13 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<Operator> builder)
         {
-            builder.ToTable("operators");
-
-            builder.HasQueryFilter(o => !o.IsDeleted);
+            builder.ToTable("operator");
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Surname).IsRequired();
-            builder.Property(x => x.Name).IsRequired();
-            builder.Property(x => x.Patronymic).IsRequired();
+            builder.Property(x => x.Surname).IsRequired().HasMaxLength(Operator.NameMaxLength);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(Operator.NameMaxLength);
+            builder.Property(x => x.Patronymic).IsRequired().HasMaxLength(Operator.NameMaxLength);
 
             builder.HasIndex(x => new { x.Surname, x.Name, x.Patronymic })
                 .IsUnique();

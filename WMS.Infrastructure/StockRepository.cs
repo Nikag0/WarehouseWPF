@@ -149,11 +149,10 @@ namespace WMS.Infrastructure
                 FROM (
                     SELECT st.*, 
                             SUM(st.""Quantity"") OVER(PARTITION BY st.""ComponentId"") as ""TotalComponentQuantity""
-                    FROM ""stocks"" st
+                    FROM ""stock"" st
                 ) s
-                INNER JOIN ""components"" c ON s.""ComponentId"" = c.""Id""
-                WHERE c.""IsDeleted"" = FALSE 
-                    AND s.""TotalComponentQuantity"" <= c.""MinQuantity""";
+                INNER JOIN ""component"" c ON s.""ComponentId"" = c.""Id""
+                WHERE s.""TotalComponentQuantity"" <= c.""MinQuantity""";
 
 
             return await _db.Stock
@@ -183,13 +182,11 @@ namespace WMS.Infrastructure
             }
         }
 
-        //Можно подумать над реалзацией.
-
-        public async Task<bool> HasStockWithQuantityAsync(Guid componentId, CancellationToken ct = default)
+        public async Task<bool> HasAnyStockAsync(Guid componentId, CancellationToken ct = default)
         {
             return await _db.Stock
                 .AsNoTracking()
-                .AnyAsync(s => s.ComponentId == componentId && s.Quantity > 0);
+                .AnyAsync(s => s.ComponentId == componentId, ct);
         }
     }
 }

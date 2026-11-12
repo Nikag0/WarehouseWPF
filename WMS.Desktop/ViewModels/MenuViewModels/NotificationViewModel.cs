@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WMS.Application.DTO;
 using WMS.Application.Services;
 using WMS.Desktop.Services;
 using WMS.Domain;

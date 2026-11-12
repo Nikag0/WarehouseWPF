@@ -13,7 +13,7 @@ namespace WMS.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<OperationHistory> builder)
         {
-            builder.ToTable("operationhistory");
+            builder.ToTable("operation_history");
 
             builder.HasKey(x => x.Id);
 
@@ -24,7 +24,7 @@ namespace WMS.Infrastructure.Configurations
                 .IsRequired();
 
             builder.Property(x => x.Comment)
-                .HasMaxLength(500);
+                .HasMaxLength(OperationHistory.CommentMaxLength);
         }
     }
 }
