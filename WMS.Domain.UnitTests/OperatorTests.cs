@@ -200,5 +200,50 @@ namespace WMS.Domain.UnitTests
             @operator.Name.Should().Be(longName);
             @operator.Patronymic.Should().Be(longName);
         }
+
+        [Test]
+        public void Create_ShouldTrimNames()
+        {
+            var @operator = Operator.Create("  Иванов ", " Иван", "Иванович  ");
+
+            @operator.Surname.Should().Be("Иванов");
+            @operator.Name.Should().Be("Иван");
+            @operator.Patronymic.Should().Be("Иванович");
+            @operator.FullName.Should().Be("Иванов И. И.");
+        }
+
+        [Test]
+        public void Create_WithTooLongSurname_ShouldThrowBusinessException()
+        {
+            var tooLong = new string('А', Operator.NameMaxLength + 1);
+
+            var act = () => Operator.Create(tooLong, ValidName, ValidPatronymic);
+
+            act.Should().Throw<BusinessException>()
+                .WithMessage($"Фамилия не может быть длиннее {Operator.NameMaxLength} символов");
+        }
+
+        [Test]
+        public void Create_WithMaxLengthNameSurroundedBySpaces_ShouldSucceed()
+        {
+            var name = " " + new string('А', Operator.NameMaxLength) + " ";
+
+            var @operator = Operator.Create(ValidSurnameName, name, ValidPatronymic);
+
+            @operator.Name.Length.Should().Be(Operator.NameMaxLength);
+        }
+
+        [Test]
+        public void Update_WithInvalidPatronymic_ShouldNotChangeOperator()
+        {
+            var @operator = CreateValidOperator();
+
+            var act = () => @operator.Update("Петров", "Пётр", " ");
+
+            act.Should().Throw<BusinessException>();
+            @operator.Surname.Should().Be(ValidSurnameName);
+            @operator.Name.Should().Be(ValidName);
+            @operator.Patronymic.Should().Be(ValidPatronymic);
+        }
     }
 }

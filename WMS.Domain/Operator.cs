@@ -4,22 +4,21 @@ namespace WMS.Domain
 {
     public class Operator
     {
+        // Ограничение длины фамилии, имени и отчества
+        public const int NameMaxLength = 100;
+
         public Guid Id { get; private set; }
-        public string Surname { get; private set; }
-        public string Name { get; private set; }
-        public string Patronymic { get; private set; }
+        public string Surname { get; private set; } = null!;
+        public string Name { get; private set; } = null!;
+        public string Patronymic { get; private set; } = null!;
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
 
         private Operator() { } // для EF
 
-        private Operator(Guid id, string surname, string name, string patronymic, DateTime createdAt, DateTime updatedAt)
+        private Operator(Guid id, DateTime createdAt, DateTime updatedAt)
         {
             Id = id;
-            Surname = surname;
-            Name = name;
-            Patronymic = patronymic;
-
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
         }
@@ -29,45 +28,48 @@ namespace WMS.Domain
             string name,
             string patronymic)
         {
-            Validate(surname, name, patronymic);
-
             var now = DateTime.UtcNow;
 
-            return new Operator(
-                Guid.NewGuid(),
-                surname,
-                name,
-                patronymic,
-                now,
-                now);
+            var @operator = new Operator(Guid.NewGuid(), now, now);
+            @operator.SetFullName(surname, name, patronymic);
+
+            return @operator;
         }
 
         public void Update(string surname, string name, string patronymic)
         {
-            Validate(surname, name, patronymic);
+            SetFullName(surname, name, patronymic);
 
             UpdatedAt = DateTime.UtcNow;
-
-            Surname = surname.Trim();
-            Name = name.Trim();
-            Patronymic = patronymic.Trim();
         }
 
-        private static void Validate(
-            string surname,
-            string name,
-            string patronymic)
+        // -------- Business rules --------
+
+        private void SetFullName(string surname, string name, string patronymic)
         {
-            if (string.IsNullOrWhiteSpace(surname))
-                throw new BusinessException("Фамилия не задана");
+            // Проверка полей.
+            var normalizedSurname = Normalize(surname, "Фамилия не задана", "Фамилия");
+            var normalizedName = Normalize(name, "Имя не задано", "Имя");
+            var normalizedPatronymic = Normalize(patronymic, "Отчество не задано", "Отчество");
 
-            if (string.IsNullOrWhiteSpace(name))
-                throw new BusinessException("Имя не задано");
-
-            if (string.IsNullOrWhiteSpace(patronymic))
-                throw new BusinessException("Отчество не задано");
+            Surname = normalizedSurname;
+            Name = normalizedName;
+            Patronymic = normalizedPatronymic;
         }
 
-        public string FullName =>$"{Surname} {Name[0]}. {Patronymic[0]}.";
+        private static string Normalize(string value, string emptyMessage, string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new BusinessException(emptyMessage);
+
+            value = value.Trim();
+
+            if (value.Length > NameMaxLength)
+                throw new BusinessException($"{fieldName} не может быть длиннее {NameMaxLength} символов");
+
+            return value;
+        }
+
+        public string FullName => $"{Surname} {Name[0]}. {Patronymic[0]}.";
     }
 }

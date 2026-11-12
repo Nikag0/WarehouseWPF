@@ -17,9 +17,9 @@ namespace WMS.Infrastructure.Configurations
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Surname).IsRequired();
-            builder.Property(x => x.Name).IsRequired();
-            builder.Property(x => x.Patronymic).IsRequired();
+            builder.Property(x => x.Surname).IsRequired().HasMaxLength(Operator.NameMaxLength);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(Operator.NameMaxLength);
+            builder.Property(x => x.Patronymic).IsRequired().HasMaxLength(Operator.NameMaxLength);
 
             builder.HasIndex(x => new { x.Surname, x.Name, x.Patronymic })
                 .IsUnique();

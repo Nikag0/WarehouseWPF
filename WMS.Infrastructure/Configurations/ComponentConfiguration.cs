@@ -15,18 +15,18 @@ namespace WMS.Infrastructure.Configurations
 
             builder.Property(x => x.Article)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(Component.TextMaxLength);
 
             builder.HasIndex(c => c.Article)
                 .IsUnique();
 
             builder.Property(x => x.Name)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasMaxLength(Component.TextMaxLength);
 
             builder.Property(x => x.Manufacturer)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(Component.TextMaxLength);
 
             builder.Property(x => x.MinQuantity)
                 .IsRequired();

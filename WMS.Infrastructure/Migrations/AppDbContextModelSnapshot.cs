@@ -53,8 +53,8 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<string>("Article")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -72,8 +72,8 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -181,9 +181,6 @@ namespace WMS.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CellId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("CellName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -191,9 +188,6 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<string>("Comment")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<Guid?>("ComponentId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ComponentName")
                         .IsRequired()
@@ -214,9 +208,6 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<int>("QuantityChanged")
                         .HasColumnType("integer");
-
-                    b.Property<Guid>("RackId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("RackName")
                         .IsRequired()
@@ -241,15 +232,18 @@ namespace WMS.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Patronymic")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

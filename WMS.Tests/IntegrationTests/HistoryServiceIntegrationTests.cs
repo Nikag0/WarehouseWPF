@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WMS.Application.Services;
 using WMS.Domain;
 using WMS.Infrastructure;
@@ -24,8 +24,7 @@ public class HistoryServiceIntegrationTests : IntegrationTestBase
     {
         var operation = OperationHistory.Create(
             OperationType.Receipt, "Оператор", null,
-            Guid.NewGuid(), componentName,
-            Guid.NewGuid(), "А-1", Guid.NewGuid(), "А-3",
+            componentName, "А-1", "А-3",
             0, 5, 5);
 
         await using var db = CreateContext();

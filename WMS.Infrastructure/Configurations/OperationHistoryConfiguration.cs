@@ -24,7 +24,7 @@ namespace WMS.Infrastructure.Configurations
                 .IsRequired();
 
             builder.Property(x => x.Comment)
-                .HasMaxLength(500);
+                .HasMaxLength(OperationHistory.CommentMaxLength);
         }
     }
 }
