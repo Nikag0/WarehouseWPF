@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using WMS.Application;
@@ -16,7 +18,6 @@ using WMS.Desktop.ViewModels.MenuViewModels;
 using WMS.Domain.ExceptionControl;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Context;
-using WMS.Infrastructure.Migrations;
 
 
 namespace WMS.Desktop
@@ -41,15 +42,135 @@ namespace WMS.Desktop
         // Защита от повторного показа окна ошибки, пока предыдущее ещё открыто
         private bool _isShowingError;
 
+        // Запрет второй копии программы: две копии одновременно меняли бы остатки и управляли подсветкой.
+        // Мьютекс принадлежит первой копии, пока она работает; Windows освобождает его и при аварийном завершении.
+        private const string SingleInstanceMutexName = "WMS.Desktop.SingleInstance";
+        private Mutex? _singleInstanceMutex;
+
         protected async override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            var mutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
+            if (!isFirstInstance)
+            {
+                mutex.Dispose();
+
+                if (!ActivateRunningInstance())
+                {
+                    MessageBox.Show(
+                        "Программа уже запущена. Дождитесь, пока откроется её окно.",
+                        "Склад",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+
+                Shutdown();
+                return;
+            }
+            _singleInstanceMutex = mutex;
 
             // Глобальные обработчики ошибок: приложение не должно закрываться из-за необработанного исключения
             DispatcherUnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
+            // Весь запуск — в одном try: любая ошибка до появления главного окна должна закрывать программу
+            // с понятным сообщением. Иначе её погасит глобальный обработчик, и процесс останется висеть без окон.
+            try
+            {
+                Services = BuildServiceProvider(LoadConfiguration());
+
+                await InitializeDatabaseAndControllersAsync();
+
+                // Запуск интерфейса
+                var window = new Views.MainWindow();
+                window.DataContext = Services.GetRequiredService<MainViewModel>();
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                // Показываем красивое и информативное окно пользователю
+                MessageBox.Show(
+                    $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
+                    "Ошибка инициализации",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Shutdown(-1);
+            }
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // Освобождаем мьютекс в том же потоке, где он был захвачен при запуске
+            _singleInstanceMutex?.ReleaseMutex();
+            _singleInstanceMutex?.Dispose();
+
+            base.OnExit(e);
+        }
+
+        // Выводит на передний план окно уже запущенной копии. Возвращает false, если окна ещё нет
+        // (например, первая копия пока подключается к базе).
+        private static bool ActivateRunningInstance()
+        {
+            try
+            {
+                var current = Process.GetCurrentProcess();
+                var running = Process.GetProcessesByName(current.ProcessName)
+                    .FirstOrDefault(p => p.Id != current.Id && p.MainWindowHandle != IntPtr.Zero);
+
+                if (running is null)
+                    return false;
+
+                // Если окно свёрнуто, разворачиваем его
+                if (IsIconic(running.MainWindowHandle))
+                    ShowWindow(running.MainWindowHandle, SwRestore);
+
+                return SetForegroundWindow(running.MainWindowHandle);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private const int SwRestore = 9;
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
+        // Читает appsettings.json рядом с программой. Ошибку в файле (например, лишнюю запятую после правки пароля)
+        // переводит в понятное сообщение вместо технического текста парсера.
+        private static IConfiguration LoadConfiguration()
+        {
+            try
+            {
+                return new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+            }
+            catch (FileNotFoundException)
+            {
+                throw new InvalidOperationException(
+                    "Не найден файл настроек appsettings.json. Он должен лежать в папке программы рядом с WMS.Desktop.exe.");
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidDataException)
+            {
+                throw new InvalidOperationException(
+                    "Файл настроек appsettings.json повреждён: в нём ошибка формата (например, лишняя или пропущенная запятая или кавычка). " +
+                    $"Проверьте файл после последней правки.\n\nПодробности: {ex.GetBaseException().Message}");
+            }
+        }
+
+        private static IServiceProvider BuildServiceProvider(IConfiguration config)
+        {
             var services = new ServiceCollection();
 
             // Логирование
@@ -57,11 +178,6 @@ namespace WMS.Desktop
             {
                 builder.AddDebug();
             });
-
-            // Файл конфигурации
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
 
             // Создаём контекст через фабрику
             services.AddDbContextFactory<AppDbContext>(opt =>
@@ -113,56 +229,48 @@ namespace WMS.Desktop
             services.AddTransient<Func<Views.WarehouseView>>(provider => () => provider.GetRequiredService<Views.WarehouseView>());
 
             // Сборка DI контейнера
-            Services = services.BuildServiceProvider();
+            return services.BuildServiceProvider();
+        }
 
-            try
+        // Проверка подключения к БД, миграции и инициализация светодиодных лент
+        private static async Task InitializeDatabaseAndControllersAsync()
+        {
+            using var scope = Services!.CreateScope();
+
+            // Получаем фабрику контекстов для проверки подключения и миграций
+            var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+            using var db = contextFactory.CreateDbContext();
+
+            // Проверяем, доступ к серверу БД
+            if (!await db.Database.CanConnectAsync())
             {
-                using (var scope = Services.CreateScope())
-                {
-                    // Получаем фабрику контекстов для проверки подключения и миграций
-                    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
-                    using var db = contextFactory.CreateDbContext();
-
-                    // Проверяем, доступ к серверу БД
-                    if (!await db.Database.CanConnectAsync())
-                    {
-                        throw new InvalidOperationException("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
-                    }
-
-                    // Накатываем миграции при старте
-                    await db.Database.MigrateAsync();
-
-                    // Инициализируем светодиодные ленты
-                    var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
-                    var success = await ledService.InitializeSectorsAsync();
-
-                    if (!success)
-                    {
-                        MessageBox.Show(
-                            "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
-                            "Ошибка LED",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                    }
-                }
+                throw new InvalidOperationException("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
             }
-            catch (Exception ex)
+
+            // Накатываем миграции при старте
+            await db.Database.MigrateAsync();
+
+            // Инициализируем светодиодные ленты
+            var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
+            var ledResult = await ledService.InitializeSectorsAsync();
+
+            if (ledResult == ControllersInitResult.Failed)
             {
-                // Показываем красивое и информативное окно пользователю
                 MessageBox.Show(
-                    $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
-                    "Ошибка инициализации",
+                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.\n" +
+                    "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
+                    "Ошибка LED",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-
-                Shutdown(-1);
-                return;
+                    MessageBoxImage.Warning);
             }
-
-            // Запуск интерфейса
-            var window = new Views.MainWindow();
-            window.DataContext = Services.GetRequiredService<MainViewModel>();
-            window.Show();
+            else if (ledResult == ControllersInitResult.NotConfigured)
+            {
+                MessageBox.Show(
+                    "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",
+                    "Подсветка не настроена",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         // Ошибка в потоке интерфейса (команды, обработчики событий, async void). Её можно погасить и продолжить работу.

@@ -49,18 +49,20 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
+            // Запоминаем токен этого запроса: поле _cts к моменту ответа может уже указывать на более новый поиск
+            var token = _cts.Token;
 
             Task.Run(async () =>
             {
                 try
                 {
-                    await Task.Delay(500, _cts.Token);
+                    await Task.Delay(500, token);
 
-                    var result = await _componentService.GetViewFilterAsync(searchText: value, maxCount: 100, _cts.Token);
+                    var result = await _componentService.GetViewFilterAsync(searchText: value, maxCount: 100, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!_cts.Token.IsCancellationRequested)
+                        if (!token.IsCancellationRequested)
                         {
                             FilteredComponents.Clear();
                             foreach (var component in result)

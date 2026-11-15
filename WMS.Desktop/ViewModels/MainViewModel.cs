@@ -61,12 +61,14 @@ namespace WMS.Desktop.ViewModels
             ShowSettingsCommand = new RelayCommand(_ =>
             {
                 var window = settingsWindowFactory();
+                window.Owner = WindowOwner.Current;
                 window.ShowDialog();
             });
 
             ShowWarehouseCommand = new RelayCommand(_ =>
             {
                 var window = warehouseFactory();
+                window.Owner = WindowOwner.Current;
                 window.ShowDialog();
             });
         }

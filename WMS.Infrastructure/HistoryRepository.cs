@@ -26,8 +26,8 @@ namespace WMS.Infrastructure
 
         public async Task<IReadOnlyList<OperationHistory>> GetFilteredAsync(
             string? searchText,
-            DateTime? dateFrom,
-            DateTime? dateTo,
+            DateTime? fromUtc,
+            DateTime? toUtc,
             OperationType? operationType,
             int maxCount,
             CancellationToken ct = default)
@@ -37,25 +37,26 @@ namespace WMS.Infrastructure
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                searchText = searchText.Trim();
+                // ILike — поиск без учёта регистра, как в поиске компонентов: «иванов» найдёт «Иванов И. И.»
+                var pattern = $"%{searchText.Trim()}%";
 
                 query = query.Where(x =>
-                    x.ComponentName.Contains(searchText) ||
-                    x.Operator.Contains(searchText) ||
-                    x.CellName.Contains(searchText) ||
-                    x.RackName.Contains(searchText));
+                    EF.Functions.ILike(x.ComponentName, pattern) ||
+                    EF.Functions.ILike(x.Operator, pattern) ||
+                    EF.Functions.ILike(x.CellName, pattern) ||
+                    EF.Functions.ILike(x.RackName, pattern));
             }
 
-            if (dateFrom.HasValue)
+            if (fromUtc.HasValue)
             {
-                var utcFrom = DateTime.SpecifyKind(dateFrom.Value.Date, DateTimeKind.Utc);
-                query = query.Where(x => x.OccurredAt >= utcFrom);
+                var from = fromUtc.Value;
+                query = query.Where(x => x.OccurredAt >= from);
             }
 
-            if (dateTo.HasValue)
+            if (toUtc.HasValue)
             {
-                var utcTo = DateTime.SpecifyKind(dateTo.Value.Date.AddDays(1), DateTimeKind.Utc);
-                query = query.Where(x => x.OccurredAt < utcTo);
+                var to = toUtc.Value;
+                query = query.Where(x => x.OccurredAt < to);
             }
 
             if (operationType.HasValue)
@@ -69,29 +70,26 @@ namespace WMS.Infrastructure
                  .ToListAsync(ct);
         }
 
-        public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime dateFrom, DateTime dateTo)
+        public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc, CancellationToken ct = default)
         {
-            return QueryByPeriod(dateFrom, dateTo)
+            return QueryByPeriod(fromUtc, toUtc)
                 .AsNoTracking()
                 .OrderBy(h => h.OccurredAt)
-                .AsAsyncEnumerable();
+                .StreamAsync(ct);
         }
 
         public async Task DeleteHistoryAsync(
-            DateTime dateFrom,
-            DateTime dateTo,
+            DateTime fromUtc,
+            DateTime toUtc,
             CancellationToken ct = default)
         {
-            await QueryByPeriod(dateFrom, dateTo).ExecuteDeleteAsync(ct);
+            await QueryByPeriod(fromUtc, toUtc).ExecuteDeleteAsync(ct);
         }
 
         // Общий фильтр периода для выгрузки и удаления: в CSV попадают ровно те записи, которые будут удалены
-        private IQueryable<OperationHistory> QueryByPeriod(DateTime dateFrom, DateTime dateTo)
+        private IQueryable<OperationHistory> QueryByPeriod(DateTime fromUtc, DateTime toUtc)
         {
-            var utcFrom = DateTime.SpecifyKind(dateFrom.Date, DateTimeKind.Utc);
-            var utcTo = DateTime.SpecifyKind(dateTo.Date.AddDays(1), DateTimeKind.Utc);
-
-            return _db.OperationHistory.Where(h => h.OccurredAt >= utcFrom && h.OccurredAt < utcTo);
+            return _db.OperationHistory.Where(h => h.OccurredAt >= fromUtc && h.OccurredAt < toUtc);
         }
     }
 }

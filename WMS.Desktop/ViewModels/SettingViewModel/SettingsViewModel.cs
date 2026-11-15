@@ -44,6 +44,7 @@ namespace WMS.Desktop.ViewModels
         private readonly DialogService _dialogService;
         private readonly HistoryService _historyService;
         private readonly IStockService _stockService;
+        private readonly LedStripService _ledStripService;
 
 
         public SettingsViewModel(
@@ -51,13 +52,50 @@ namespace WMS.Desktop.ViewModels
             OperatorService operatorService,
             DialogService dialogService,
             HistoryService historyService,
-            IStockService stockService)
+            IStockService stockService,
+            LedStripService ledStripService)
         {
             _componentService = componentService;
             _operatorService = operatorService;
             _dialogService = dialogService;
             _historyService = historyService;
             _stockService = stockService;
+            _ledStripService = ledStripService;
+        }
+
+        // Повторно отправляет контроллерам зоны подсветки — как при запуске программы.
+        // Нужно, если контроллер был выключен при старте или перезагрузился во время работы.
+        // Пока команда выполняется, кнопка неактивна, поэтому повторное нажатие не запустит её второй раз.
+        [RelayCommand]
+        private async Task ReinitializeControllers()
+        {
+            try
+            {
+                var result = await _ledStripService.InitializeSectorsAsync();
+
+                switch (result)
+                {
+                    case ControllersInitResult.Success:
+                        _dialogService.ShowInfo("Контроллеры подсветки успешно перезагружены.");
+                        break;
+
+                    case ControllersInitResult.NotConfigured:
+                        _dialogService.ShowWarning(
+                            "В базе данных нет настроек подсветки (контроллеров, лент и зон ячеек).\n" +
+                            "Перезагружать нечего: подсветка ячеек работать не будет.");
+                        break;
+
+                    default:
+                        _dialogService.ShowWarning(
+                            "Не удалось перезагрузить контроллеры подсветки.\n" +
+                            "Проверьте, что платы включены и подключены к сети, и повторите попытку.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Не удалось загрузить настройки подсветки из базы данных: {ex.Message}");
+            }
         }
 
         public async Task LoadDataAsync()
@@ -79,7 +117,7 @@ namespace WMS.Desktop.ViewModels
         private void AddComponent()
         {
             var vm = new ComponentEditViewModel(_componentService, _dialogService);
-            var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -93,7 +131,7 @@ namespace WMS.Desktop.ViewModels
             if (component == null) return;
 
             var vm = new ComponentEditViewModel(_componentService, _dialogService, component);
-            var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -133,7 +171,7 @@ namespace WMS.Desktop.ViewModels
         private void AddOperator()
         {
             var vm = new OperatorEditViewModel(_operatorService, _dialogService);
-            var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new OperatorEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -147,7 +185,7 @@ namespace WMS.Desktop.ViewModels
             if (op == null) return;
 
             var vm = new OperatorEditViewModel(_operatorService, _dialogService, op);
-            var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new OperatorEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -227,7 +265,7 @@ namespace WMS.Desktop.ViewModels
                     return true;
                 });
 
-                var dialog = new DeleteConfirmationWindow { DataContext = confirmVm };
+                var dialog = new DeleteConfirmationWindow { DataContext = confirmVm, Owner = WindowOwner.Current };
 
                 if (dialog.ShowDialog() == true)
                 {
@@ -281,18 +319,20 @@ namespace WMS.Desktop.ViewModels
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
+            // Запоминаем токен этого запроса: поле _cts к моменту ответа может уже указывать на более новый поиск
+            var token = _cts.Token;
 
             Task.Run(async () =>
             {
                 try
                 {
-                    await Task.Delay(500, _cts.Token);
+                    await Task.Delay(500, token);
 
-                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, _cts.Token);
+                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!_cts.Token.IsCancellationRequested)
+                        if (!token.IsCancellationRequested)
                         {
                             FilteredComponents.Clear();
                             foreach (var component in result)
