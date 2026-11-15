@@ -335,7 +335,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     return;
                 }
 
-                IssueItems.Add(stock);
+                InsertIssueItemByPlace(stock);
                 UpdateRackHighlights();
                 UpdateCellHighlights();
             }
@@ -347,6 +347,39 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 _dialogService.ShowError($"Не удалось добавить товар в выдачу: {ex.Message}");
             }
+        }
+
+        // Список выдачи упорядочен по месту на складе: стеллаж А-1, А-2 … Д-3, внутри стеллажа — ячейка А-1, А-2 … Ж-4.
+        // В этом же порядке идёт обход при выдаче. Товары из одной ячейки остаются в порядке добавления.
+        private void InsertIssueItemByPlace(StockViewDTO stock)
+        {
+            var place = GetPlaceKey(stock);
+
+            var index = 0;
+            while (index < IssueItems.Count && GetPlaceKey(IssueItems[index]).CompareTo(place) <= 0)
+                index++;
+
+            IssueItems.Insert(index, stock);
+        }
+
+        // Ключ сортировки: ряд стеллажа (буква), номер стеллажа, полка (буква), номер ячейки.
+        private static (int RackRow, int RackNumber, int Shelf, int CellNumber) GetPlaceKey(StockViewDTO stock)
+        {
+            var (rackNumber, rackRow) = ParsePlaceCode(stock.RackCode);
+            var (cellNumber, shelf) = ParsePlaceCode(stock.CellCode);
+
+            return (rackRow, rackNumber, shelf, cellNumber);
+        }
+
+        // RackCode и CellCode имеют вид «номер-ряд» числами (см. MappingExtensions.StockToView): «2-1» — это А-2.
+        // Код, который не удалось разобрать, уходит в конец списка.
+        private static (int Number, int Row) ParsePlaceCode(string code)
+        {
+            var parts = code?.Split('-');
+
+            return parts is { Length: 2 } && int.TryParse(parts[0], out var number) && int.TryParse(parts[1], out var row)
+                ? (number, row)
+                : (int.MaxValue, int.MaxValue);
         }
 
         private async Task LoadWarehouseAsync()
