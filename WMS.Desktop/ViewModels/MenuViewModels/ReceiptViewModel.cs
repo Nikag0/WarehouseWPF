@@ -145,7 +145,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private string _searchCell;
         private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
-        private CancellationTokenSource? _cts;
+        // У поиска и у загрузки содержимого стеллажа свои токены: иначе ввод в поиске отменял бы загрузку стеллажа
+        // (на экране оставались бы товары предыдущего стеллажа), а выбор стеллажа — поиск
+        private CancellationTokenSource? _searchCts;
+        private CancellationTokenSource? _rackStockCts;
         private readonly SemaphoreSlim _lock = new(1, 1);
         private readonly IStockService _stockService;
         private readonly DialogService _dialogService;
@@ -496,7 +499,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         private async Task RefreshStockInRackAsync()
         {
-            this._cts?.Cancel();
+            _rackStockCts?.Cancel();
 
             if (SelectedRack == null)
             {
@@ -504,8 +507,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
-            this._cts = new CancellationTokenSource();
-            var token = this._cts.Token;
+            _rackStockCts = new CancellationTokenSource();
+            var token = _rackStockCts.Token;
 
             try
             {
@@ -593,7 +596,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
         partial void OnSearchStockOrComponentChanged(string value)
         {
-            _cts?.Cancel();
+            _searchCts?.Cancel();
 
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -601,19 +604,21 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
-            _cts = new CancellationTokenSource();
+            _searchCts = new CancellationTokenSource();
+            // Запоминаем токен этого запроса: поле _searchCts к моменту ответа может уже указывать на более новый поиск
+            var token = _searchCts.Token;
 
             Task.Run(async () =>
             {
                 try
                 {
-                    await Task.Delay(500, _cts.Token);
+                    await Task.Delay(500, token);
 
-                    var suggestions = await _stockService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, _cts.Token);
+                    var suggestions = await _stockService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!_cts.Token.IsCancellationRequested)
+                        if (!token.IsCancellationRequested)
                         {
                             FilteredStocksOrComponents.Clear();
                             foreach (var item in suggestions)

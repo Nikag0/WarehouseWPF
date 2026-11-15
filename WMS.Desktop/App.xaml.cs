@@ -49,6 +49,57 @@ namespace WMS.Desktop
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
+            // Весь запуск — в одном try: любая ошибка до появления главного окна должна закрывать программу
+            // с понятным сообщением. Иначе её погасит глобальный обработчик, и процесс останется висеть без окон.
+            try
+            {
+                Services = BuildServiceProvider(LoadConfiguration());
+
+                await InitializeDatabaseAndControllersAsync();
+
+                // Запуск интерфейса
+                var window = new Views.MainWindow();
+                window.DataContext = Services.GetRequiredService<MainViewModel>();
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                // Показываем красивое и информативное окно пользователю
+                MessageBox.Show(
+                    $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
+                    "Ошибка инициализации",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Shutdown(-1);
+            }
+        }
+
+        // Читает appsettings.json рядом с программой. Ошибку в файле (например, лишнюю запятую после правки пароля)
+        // переводит в понятное сообщение вместо технического текста парсера.
+        private static IConfiguration LoadConfiguration()
+        {
+            try
+            {
+                return new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+            }
+            catch (FileNotFoundException)
+            {
+                throw new InvalidOperationException(
+                    "Не найден файл настроек appsettings.json. Он должен лежать в папке программы рядом с WMS.Desktop.exe.");
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidDataException)
+            {
+                throw new InvalidOperationException(
+                    "Файл настроек appsettings.json повреждён: в нём ошибка формата (например, лишняя или пропущенная запятая или кавычка). " +
+                    $"Проверьте файл после последней правки.\n\nПодробности: {ex.GetBaseException().Message}");
+            }
+        }
+
+        private static IServiceProvider BuildServiceProvider(IConfiguration config)
+        {
             var services = new ServiceCollection();
 
             // Логирование
@@ -56,11 +107,6 @@ namespace WMS.Desktop
             {
                 builder.AddDebug();
             });
-
-            // Файл конфигурации
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
 
             // Создаём контекст через фабрику
             services.AddDbContextFactory<AppDbContext>(opt =>
@@ -112,65 +158,48 @@ namespace WMS.Desktop
             services.AddTransient<Func<Views.WarehouseView>>(provider => () => provider.GetRequiredService<Views.WarehouseView>());
 
             // Сборка DI контейнера
-            Services = services.BuildServiceProvider();
+            return services.BuildServiceProvider();
+        }
 
-            try
+        // Проверка подключения к БД, миграции и инициализация светодиодных лент
+        private static async Task InitializeDatabaseAndControllersAsync()
+        {
+            using var scope = Services!.CreateScope();
+
+            // Получаем фабрику контекстов для проверки подключения и миграций
+            var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+            using var db = contextFactory.CreateDbContext();
+
+            // Проверяем, доступ к серверу БД
+            if (!await db.Database.CanConnectAsync())
             {
-                using (var scope = Services.CreateScope())
-                {
-                    // Получаем фабрику контекстов для проверки подключения и миграций
-                    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
-                    using var db = contextFactory.CreateDbContext();
-
-                    // Проверяем, доступ к серверу БД
-                    if (!await db.Database.CanConnectAsync())
-                    {
-                        throw new InvalidOperationException("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
-                    }
-
-                    // Накатываем миграции при старте
-                    await db.Database.MigrateAsync();
-
-                    // Инициализируем светодиодные ленты
-                    var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
-                    var ledResult = await ledService.InitializeSectorsAsync();
-
-                    if (ledResult == ControllersInitResult.Failed)
-                    {
-                        MessageBox.Show(
-                            "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.\n" +
-                            "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
-                            "Ошибка LED",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                    }
-                    else if (ledResult == ControllersInitResult.NotConfigured)
-                    {
-                        MessageBox.Show(
-                            "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",
-                            "Подсветка не настроена",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                    }
-                }
+                throw new InvalidOperationException("Не удалось установить соединение с сервером PostgreSQL. Проверьте строку подключения и запущен ли сервис базы данных.");
             }
-            catch (Exception ex)
+
+            // Накатываем миграции при старте
+            await db.Database.MigrateAsync();
+
+            // Инициализируем светодиодные ленты
+            var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
+            var ledResult = await ledService.InitializeSectorsAsync();
+
+            if (ledResult == ControllersInitResult.Failed)
             {
-                // Показываем красивое и информативное окно пользователю
                 MessageBox.Show(
-                    $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
-                    "Ошибка инициализации",
+                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.\n" +
+                    "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
+                    "Ошибка LED",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-
-                Shutdown(-1);
-                return;
+                    MessageBoxImage.Warning);
             }
-
-            // Запуск интерфейса
-            var window = new Views.MainWindow();
-            window.DataContext = Services.GetRequiredService<MainViewModel>();
-            window.Show();
+            else if (ledResult == ControllersInitResult.NotConfigured)
+            {
+                MessageBox.Show(
+                    "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",
+                    "Подсветка не настроена",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         // Ошибка в потоке интерфейса (команды, обработчики событий, async void). Её можно погасить и продолжить работу.
