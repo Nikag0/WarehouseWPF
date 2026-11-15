@@ -117,7 +117,7 @@ namespace WMS.Desktop.ViewModels
         private void AddComponent()
         {
             var vm = new ComponentEditViewModel(_componentService, _dialogService);
-            var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -131,7 +131,7 @@ namespace WMS.Desktop.ViewModels
             if (component == null) return;
 
             var vm = new ComponentEditViewModel(_componentService, _dialogService, component);
-            var window = new ComponentEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -171,7 +171,7 @@ namespace WMS.Desktop.ViewModels
         private void AddOperator()
         {
             var vm = new OperatorEditViewModel(_operatorService, _dialogService);
-            var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new OperatorEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -185,7 +185,7 @@ namespace WMS.Desktop.ViewModels
             if (op == null) return;
 
             var vm = new OperatorEditViewModel(_operatorService, _dialogService, op);
-            var window = new OperatorEditWindow(vm) { Owner = App.Current.MainWindow };
+            var window = new OperatorEditWindow(vm) { Owner = WindowOwner.Current };
 
             if (window.ShowDialog() == true)
             {
@@ -265,7 +265,7 @@ namespace WMS.Desktop.ViewModels
                     return true;
                 });
 
-                var dialog = new DeleteConfirmationWindow { DataContext = confirmVm };
+                var dialog = new DeleteConfirmationWindow { DataContext = confirmVm, Owner = WindowOwner.Current };
 
                 if (dialog.ShowDialog() == true)
                 {
@@ -319,18 +319,20 @@ namespace WMS.Desktop.ViewModels
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
+            // Запоминаем токен этого запроса: поле _cts к моменту ответа может уже указывать на более новый поиск
+            var token = _cts.Token;
 
             Task.Run(async () =>
             {
                 try
                 {
-                    await Task.Delay(500, _cts.Token);
+                    await Task.Delay(500, token);
 
-                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, _cts.Token);
+                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!_cts.Token.IsCancellationRequested)
+                        if (!token.IsCancellationRequested)
                         {
                             FilteredComponents.Clear();
                             foreach (var component in result)

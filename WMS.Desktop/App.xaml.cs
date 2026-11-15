@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using WMS.Application;
@@ -40,9 +42,33 @@ namespace WMS.Desktop
         // Защита от повторного показа окна ошибки, пока предыдущее ещё открыто
         private bool _isShowingError;
 
+        // Запрет второй копии программы: две копии одновременно меняли бы остатки и управляли подсветкой.
+        // Мьютекс принадлежит первой копии, пока она работает; Windows освобождает его и при аварийном завершении.
+        private const string SingleInstanceMutexName = "WMS.Desktop.SingleInstance";
+        private Mutex? _singleInstanceMutex;
+
         protected async override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            var mutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
+            if (!isFirstInstance)
+            {
+                mutex.Dispose();
+
+                if (!ActivateRunningInstance())
+                {
+                    MessageBox.Show(
+                        "Программа уже запущена. Дождитесь, пока откроется её окно.",
+                        "Склад",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+
+                Shutdown();
+                return;
+            }
+            _singleInstanceMutex = mutex;
 
             // Глобальные обработчики ошибок: приложение не должно закрываться из-за необработанного исключения
             DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -74,6 +100,51 @@ namespace WMS.Desktop
                 Shutdown(-1);
             }
         }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // Освобождаем мьютекс в том же потоке, где он был захвачен при запуске
+            _singleInstanceMutex?.ReleaseMutex();
+            _singleInstanceMutex?.Dispose();
+
+            base.OnExit(e);
+        }
+
+        // Выводит на передний план окно уже запущенной копии. Возвращает false, если окна ещё нет
+        // (например, первая копия пока подключается к базе).
+        private static bool ActivateRunningInstance()
+        {
+            try
+            {
+                var current = Process.GetCurrentProcess();
+                var running = Process.GetProcessesByName(current.ProcessName)
+                    .FirstOrDefault(p => p.Id != current.Id && p.MainWindowHandle != IntPtr.Zero);
+
+                if (running is null)
+                    return false;
+
+                // Если окно свёрнуто, разворачиваем его
+                if (IsIconic(running.MainWindowHandle))
+                    ShowWindow(running.MainWindowHandle, SwRestore);
+
+                return SetForegroundWindow(running.MainWindowHandle);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private const int SwRestore = 9;
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
 
         // Читает appsettings.json рядом с программой. Ошибку в файле (например, лишнюю запятую после правки пароля)
         // переводит в понятное сообщение вместо технического текста парсера.
