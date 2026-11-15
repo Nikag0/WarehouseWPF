@@ -9,10 +9,14 @@ namespace WMS.Application.Services
         private readonly IHistoryRepository _historyRepository;
         private readonly IUnitOfWorkFactory _uowFactory;
 
-        public HistoryService(IHistoryRepository historyRepository, IUnitOfWorkFactory uowFactory)
+        // Часовой пояс склада. Операции хранятся в UTC, а пользователь видит и выбирает даты по местному времени.
+        private readonly TimeZoneInfo _timeZone;
+
+        public HistoryService(IHistoryRepository historyRepository, IUnitOfWorkFactory uowFactory, TimeZoneInfo? timeZone = null)
         {
             _historyRepository = historyRepository;
             _uowFactory = uowFactory;
+            _timeZone = timeZone ?? TimeZoneInfo.Local;
         }
 
         public async Task<IReadOnlyList<OperationHystoryViewDto>> GetFilteredAsync(
@@ -27,13 +31,13 @@ namespace WMS.Application.Services
 
             var operationItem = await _historyRepository.GetFilteredAsync(
                 searchText,
-                dateFrom,
-                dateTo,
+                dateFrom.HasValue ? DayStartUtc(dateFrom.Value) : null,
+                dateTo.HasValue ? DayStartUtc(dateTo.Value.AddDays(1)) : null,
                 operationType,
                 maxCount,
                 token);
 
-            return operationItem.Select(MappingExtensions.OperationHystoryToViewDTO).ToList();
+            return operationItem.Select(o => o.OperationHystoryToViewDTO(_timeZone)).ToList();
         }
 
         public async Task DeleteHistoryAsync(
@@ -43,7 +47,7 @@ namespace WMS.Application.Services
         {
             await using var uow = _uowFactory.Create();
 
-            await _historyRepository.DeleteHistoryAsync(dateFrom, dateTo, ct);
+            await _historyRepository.DeleteHistoryAsync(DayStartUtc(dateFrom), DayStartUtc(dateTo.AddDays(1)), ct);
         }
 
         public async Task ExportCsvAsync(
@@ -55,10 +59,17 @@ namespace WMS.Application.Services
             await using var uow = _uowFactory.Create();
 
             var dtoStream = _historyRepository
-                .GetForPeriodAsync(dateFrom, dateTo)
-                .Select(operation => operation.HistoryToCsv());
+                .GetForPeriodAsync(DayStartUtc(dateFrom), DayStartUtc(dateTo.AddDays(1)))
+                .Select(operation => operation.HistoryToCsv(_timeZone));
 
             await CsvExporter.WriteAsync(filePath, dtoStream, ct);
+        }
+
+        // Начало местных суток (00:00 на складе), переведённое в UTC
+        private DateTime DayStartUtc(DateTime localDate)
+        {
+            var midnight = DateTime.SpecifyKind(localDate.Date, DateTimeKind.Unspecified);
+            return TimeZoneInfo.ConvertTimeToUtc(midnight, _timeZone);
         }
     }
 }

@@ -41,11 +41,11 @@ namespace WMS.Application
             );
         }
 
-        public static HistoryCsvDto HistoryToCsv(this OperationHistory o)
+        public static HistoryCsvDto HistoryToCsv(this OperationHistory o, TimeZoneInfo timeZone)
         {
             return new HistoryCsvDto(
-                // В БД время хранится в UTC, в файл выгружаем местное
-                o.OccurredAt.ToLocalTime(),
+                // В БД время хранится в UTC, в файл выгружаем время склада
+                UtcToLocal(o.OccurredAt, timeZone),
                 OperationToStr(o.Type),
                 o.ComponentName,
                 o.RackName,
@@ -88,10 +88,16 @@ namespace WMS.Application
             );
         }
 
-        public static OperationHystoryViewDto OperationHystoryToViewDTO(this OperationHistory o)
+        // Переводит время операции из UTC (как оно хранится в БД) во время склада
+        public static DateTime UtcToLocal(DateTime utc, TimeZoneInfo timeZone)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), timeZone);
+        }
+
+        public static OperationHystoryViewDto OperationHystoryToViewDTO(this OperationHistory o, TimeZoneInfo timeZone)
         {
             return new OperationHystoryViewDto(
-                o.OccurredAt,
+                UtcToLocal(o.OccurredAt, timeZone),
                 OperationToStr(o.Type),
                 o.ComponentName,
                 $"Стеллаж {o.RackName} Ячейка {o.CellName}",

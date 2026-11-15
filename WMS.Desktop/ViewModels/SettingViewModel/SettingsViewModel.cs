@@ -44,6 +44,7 @@ namespace WMS.Desktop.ViewModels
         private readonly DialogService _dialogService;
         private readonly HistoryService _historyService;
         private readonly IStockService _stockService;
+        private readonly LedStripService _ledStripService;
 
 
         public SettingsViewModel(
@@ -51,13 +52,50 @@ namespace WMS.Desktop.ViewModels
             OperatorService operatorService,
             DialogService dialogService,
             HistoryService historyService,
-            IStockService stockService)
+            IStockService stockService,
+            LedStripService ledStripService)
         {
             _componentService = componentService;
             _operatorService = operatorService;
             _dialogService = dialogService;
             _historyService = historyService;
             _stockService = stockService;
+            _ledStripService = ledStripService;
+        }
+
+        // Повторно отправляет контроллерам зоны подсветки — как при запуске программы.
+        // Нужно, если контроллер был выключен при старте или перезагрузился во время работы.
+        // Пока команда выполняется, кнопка неактивна, поэтому повторное нажатие не запустит её второй раз.
+        [RelayCommand]
+        private async Task ReinitializeControllers()
+        {
+            try
+            {
+                var result = await _ledStripService.InitializeSectorsAsync();
+
+                switch (result)
+                {
+                    case ControllersInitResult.Success:
+                        _dialogService.ShowInfo("Контроллеры подсветки успешно перезагружены.");
+                        break;
+
+                    case ControllersInitResult.NotConfigured:
+                        _dialogService.ShowWarning(
+                            "В базе данных нет настроек подсветки (контроллеров, лент и зон ячеек).\n" +
+                            "Перезагружать нечего: подсветка ячеек работать не будет.");
+                        break;
+
+                    default:
+                        _dialogService.ShowWarning(
+                            "Не удалось перезагрузить контроллеры подсветки.\n" +
+                            "Проверьте, что платы включены и подключены к сети, и повторите попытку.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Не удалось загрузить настройки подсветки из базы данных: {ex.Message}");
+            }
         }
 
         public async Task LoadDataAsync()

@@ -34,19 +34,18 @@ namespace WMS.Application.Services
                 if (component is null)
                     throw new BusinessException("Компонент не найден.");
 
-                if (!string.Equals(component.Article, dto.Article, StringComparison.OrdinalIgnoreCase))
-                {
-                    var existing = await _componentRepo.GetByArticleAsync(dto.Article);
-                    if (existing is not null)
-                        throw new BusinessException($"Артикул '{dto.Article}' уже используется другим компонентом.");
-                }
-
+                // Сначала доменная проверка: она обрежет пробелы в артикуле. До CommitAsync изменения в БД не попадут
                 component.Update(
                     dto.Article,
                     dto.Name,
                     dto.Manufacturer,
                     dto.ExpirationDate,
                     dto.MinQuantity);
+
+                // Уникальность проверяем по уже очищенному артикулу; сам редактируемый компонент не считается дублем
+                var existing = await _componentRepo.GetByArticleAsync(component.Article);
+                if (existing is not null && existing.Id != component.Id)
+                    throw new BusinessException($"Артикул '{component.Article}' уже используется другим компонентом.");
 
                 await uow.CommitAsync();
             }
@@ -63,11 +62,13 @@ namespace WMS.Application.Services
             {
                 await using var uow = _uowFactory.Create();
 
-                var existing = await _componentRepo.GetByArticleAsync(dto.Article);
-                if (existing is not null)
-                    throw new BusinessException($"Артикул '{dto.Article}' уже используется.");
-
+                // Сначала доменная проверка: она обрежет пробелы в артикуле, и уникальность проверится по очищенному значению
                 var component = Domain.Component.Create(dto.Article, dto.Name, dto.Manufacturer, dto.ExpirationDate, dto.MinQuantity);
+
+                var existing = await _componentRepo.GetByArticleAsync(component.Article);
+                if (existing is not null)
+                    throw new BusinessException($"Артикул '{component.Article}' уже используется.");
+
                 await _componentRepo.AddAsync(component);
                 await uow.CommitAsync();
             }

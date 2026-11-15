@@ -11,19 +11,21 @@ namespace WMS.Application.Abstractions
     {
         void Add(OperationHistory operation, CancellationToken ct = default);
         
+        // Границы периода — моменты времени в UTC: fromUtc включительно, toUtc не включительно.
+        // Перевод местных суток в UTC делает HistoryService.
         Task<IReadOnlyList<OperationHistory>> GetFilteredAsync(
-            string searchText,
-            DateTime? dateFrom,
-            DateTime? dateTo,
+            string? searchText,
+            DateTime? fromUtc,
+            DateTime? toUtc,
             OperationType? operationType,
             int maxCount,
             CancellationToken ct = default);
 
-        IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime dateFrom, DateTime dateTo);
+        IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc);
 
         Task DeleteHistoryAsync(
-            DateTime dateFrom,
-            DateTime dateTo,
+            DateTime fromUtc,
+            DateTime toUtc,
             CancellationToken ct = default);
     }
 }

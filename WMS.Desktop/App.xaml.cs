@@ -134,13 +134,22 @@ namespace WMS.Desktop
 
                     // Инициализируем светодиодные ленты
                     var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
-                    var success = await ledService.InitializeSectorsAsync();
+                    var ledResult = await ledService.InitializeSectorsAsync();
 
-                    if (!success)
+                    if (ledResult == ControllersInitResult.Failed)
                     {
                         MessageBox.Show(
-                            "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.",
+                            "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.\n" +
+                            "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
                             "Ошибка LED",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    }
+                    else if (ledResult == ControllersInitResult.NotConfigured)
+                    {
+                        MessageBox.Show(
+                            "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",
+                            "Подсветка не настроена",
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                     }
