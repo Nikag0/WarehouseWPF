@@ -87,7 +87,7 @@ namespace WMS.Application.Services
                     _historyRepo.Add(operationHistory, ct);
                 }
 
-                await uow.CommitAsync();
+                await uow.CommitAsync(ct);
             }
             catch (Exception ex) when (ex is not BusinessException)
             {
@@ -150,7 +150,7 @@ namespace WMS.Application.Services
 
                 _historyRepo.Add(operationHistory, ct);
 
-                await uow.CommitAsync();
+                await uow.CommitAsync(ct);
             }
             catch (Exception ex) when (ex is not BusinessException)
             {
@@ -166,7 +166,7 @@ namespace WMS.Application.Services
         {
             await using var uow = _uowFactory.Create();
             
-            var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, token);
             var components = await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
             var result = new List<StockViewDTO>();
@@ -188,11 +188,11 @@ namespace WMS.Application.Services
             return result.Take(maxCount).ToList();
         }
 
-        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default)
         {
             await using var uow = _uowFactory.Create();
 
-            var stocks = await _stockRepo.SearchAsync(searchText, maxCount);
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, token);
 
             return stocks.Select(MappingExtensions.StockToView).ToList();
         }

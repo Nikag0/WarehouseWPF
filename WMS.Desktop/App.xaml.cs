@@ -16,7 +16,6 @@ using WMS.Desktop.ViewModels.MenuViewModels;
 using WMS.Domain.ExceptionControl;
 using WMS.Infrastructure;
 using WMS.Infrastructure.Context;
-using WMS.Infrastructure.Migrations;
 
 
 namespace WMS.Desktop

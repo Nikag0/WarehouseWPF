@@ -52,7 +52,7 @@ namespace WMS.Infrastructure
                 .Include(s => s.Rack)
                 .Include(s => s.Cell)
                 .Where(s => s.RackId == rackId)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
         public async Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
@@ -103,7 +103,7 @@ namespace WMS.Infrastructure
             return await query
                 .OrderBy(s => s.Component.Name)
                 .Take(maxCount)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
         public async Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default)
@@ -126,17 +126,18 @@ namespace WMS.Infrastructure
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
                 .Include(s => s.Cell)
-                .ToListAsync();
+                .ToListAsync(ct);
         }
 
         public IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default)
         {
-            return _db.Stock
+            var query = _db.Stock
                 .AsNoTracking() // Отключаем отслеживание сущностей ради экономии памяти
                 .Include(s => s.Component)
                 .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .AsAsyncEnumerable(); // Переводим в асинхронный поток (стриминг)
+                .Include(s => s.Cell);
+
+            return query.StreamAsync(ct); // Переводим в асинхронный поток (стриминг)
         }
 
         public async Task<bool> HasAnyStockAsync(Guid componentId, CancellationToken ct = default)

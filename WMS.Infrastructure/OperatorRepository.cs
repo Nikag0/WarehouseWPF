@@ -3,7 +3,7 @@ using WMS.Application.Abstractions;
 using WMS.Domain;
 using WMS.Infrastructure.Context;
 
-namespace WMS.Infrastructure.Migrations
+namespace WMS.Infrastructure
 {
     public class OperatorRepository : IOperatorRepository
     {

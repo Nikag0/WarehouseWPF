@@ -59,7 +59,7 @@ namespace WMS.Application.Services
             await using var uow = _uowFactory.Create();
 
             var dtoStream = _historyRepository
-                .GetForPeriodAsync(DayStartUtc(dateFrom), DayStartUtc(dateTo.AddDays(1)))
+                .GetForPeriodAsync(DayStartUtc(dateFrom), DayStartUtc(dateTo.AddDays(1)), ct)
                 .Select(operation => operation.HistoryToCsv(_timeZone));
 
             await CsvExporter.WriteAsync(filePath, dtoStream, ct);

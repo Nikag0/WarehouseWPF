@@ -21,7 +21,7 @@ namespace WMS.Application.Abstractions
             int maxCount,
             CancellationToken ct = default);
 
-        IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc);
+        IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc, CancellationToken ct = default);
 
         Task DeleteHistoryAsync(
             DateTime fromUtc,

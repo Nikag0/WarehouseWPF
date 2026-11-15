@@ -37,13 +37,14 @@ namespace WMS.Infrastructure
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                searchText = searchText.Trim();
+                // ILike — поиск без учёта регистра, как в поиске компонентов: «иванов» найдёт «Иванов И. И.»
+                var pattern = $"%{searchText.Trim()}%";
 
                 query = query.Where(x =>
-                    x.ComponentName.Contains(searchText) ||
-                    x.Operator.Contains(searchText) ||
-                    x.CellName.Contains(searchText) ||
-                    x.RackName.Contains(searchText));
+                    EF.Functions.ILike(x.ComponentName, pattern) ||
+                    EF.Functions.ILike(x.Operator, pattern) ||
+                    EF.Functions.ILike(x.CellName, pattern) ||
+                    EF.Functions.ILike(x.RackName, pattern));
             }
 
             if (fromUtc.HasValue)
@@ -69,12 +70,12 @@ namespace WMS.Infrastructure
                  .ToListAsync(ct);
         }
 
-        public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc)
+        public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc, CancellationToken ct = default)
         {
             return QueryByPeriod(fromUtc, toUtc)
                 .AsNoTracking()
                 .OrderBy(h => h.OccurredAt)
-                .AsAsyncEnumerable();
+                .StreamAsync(ct);
         }
 
         public async Task DeleteHistoryAsync(

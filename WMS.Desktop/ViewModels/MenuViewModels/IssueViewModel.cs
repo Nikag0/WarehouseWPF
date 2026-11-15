@@ -404,7 +404,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15);
+                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
