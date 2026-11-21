@@ -102,7 +102,9 @@ namespace WMS.Application
                 o.ComponentName,
                 $"Стеллаж {o.RackName} Ячейка {o.CellName}",
                 o.PreviousQuantity,
-                o.Type == OperationType.Receipt ? $"+{o.QuantityChanged}" : $"-{Math.Abs(o.QuantityChanged)}",
+                o.Type == OperationType.Receipt
+                    ? $"+{FormatQuantity(o.QuantityChanged)}"
+                    : $"-{FormatQuantity(Math.Abs(o.QuantityChanged))}",
                 o.NewQuantity,
                 o.Operator,
                 o.Comment ?? string.Empty
@@ -132,6 +134,10 @@ namespace WMS.Application
                 _ => operationType.ToString(),
             };
         }
+
+        // Количество для вывода пользователю: до трёх знаков после запятой, без лишних нулей
+        public static string FormatQuantity(decimal quantity)
+            => quantity.ToString(QuantityRules.DisplayFormat, System.Globalization.CultureInfo.CurrentCulture);
 
         public static string CodeToDisplay(int column, int row)
         {

@@ -22,6 +22,7 @@ namespace WMS.Infrastructure.Configurations
                 .IsRequired();
 
             builder.Property(x => x.Quantity)
+                .HasPrecision(QuantityRules.Precision, QuantityRules.Scale)
                 .IsRequired();
 
             builder.HasIndex(x => new { x.ComponentId, x.RackId, x.CellId })

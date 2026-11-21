@@ -5,9 +5,9 @@ public record OperationHystoryViewDto(
     DateTime OccurredAt, 
     string Type, 
     string ComponentName,
-    string RackAndCellName, 
-    int PreviousQuantity,
+    string RackAndCellName,
+    decimal PreviousQuantity,
     string QuantityChanged,
-    int NewQuantity,
+    decimal NewQuantity,
     string Operator, 
     string Comment);

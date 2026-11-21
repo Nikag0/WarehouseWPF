@@ -1,4 +1,5 @@
 ﻿using CsvHelper.Configuration.Attributes;
+using WMS.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,6 @@ namespace WMS.Application.DTO
         [property: Name("Производитель")] string Manufacturer,
         [property: Name("Стеллаж")] string Rack,
         [property: Name("Ячейка")] string Cell,
-        [property: Name("Количество")] int Quantity
+        [property: Name("Количество"), Format(QuantityRules.DisplayFormat)] decimal Quantity
     );
 }

@@ -71,25 +71,18 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                var result = await _ledStripService.InitializeSectorsAsync();
+                var report = await _ledStripService.InitializeAsync();
 
-                switch (result)
+                // Об успехе сообщают лампы рядов (все загораются зелёным), окно показываем только при проблемах
+                if (!report.IsConfigured)
                 {
-                    case ControllersInitResult.Success:
-                        _dialogService.ShowInfo("Контроллеры подсветки успешно перезагружены.");
-                        break;
-
-                    case ControllersInitResult.NotConfigured:
-                        _dialogService.ShowWarning(
-                            "В базе данных нет настроек подсветки (контроллеров, лент и зон ячеек).\n" +
-                            "Перезагружать нечего: подсветка ячеек работать не будет.");
-                        break;
-
-                    default:
-                        _dialogService.ShowWarning(
-                            "Не удалось перезагрузить контроллеры подсветки.\n" +
-                            "Проверьте, что платы включены и подключены к сети, и повторите попытку.");
-                        break;
+                    _dialogService.ShowWarning(
+                        "В базе данных нет настроек подсветки (контроллеров, лент и зон ячеек).\n" +
+                        "Перезагружать нечего: подсветка ячеек работать не будет.");
+                }
+                else if (!report.IsSuccess)
+                {
+                    _dialogService.ShowWarning(LightingReportFormatter.Describe(report));
                 }
             }
             catch (Exception ex)

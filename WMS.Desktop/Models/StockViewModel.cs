@@ -104,7 +104,7 @@ namespace WMS.Desktop.Models
         }
         private string? _cellCode;
 
-        public int Quantity
+        public decimal Quantity
         {
             get => _quantity;
             set
@@ -113,8 +113,8 @@ namespace WMS.Desktop.Models
                 OnPropertyChanged();
             }
         }
-        private int _quantity;
-        public int OperationQuantity
+        private decimal _quantity;
+        public decimal OperationQuantity
         {
             get => _operationQuantity;
             set
@@ -123,7 +123,7 @@ namespace WMS.Desktop.Models
                 OnPropertyChanged();
             }
         }
-        private int _operationQuantity;
+        private decimal _operationQuantity;
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

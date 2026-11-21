@@ -20,9 +20,9 @@ namespace WMS.Domain
         public string CellName { get; private set; } = null!;
 
         // Какое количество было до проведения операции
-        public int PreviousQuantity { get; private set; }
-        public int QuantityChanged { get; private set; }
-        public int NewQuantity { get; private set; }
+        public decimal PreviousQuantity { get; private set; }
+        public decimal QuantityChanged { get; private set; }
+        public decimal NewQuantity { get; private set; }
 
         private OperationHistory() { }
 
@@ -33,9 +33,9 @@ namespace WMS.Domain
             string componentName,
             string rackName,
             string cellName,
-            int previousQuantity,
-            int quantityChanged,
-            int newQuantity)
+            decimal previousQuantity,
+            decimal quantityChanged,
+            decimal newQuantity)
         {
             Id = Guid.NewGuid();
             Type = type;
@@ -59,9 +59,9 @@ namespace WMS.Domain
             string componentName,
             string rackName,
             string cellName,
-            int previousQuantity,
-            int quantityChanged,
-            int newQuantity)
+            decimal previousQuantity,
+            decimal quantityChanged,
+            decimal newQuantity)
         {
             if (!Enum.IsDefined(type))
                 throw new BusinessException("Неизвестный тип операции");
@@ -112,13 +112,17 @@ namespace WMS.Domain
             return comment;
         }
 
-        private static void ValidateQuantities(OperationType type, int previousQuantity, int quantityChanged, int newQuantity)
+        private static void ValidateQuantities(OperationType type, decimal previousQuantity, decimal quantityChanged, decimal newQuantity)
         {
             if (previousQuantity < 0 || newQuantity < 0)
                 throw new BusinessException("Количество не может быть отрицательным");
 
             if (quantityChanged <= 0)
                 throw new BusinessException("Изменение количества должно быть больше нуля");
+
+            QuantityRules.EnsureValid(previousQuantity);
+            QuantityRules.EnsureValid(quantityChanged);
+            QuantityRules.EnsureValid(newQuantity);
 
             var expectedQuantity = type == OperationType.Receipt
                 ? previousQuantity + quantityChanged

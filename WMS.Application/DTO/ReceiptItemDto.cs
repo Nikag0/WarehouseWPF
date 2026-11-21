@@ -5,6 +5,5 @@
     string RackName,
     Guid CellId,
     string CellName,
-    int Quantity
+    decimal Quantity
 );
-

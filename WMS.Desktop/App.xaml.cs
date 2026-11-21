@@ -49,6 +49,13 @@ namespace WMS.Desktop
 
         protected async override void OnStartup(StartupEventArgs e)
         {
+            // По умолчанию привязки WPF форматируют числа в en-US (1.5), а C#-код и DecimalUpDown — в культуре ОС (1,5).
+            // Выравниваем культуру, чтобы дробные количества везде выглядели и вводились одинаково.
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(
+                    System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
+
             base.OnStartup(e);
 
             var mutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
@@ -169,6 +176,56 @@ namespace WMS.Desktop
             }
         }
 
+        // Читает секцию Lighting из appsettings.json — единственное место настройки подсветки.
+        // Если значения нет или оно неверное, программа закрывается с сообщением, какую настройку исправить.
+        private static LightingOptions LoadLightingOptions(IConfiguration config)
+        {
+            var section = config.GetSection("Lighting");
+
+            string ReadRequired(string key)
+            {
+                return section[key] ?? throw new InvalidOperationException(
+                    $"В appsettings.json не задана настройка Lighting:{key}.");
+            }
+
+            TimeSpan ReadMilliseconds(string key)
+            {
+                var value = ReadRequired(key);
+
+                if (!int.TryParse(value, out var ms) || ms < 0)
+                    throw new InvalidOperationException(
+                        $"Настройка Lighting:{key} = «{value}» в appsettings.json задана неверно. Нужно целое число миллисекунд, не меньше 0.");
+
+                return TimeSpan.FromMilliseconds(ms);
+            }
+
+            bool ReadBool(string key)
+            {
+                var value = ReadRequired(key);
+
+                if (!bool.TryParse(value, out var result))
+                    throw new InvalidOperationException(
+                        $"Настройка Lighting:{key} = «{value}» в appsettings.json задана неверно. Нужно true или false.");
+
+                return result;
+            }
+
+            var lampMasks = Enum.GetValues<LampSignal>().ToDictionary(
+                signal => signal,
+                signal => LightingOptions.ParseLampMask(ReadRequired($"LampSignals:{signal}"), signal));
+
+            return new LightingOptions
+            {
+                Enabled = ReadBool("Enabled"),
+                TcpTimeout = ReadMilliseconds("TcpTimeoutMs"),
+                RowStepDelay = ReadMilliseconds("RowStepDelayMs"),
+                ResultHoldTime = ReadMilliseconds("ResultHoldTimeMs"),
+                CheckSectorsOnInit = ReadBool("CheckSectorsOnInit"),
+                SectorCheckDelay = ReadMilliseconds("SectorCheckDelayMs"),
+                LampMasks = lampMasks
+            };
+        }
+
         private static IServiceProvider BuildServiceProvider(IConfiguration config)
         {
             var services = new ServiceCollection();
@@ -177,6 +234,7 @@ namespace WMS.Desktop
             services.AddLogging(builder =>
             {
                 builder.AddDebug();
+                builder.AddFile("Logs/wms-{Date}.txt");
             });
 
             // Создаём контекст через фабрику
@@ -209,7 +267,9 @@ namespace WMS.Desktop
             services.AddTransient<NotificationService>();
             services.AddTransient<LedStripService>();
 
-            services.AddSingleton<ITcpPacketSender>(new TcpPacketSender(TimeSpan.FromSeconds(3)));
+            var lightingOptions = LoadLightingOptions(config);
+            services.AddSingleton(lightingOptions);
+            services.AddSingleton<ITcpPacketSender>(new TcpPacketSender(lightingOptions.TcpTimeout));
 
             /// 5. View Models и Views
             services.AddSingleton<MainViewModel>(); // Главная
@@ -252,18 +312,18 @@ namespace WMS.Desktop
 
             // Инициализируем светодиодные ленты
             var ledService = scope.ServiceProvider.GetRequiredService<LedStripService>();
-            var ledResult = await ledService.InitializeSectorsAsync();
+            var ledReport = await ledService.InitializeAsync();
 
-            if (ledResult == ControllersInitResult.Failed)
+            if (ledReport.IsConfigured && !ledReport.IsSuccess)
             {
                 MessageBox.Show(
-                    "Не удалось инициализировать LED-контроллеры. Проверьте подключение к плате.\n" +
+                    LightingReportFormatter.Describe(ledReport) + "\n\n" +
                     "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
-                    "Ошибка LED",
+                    "Ошибка подсветки",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
-            else if (ledResult == ControllersInitResult.NotConfigured)
+            else if (!ledReport.IsConfigured)
             {
                 MessageBox.Show(
                     "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",

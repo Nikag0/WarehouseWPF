@@ -1,4 +1,5 @@
 using CsvHelper.Configuration.Attributes;
+using WMS.Domain;
 
 namespace WMS.Application.DTO
 {
@@ -9,9 +10,9 @@ namespace WMS.Application.DTO
         [property: Name("Компонент")] string ComponentName,
         [property: Name("Стеллаж")] string Rack,
         [property: Name("Ячейка")] string Cell,
-        [property: Name("Было")] int PreviousQuantity,
-        [property: Name("Изменение")] int QuantityChanged,
-        [property: Name("Стало")] int NewQuantity,
+        [property: Name("Было"), Format(QuantityRules.DisplayFormat)] decimal PreviousQuantity,
+        [property: Name("Изменение"), Format(QuantityRules.DisplayFormat)] decimal QuantityChanged,
+        [property: Name("Стало"), Format(QuantityRules.DisplayFormat)] decimal NewQuantity,
         [property: Name("Оператор")] string Operator,
         [property: Name("Комментарий")] string Comment
     );

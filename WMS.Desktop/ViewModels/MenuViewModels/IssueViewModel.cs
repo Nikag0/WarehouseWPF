@@ -143,12 +143,23 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            // Проверка точности: не больше трёх знаков после запятой.
+            var tooPreciseItem = IssueItems
+                .FirstOrDefault(x => decimal.Round(x.OperationQuantity, QuantityRules.Scale) != x.OperationQuantity);
+
+            if (tooPreciseItem != null)
+            {
+                _dialogService.ShowWarning(
+                    $"{tooPreciseItem.ComponentName}: количество может содержать не более {QuantityRules.Scale} знаков после запятой.");
+                return;
+            }
+
             // Проверка кол-ва выдачи в бд
             var shortagedItems = IssueItems.Where(x => x.Quantity < x.OperationQuantity).ToList();
             if (shortagedItems.Any())
             {
                 var firstShort = shortagedItems.First();
-                _dialogService.ShowWarning($"{firstShort.ComponentName} не хватает. Осталось: {firstShort.Quantity}. В выдаче: {firstShort.OperationQuantity}");
+                _dialogService.ShowWarning($"{firstShort.ComponentName} не хватает. Осталось: {firstShort.Quantity:0.###}. В выдаче: {firstShort.OperationQuantity:0.###}");
                 return;
             }
 
@@ -173,7 +184,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == item.RackId);
                 SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == item.CellId);
 
-                var question = $"Товар найден?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity}";
+                var question = $"Товар найден?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity:0.###}";
 
                 // Включили подсветку на ячейке.
                 if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: true))
@@ -250,13 +261,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             try
             {
-                var isLightOk = isOn
-                    ? await _ledStripService.TurnOnSectorAsync(cellId)
-                    : await _ledStripService.TurnOffSectorAsync(cellId);
-
-                var isGpioOk = await _ledStripService.SetGPIOAsync(cellId, isOn ? 1 : 0);
-
-                return isLightOk && isGpioOk;
+                return isOn
+                    ? await _ledStripService.HighlightCellAsync(cellId)
+                    : await _ledStripService.ClearCellAsync(cellId);
             }
             catch (Exception)
             {

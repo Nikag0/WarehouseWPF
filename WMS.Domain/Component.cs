@@ -12,7 +12,7 @@ public class Component
     public string Name { get; private set; } = null!;
     public string Manufacturer { get; private set; } = null!;
     public DateOnly? ExpirationDate { get; private set; }
-    public int MinQuantity { get; private set; }
+    public decimal MinQuantity { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -32,7 +32,7 @@ public class Component
         string name,
         string manufacturer,
         DateOnly? expirationDate,
-        int minQuantity)
+        decimal minQuantity)
     {
         var now = DateTime.UtcNow;
 
@@ -47,7 +47,7 @@ public class Component
        string name,
        string manufacturer,
        DateOnly? expirationDate,
-       int minQuantity)
+       decimal minQuantity)
     {
         SetFields(article, name, manufacturer, expirationDate, minQuantity);
 
@@ -61,7 +61,7 @@ public class Component
         string name,
         string manufacturer,
         DateOnly? expirationDate,
-        int minQuantity)
+        decimal minQuantity)
     {
         // Сначала проверяем все поля, чтобы при ошибке объект остался без изменений
         var normalizedArticle = Normalize(article, "Артикул не может быть пустым", "Артикул");
@@ -70,6 +70,8 @@ public class Component
 
         if (minQuantity <= 0)
             throw new BusinessException("Минимальный остаток не может быть отрицательным или равным нулю");
+
+        QuantityRules.EnsureValid(minQuantity);
 
         Article = normalizedArticle;
         Name = normalizedName;

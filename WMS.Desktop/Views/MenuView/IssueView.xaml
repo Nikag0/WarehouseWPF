@@ -134,15 +134,16 @@
                         <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
 
                         <DataGridTemplateColumn Header="К выдаче" Width="100" IsReadOnly="False" >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <xctk:IntegerUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    <xctk:DecimalUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                        FormatString="0.###"
                                                         Minimum="0">
-                                        <xctk:IntegerUpDown.Style>
-                                            <Style TargetType="xctk:IntegerUpDown">
+                                        <xctk:DecimalUpDown.Style>
+                                            <Style TargetType="xctk:DecimalUpDown">
                                                 <Setter Property="IsEnabled" Value="True"/>
                                                 <Setter Property="ButtonSpinnerWidth" Value="45"/>
                                                 <Setter Property="ButtonSpinnerHeight" Value="35"/>
@@ -152,8 +153,8 @@
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </xctk:IntegerUpDown.Style>
-                                    </xctk:IntegerUpDown>
+                                        </xctk:DecimalUpDown.Style>
+                                    </xctk:DecimalUpDown>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

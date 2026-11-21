@@ -14,9 +14,9 @@ namespace WMS.Domain.UnitTests
             string componentName = "Резистор",
             string rackName = "А-1",
             string cellName = "Б-2",
-            int previousQuantity = 10,
-            int quantityChanged = 5,
-            int newQuantity = 15)
+            decimal previousQuantity = 10,
+            decimal quantityChanged = 5,
+            decimal newQuantity = 15)
         {
             return OperationHistory.Create(
                 type, operatorName, comment,
@@ -125,6 +125,24 @@ namespace WMS.Domain.UnitTests
             var act = () => Create(quantityChanged: quantityChanged, newQuantity: 10 + quantityChanged);
 
             act.Should().Throw<BusinessException>().WithMessage("Изменение количества должно быть больше нуля");
+        }
+
+        [Test]
+        public void Create_WithFractionalQuantities_ShouldSetProperties()
+        {
+            var history = Create(type: OperationType.Issue, previousQuantity: 1.1m, quantityChanged: 1.0m, newQuantity: 0.1m);
+
+            history.PreviousQuantity.Should().Be(1.1m);
+            history.QuantityChanged.Should().Be(1.0m);
+            history.NewQuantity.Should().Be(0.1m);
+        }
+
+        [Test]
+        public void Create_WithMoreThanThreeDecimalPlaces_ShouldThrowBusinessException()
+        {
+            var act = () => Create(previousQuantity: 1m, quantityChanged: 0.0005m, newQuantity: 1.0005m);
+
+            act.Should().Throw<BusinessException>();
         }
 
         [Test]

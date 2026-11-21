@@ -29,6 +29,7 @@ namespace WMS.Infrastructure.Configurations
                 .HasMaxLength(Component.TextMaxLength);
 
             builder.Property(x => x.MinQuantity)
+                .HasPrecision(QuantityRules.Precision, QuantityRules.Scale)
                 .IsRequired();
         }
     }

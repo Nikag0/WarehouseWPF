@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace WMS.Application.DTO
 {
+    // Всё, что нужно, чтобы подсветить ячейку: её зону на ленте и лампу ряда
     public record SectorColorDTO(
-        byte DeviceAddress,
+        ControllerEndpoint Controller,
         byte StripNumber,
         byte Index,
-        string Ip,
-        int Port,
         byte R, byte G, byte B,
-        byte Brightness
+        byte Brightness,
+        // Контроллер, к которому подключена лампа ряда. null — у ряда нет лампы
+        ControllerEndpoint? Lamp
     );
 }

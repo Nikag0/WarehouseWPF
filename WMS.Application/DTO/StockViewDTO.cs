@@ -14,5 +14,5 @@
         string CellCode,
         string CellCodeDisplay,
 
-        int Quantity,
-        int OperationQuantity);
+        decimal Quantity,
+        decimal OperationQuantity);

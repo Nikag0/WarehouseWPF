@@ -13,7 +13,7 @@ namespace WMS.Application
 
         public TcpPacketSender(TimeSpan? timeout = null)
         {
-            _timeout = timeout ?? TimeSpan.FromSeconds(3);
+            _timeout = timeout ?? TimeSpan.FromSeconds(10);
         }
 
         public async Task<bool> SendAsync(string ip, int port, byte[] packet, CancellationToken ct = default)

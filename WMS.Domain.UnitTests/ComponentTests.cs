@@ -177,6 +177,22 @@ namespace WMS.Domain.UnitTests
         }
 
         [Fact]
+        public void Create_WithFractionalMinQuantity_ShouldKeepValue()
+        {
+            var component = Component.Create(ValidArticle, ValidName, ValidManufacturer, null, 0.5m);
+
+            component.MinQuantity.Should().Be(0.5m);
+        }
+
+        [Fact]
+        public void Create_WithMinQuantityMoreThanThreeDecimalPlaces_ShouldThrowBusinessException()
+        {
+            Action act = () => Component.Create(ValidArticle, ValidName, ValidManufacturer, null, 0.0001m);
+
+            act.Should().Throw<BusinessException>();
+        }
+
+        [Fact]
         public void Update_WithEmptyMinQuantity_ShouldThrowBusinessException()
         {
             var component = CreateValidComponent();

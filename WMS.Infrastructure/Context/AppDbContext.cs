@@ -23,6 +23,7 @@ namespace WMS.Infrastructure.Context
         public DbSet<Microcontroller> Microcontroller => Set<Microcontroller>();
         public DbSet<Strip> Strip => Set<Strip>();
         public DbSet<Sector> Sector => Set<Sector>();
+        public DbSet<SignalLamp> SignalLamp => Set<SignalLamp>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }

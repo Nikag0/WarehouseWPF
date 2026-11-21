@@ -9,7 +9,7 @@ namespace WMS.Application.DTO
     public record IssueStockDto
     (
         Guid StockId,
-        int QuantityChanged,
+        decimal QuantityChanged,
          Guid RackId,
         string RackName,
         Guid CellId,

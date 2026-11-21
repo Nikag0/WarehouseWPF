@@ -66,7 +66,7 @@
                         <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTemplateColumn Width="150" IsReadOnly="False">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -299,21 +299,22 @@
 
                             <Grid >
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="60"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock x:Name="Watermark"
                                            Grid.Column="0"
-                                           Text="шт:" 
+                                           Text="кол-во:" 
                                            Foreground="#777"
                                            FontSize="15"
                                            Margin="8,0,0,0" 
                                            VerticalAlignment="Center"
                                            IsHitTestVisible="False"/>
 
-                                <xctk:IntegerUpDown Grid.Column="1"
+                                <xctk:DecimalUpDown Grid.Column="1"
                                                     Value="{Binding ReceiptItem.OperationQuantity}"
+                                                    FormatString="0.###"
                                                     Minimum="0"
                                                     BorderThickness="0"
                                                     Background="Transparent"
@@ -417,7 +418,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Название" Width="5.8*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             <DataGridTextColumn Header="Ячейка" Width="2*" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Остаток" Width="2.2*" Binding="{Binding Quantity}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                            <DataGridTextColumn Header="Остаток" Width="2.2*" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         </DataGrid.Columns>
 
                     </DataGrid>

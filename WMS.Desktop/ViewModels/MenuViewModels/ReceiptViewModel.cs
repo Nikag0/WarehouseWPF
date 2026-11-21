@@ -212,6 +212,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 return;
             }
 
+            if (decimal.Round(ReceiptItem.OperationQuantity, QuantityRules.Scale) != ReceiptItem.OperationQuantity)
+            {
+                _dialogService.ShowWarning($"Количество может содержать не более {QuantityRules.Scale} знаков после запятой.");
+                return;
+            }
+
             if (OperatorName == null)
             {
                 _dialogService.ShowWarning("Оператор не указан.");
@@ -220,6 +226,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             // Если подсветка не включилась, выключать её не нужно — это сэкономит ожидание таймаута
             var isLedAvailable = true;
+
+            SearchStockOrComponent = SelectedCell.Id.ToString();
 
             try
             {
@@ -241,7 +249,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             var isAccepted = _dialogService.ShowConfirmation("Товар принят? \n" +
                 $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
-                $"Количество: {ReceiptItem.OperationQuantity}\n" +
+                $"Количество: {ReceiptItem.OperationQuantity:0.###}\n" +
                 $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}");
 
             if (isLedAvailable)
@@ -449,13 +457,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         {
             try
             {
-                var isLightOk = isOn
-                    ? await _ledStripService.TurnOnSectorAsync(cellId)
-                    : await _ledStripService.TurnOffSectorAsync(cellId);
-
-                var isGpioOk = await _ledStripService.SetGPIOAsync(cellId, isOn ? 1 : 0);
-
-                return isLightOk && isGpioOk;
+                return isOn
+                    ? await _ledStripService.HighlightCellAsync(cellId)
+                    : await _ledStripService.ClearCellAsync(cellId);
             }
             catch (Exception)
             {
@@ -538,6 +542,49 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 _dialogService.ShowError($"Не удалось загрузить содержимое стеллажа: {ex.Message}");
             }
         }
+
+        //private async Task RefreshStockInRackAsync()
+        //{
+        //    _rackStockCts?.Cancel();
+
+        //    if (SelectedRack == null)
+        //    {
+        //        FilteredItemsInRacks.Clear();
+        //        return;
+        //    }
+
+        //    _rackStockCts = new CancellationTokenSource();
+        //    var token = _rackStockCts.Token;
+
+        //    try
+        //    {
+        //        var stocks = await _stockService.GetStocksInRackAsync(SelectedRack.Id);
+        //        var cellWithoutStock = FilteredCells.Where(x => !stocks.Any(s => s.CellId == x.Id)).ToList();
+
+        //        token.ThrowIfCancellationRequested();
+
+        //        await App.Current.Dispatcher.InvokeAsync(() =>
+        //        {
+        //            FilteredItemsInRacks.Clear();
+
+        //            foreach (var stock in stocks)
+        //            {
+        //                FilteredItemsInRacks.Add(stock);
+        //            }
+
+        //            UpdateCellHighlights(cellWithoutStock);
+        //        });
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //        // Игнорируем отменённый запрос
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Метод вызывается без ожидания, поэтому без этого catch ошибка потерялась бы
+        //        _dialogService.ShowError($"Не удалось загрузить содержимое стеллажа: {ex.Message}");
+        //    }
+        //}
 
         private void FilterRacks(string? searchText)
         {

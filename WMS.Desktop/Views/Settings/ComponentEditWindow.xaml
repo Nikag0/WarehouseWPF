@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS.Desktop.Views"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="ComponentEditWindow" 
         Height="300" Width="400"
@@ -38,7 +39,7 @@
         <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding ExpirationDate, Mode=TwoWay}" Margin="0,5"/>-->
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Мин. остаток:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <xctk:DecimalUpDown Grid.Row="4" Grid.Column="1" Value="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" FormatString="0.###" Minimum="0" Margin="0,5" Height="25" VerticalContentAlignment="Center" TextAlignment="Center"/>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button Content="Применить" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="100" Height="30" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>

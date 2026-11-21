@@ -90,5 +90,58 @@ namespace WMS.Domain.UnitTests
 
             act.Should().Throw<BusinessException>();
         }
+
+        // -------- Дробные количества --------
+
+        [Fact]
+        public void ReceiveAndIssue_FractionalQuantities_AreExact()
+        {
+            var stock = Stock.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 0);
+
+            stock.Receive(0.1m);
+            stock.Receive(0.2m);
+            stock.Quantity.Should().Be(0.3m);
+
+            stock.Issue(0.3m);
+            stock.Quantity.Should().Be(0m);
+        }
+
+        [Fact]
+        public void Create_WithFractionalInitialQuantity_ShouldKeepValue()
+        {
+            var stock = Stock.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 2.125m);
+
+            stock.Quantity.Should().Be(2.125m);
+        }
+
+        [Fact]
+        public void Receive_WithMoreThanThreeDecimalPlaces_ShouldThrowAndKeepQuantity()
+        {
+            var stock = Stock.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 1m);
+
+            Action act = () => stock.Receive(0.0001m);
+
+            act.Should().Throw<BusinessException>();
+            stock.Quantity.Should().Be(1m);
+        }
+
+        [Fact]
+        public void Issue_WithMoreThanThreeDecimalPlaces_ShouldThrowAndKeepQuantity()
+        {
+            var stock = Stock.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 1m);
+
+            Action act = () => stock.Issue(0.1234m);
+
+            act.Should().Throw<BusinessException>();
+            stock.Quantity.Should().Be(1m);
+        }
+
+        [Fact]
+        public void Create_WithMoreThanThreeDecimalPlaces_ShouldThrow()
+        {
+            Action act = () => Stock.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 1.0005m);
+
+            act.Should().Throw<BusinessException>();
+        }
     }
 }

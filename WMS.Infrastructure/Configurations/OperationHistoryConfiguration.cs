@@ -25,6 +25,16 @@ namespace WMS.Infrastructure.Configurations
 
             builder.Property(x => x.Comment)
                 .HasMaxLength(OperationHistory.CommentMaxLength);
+
+            // numeric(18,3): до трёх знаков после запятой без ошибок округления
+            builder.Property(x => x.PreviousQuantity)
+                .HasPrecision(QuantityRules.Precision, QuantityRules.Scale);
+
+            builder.Property(x => x.QuantityChanged)
+                .HasPrecision(QuantityRules.Precision, QuantityRules.Scale);
+
+            builder.Property(x => x.NewQuantity)
+                .HasPrecision(QuantityRules.Precision, QuantityRules.Scale);
         }
     }
 }

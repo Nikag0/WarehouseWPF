@@ -34,7 +34,7 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         await db.SaveChangesAsync();
     }
 
-    private async Task<Stock> SeedStockAsync(Cell cell, int quantity)
+    private async Task<Stock> SeedStockAsync(Cell cell, decimal quantity)
     {
         var stock = Stock.Create(_component.Id, _rack.Id, cell.Id, quantity);
 
@@ -57,10 +57,10 @@ public class StockServiceIntegrationTests : IntegrationTestBase
             new UnitOfWorkFactory(new TestDbContextFactory(DbOptions), holder));
     }
 
-    private ReceiptItemDto ReceiptFor(Cell cell, int quantity) =>
+    private ReceiptItemDto ReceiptFor(Cell cell, decimal quantity) =>
         new(_component.Id, _rack.Id, "rack", cell.Id, "cell", quantity);
 
-    private IssueStockDto IssueFor(Stock stock, int quantity) =>
+    private IssueStockDto IssueFor(Stock stock, decimal quantity) =>
         new(stock.Id, quantity, stock.RackId, "rack", stock.CellId, "cell", stock.ComponentId, "component");
 
     // -------- Приёмка --------
@@ -113,8 +113,9 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         await CreateService().ReceiveAsync(ReceiptFor(_secondCell, 2), "Оператор");
 
         await using var db = CreateContext();
-        var quantities = await db.Stock.OrderBy(s => s.Quantity).Select(s => s.Quantity).ToListAsync();
-        Assert.Equal(new[] { 2, 3 }, quantities);
+        // SQLite не умеет ORDER BY по decimal, поэтому сортируем на клиенте
+        var quantities = (await db.Stock.Select(s => s.Quantity).ToListAsync()).OrderBy(q => q).ToList();
+        Assert.Equal(new decimal[] { 2, 3 }, quantities);
     }
 
     [Fact]
@@ -183,6 +184,63 @@ public class StockServiceIntegrationTests : IntegrationTestBase
 
         var history = await db.OperationHistory.SingleAsync();
         Assert.Equal(0, history.NewQuantity);
+    }
+
+    // -------- Дробные количества --------
+
+    [Fact]
+    public async Task ReceiveThenIssue_FractionalQuantities_AreExactAndStockIsDeletedAtZero()
+    {
+        await SeedCatalogAsync();
+        var service = CreateService();
+
+        // С double 0.1 + 0.2 - 0.3 дало бы 5.5e-17, и запись остатка не удалилась бы
+        await service.ReceiveAsync(ReceiptFor(_cell, 0.1m), "Оператор");
+        await service.ReceiveAsync(ReceiptFor(_cell, 0.2m), "Оператор");
+
+        Stock stock;
+        await using (var db = CreateContext())
+        {
+            stock = await db.Stock.SingleAsync();
+            Assert.Equal(0.3m, stock.Quantity);
+        }
+
+        await service.IssueAsync(new[] { IssueFor(stock, 0.3m) }, "Оператор");
+
+        await using var check = CreateContext();
+        Assert.False(await check.Stock.AnyAsync());
+
+        var lastHistory = await check.OperationHistory
+            .Where(h => h.Type == OperationType.Issue)
+            .SingleAsync();
+        Assert.Equal(0.3m, lastHistory.PreviousQuantity);
+        Assert.Equal(0.3m, lastHistory.QuantityChanged);
+        Assert.Equal(0m, lastHistory.NewQuantity);
+    }
+
+    [Fact]
+    public async Task IssueAsync_FractionalPart_KeepsThreeDecimalPlacesInDatabase()
+    {
+        await SeedCatalogAsync();
+        var stock = await SeedStockAsync(_cell, 1.1m);
+
+        await CreateService().IssueAsync(new[] { IssueFor(stock, 1.0m) }, "Оператор");
+
+        await using var db = CreateContext();
+        Assert.Equal(0.1m, (await db.Stock.SingleAsync()).Quantity);
+    }
+
+    [Fact]
+    public async Task ReceiveAsync_MoreThanThreeDecimalPlaces_ThrowsAndSavesNothing()
+    {
+        await SeedCatalogAsync();
+
+        await Assert.ThrowsAsync<BusinessException>(
+            () => CreateService().ReceiveAsync(ReceiptFor(_cell, 1.2345m), "Оператор"));
+
+        await using var db = CreateContext();
+        Assert.False(await db.Stock.AnyAsync());
+        Assert.False(await db.OperationHistory.AnyAsync());
     }
 
     [Fact]

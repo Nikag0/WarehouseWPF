@@ -4,4 +4,4 @@
     string Name,
     string Manufacturer,
     DateOnly? ExpirationDate,
-    int MinQuantity);
+    decimal MinQuantity);

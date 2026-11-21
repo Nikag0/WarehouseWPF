@@ -21,7 +21,7 @@ namespace WMS.Desktop.ViewModels
         [ObservableProperty] private string _name = string.Empty;
         [ObservableProperty] private string _manufacturer = string.Empty;
         //[ObservableProperty] private DateTime expirationDate;
-        [ObservableProperty] private int _minQuantity;
+        [ObservableProperty] private decimal _minQuantity;
 
         public ComponentEditViewModel(
             ComponentService componentService, 

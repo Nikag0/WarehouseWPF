@@ -7,7 +7,7 @@ public class Stock
     public Guid ComponentId { get; private set; }
     public Guid RackId { get; private set; }
     public Guid CellId { get; private set; }
-    public int Quantity { get; private set; }
+    public decimal Quantity { get; private set; }
 
     // Навигационные свойства.
     public Component Component { get; private set; } = null!;
@@ -17,7 +17,7 @@ public class Stock
     // Для EF Core
     private Stock() { }
 
-    private Stock(Guid id, Guid componentId, Guid rackId, Guid cellId, int quantity)
+    private Stock(Guid id, Guid componentId, Guid rackId, Guid cellId, decimal quantity)
     {
         Id = id;
         ComponentId = componentId;
@@ -31,7 +31,7 @@ public class Stock
         Guid componentId,
         Guid rackId,
         Guid cellId,
-        int initialQuantity)
+        decimal initialQuantity)
     {
         if (componentId == Guid.Empty)
             throw new BusinessException("Компонент не указан");
@@ -53,13 +53,13 @@ public class Stock
 
     // -------- Business logic --------
 
-    public void Receive(int quantity)
+    public void Receive(decimal quantity)
     {
         ValidatePositiveQuantity(quantity);
         Quantity += quantity;
     }
 
-    public void Issue(int quantity)
+    public void Issue(decimal quantity)
     {
         ValidatePositiveQuantity(quantity);
 
@@ -71,17 +71,21 @@ public class Stock
 
     // -------- Helpers --------
 
-    private void SetInitialQuantity(int quantity)
+    private void SetInitialQuantity(decimal quantity)
     {
         if (quantity < 0)
             throw new BusinessException("Начальное количество не может быть отрицательным");
 
+        QuantityRules.EnsureValid(quantity);
+
         Quantity = quantity;
     }
 
-    private static void ValidatePositiveQuantity(int quantity)
+    private static void ValidatePositiveQuantity(decimal quantity)
     {
         if (quantity <= 0)
             throw new BusinessException("Количество должно быть больше нуля");
+
+        QuantityRules.EnsureValid(quantity);
     }
 }

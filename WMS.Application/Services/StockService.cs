@@ -119,8 +119,8 @@ namespace WMS.Application.Services
 
                 var stock = await _stockRepo.GetByLocationAsync(receiptStock.ComponentId, receiptStock.RackId, receiptStock.CellId, ct);
 
-                int previousQuantity;
-                int newQuantity;
+                decimal previousQuantity;
+                decimal newQuantity;
 
                 if (stock is null)
                 {

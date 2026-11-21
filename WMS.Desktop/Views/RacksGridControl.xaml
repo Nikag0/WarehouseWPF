@@ -34,19 +34,42 @@
               Grid.Row="1">
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="12,5*"/>
+                <RowDefinition Height="18,5*"/>
+                <RowDefinition Height="12,5*"/>
+                <RowDefinition Height="0,5*"/>
+                <RowDefinition Height="12,5*"/>
+                <RowDefinition Height="12,5*"/>
+                <RowDefinition Height="12,5*"/>
+                <RowDefinition Height="18,5*"/>
+                <RowDefinition Height="12,5*"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="А" Margin="0,15,0,0" 
                 HorizontalAlignment="Center" 
                 Style="{StaticResource HeaderTextStyle}"/>
 
-            <TextBlock Grid.Row="1" Text="Б" Margin="0,120,0,0" 
+            <TextBlock Grid.Row="2" Text="Б"
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="4" Text="В"
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="6" Text="Г"
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="8" Text="Д"
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <!--<TextBlock Grid.Row="0" Text="А" Margin="0,15,0,0" 
+                HorizontalAlignment="Center" 
+                Style="{StaticResource HeaderTextStyle}"/>
+
+            <TextBlock Grid.Row="1" Text="Б" Margin="0,80,0,0" 
                 HorizontalAlignment="Center" 
                 Style="{StaticResource HeaderTextStyle}"/>
 
@@ -54,13 +77,13 @@
                 HorizontalAlignment="Center" 
                 Style="{StaticResource HeaderTextStyle}"/>
 
-            <TextBlock Grid.Row="3" Text="Г" Margin="0,100,0,0" 
+            <TextBlock Grid.Row="3" Text="Г" Margin="0,80,0,0" 
                 HorizontalAlignment="Center" 
                 Style="{StaticResource HeaderTextStyle}"/>
 
             <TextBlock Grid.Row="4" Text="Д" Margin="0,120,0,0" 
                 HorizontalAlignment="Center" 
-                Style="{StaticResource HeaderTextStyle}"/>
+                Style="{StaticResource HeaderTextStyle}"/>-->
 
         </Grid>
 

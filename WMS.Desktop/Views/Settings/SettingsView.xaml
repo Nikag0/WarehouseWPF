@@ -97,7 +97,7 @@
                             <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Минимальный остаток" Binding="{Binding MinQuantity}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                            <DataGridTextColumn Header="Минимальный остаток" Binding="{Binding MinQuantity, StringFormat={}{0:0.###}}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             
                             <DataGridTemplateColumn Width="150" IsReadOnly="False">
                                 <DataGridTemplateColumn.CellTemplate>

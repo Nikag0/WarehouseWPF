@@ -67,8 +67,9 @@ namespace WMS.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("MinQuantity")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("MinQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -103,7 +104,12 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<int>("Port")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("SignalLampId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SignalLampId");
 
                     b.ToTable("microcontroller", (string)null);
                 });
@@ -155,6 +161,27 @@ namespace WMS.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("WMS.Domain.LedStrip.SignalLamp", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MicrocontrollerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MicrocontrollerId");
+
+                    b.ToTable("signal_lamp", (string)null);
+                });
+
             modelBuilder.Entity("WMS.Domain.LedStrip.Strip", b =>
                 {
                     b.Property<Guid>("Id")
@@ -193,8 +220,9 @@ namespace WMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("NewQuantity")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("NewQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
                     b.Property<DateTime>("OccurredAt")
                         .HasColumnType("timestamp with time zone");
@@ -203,11 +231,13 @@ namespace WMS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PreviousQuantity")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("PreviousQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
-                    b.Property<int>("QuantityChanged")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("QuantityChanged")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
                     b.Property<string>("RackName")
                         .IsRequired()
@@ -292,8 +322,9 @@ namespace WMS.Infrastructure.Migrations
                     b.Property<Guid>("ComponentId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
                     b.Property<Guid>("RackId")
                         .HasColumnType("uuid");
@@ -319,6 +350,16 @@ namespace WMS.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WMS.Domain.LedStrip.Microcontroller", b =>
+                {
+                    b.HasOne("WMS.Domain.LedStrip.SignalLamp", "SignalLamp")
+                        .WithMany("AssignedControllers")
+                        .HasForeignKey("SignalLampId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("SignalLamp");
+                });
+
             modelBuilder.Entity("WMS.Domain.LedStrip.Sector", b =>
                 {
                     b.HasOne("WMS.Domain.Cell", "Cell")
@@ -336,6 +377,17 @@ namespace WMS.Infrastructure.Migrations
                     b.Navigation("Cell");
 
                     b.Navigation("Strip");
+                });
+
+            modelBuilder.Entity("WMS.Domain.LedStrip.SignalLamp", b =>
+                {
+                    b.HasOne("WMS.Domain.LedStrip.Microcontroller", "Microcontroller")
+                        .WithMany()
+                        .HasForeignKey("MicrocontrollerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Microcontroller");
                 });
 
             modelBuilder.Entity("WMS.Domain.LedStrip.Strip", b =>
@@ -379,6 +431,11 @@ namespace WMS.Infrastructure.Migrations
             modelBuilder.Entity("WMS.Domain.LedStrip.Microcontroller", b =>
                 {
                     b.Navigation("Strips");
+                });
+
+            modelBuilder.Entity("WMS.Domain.LedStrip.SignalLamp", b =>
+                {
+                    b.Navigation("AssignedControllers");
                 });
 
             modelBuilder.Entity("WMS.Domain.LedStrip.Strip", b =>

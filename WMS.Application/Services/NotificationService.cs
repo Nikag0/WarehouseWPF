@@ -33,15 +33,15 @@ namespace WMS.Application.Services
             {
                 var firstStock = group.First();
 
-                int totalQuantity = group.Sum(s => s.Quantity);
+                var totalQuantity = group.Sum(s => s.Quantity);
 
                 var locations = group.Select(s =>
                     $"ст. {MappingExtensions.CodeToDisplay(s.Rack.Column, s.Rack.Row)} " +
-                    $"яч. {MappingExtensions.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({s.Quantity} шт.)");
+                    $"яч. {MappingExtensions.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({MappingExtensions.FormatQuantity(s.Quantity)} шт.)");
 
                 return new NotificationItem(
                     title: $"Критический остаток: {firstStock.Component.Name}.",
-                    description: $"Общий остаток: {totalQuantity} шт. (Минимум: {firstStock.Component.MinQuantity} шт.). " +
+                    description: $"Общий остаток: {MappingExtensions.FormatQuantity(totalQuantity)} шт. (Минимум: {MappingExtensions.FormatQuantity(firstStock.Component.MinQuantity)} шт.)." +
                                     $"Размещение: {string.Join("; ", locations)}",
                     type: NotificationType.LowStock
                 );
