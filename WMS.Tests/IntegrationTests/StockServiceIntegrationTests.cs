@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Moq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using WMS.Application;
+using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using WMS.Application.Services;
 using WMS.Domain;
@@ -332,5 +334,101 @@ public class StockServiceIntegrationTests : IntegrationTestBase
         await using var verify = CreateContext();
         Assert.Equal(2, (await verify.Stock.SingleAsync()).Quantity);
         Assert.Equal(3, await verify.OperationHistory.CountAsync());
+    }
+
+    // -------- Поиск с учётом стеллажа --------
+
+    // Второй стеллаж с другим товаром, чтобы было что отфильтровать
+    private async Task<(Rack Rack, Component Component)> SeedSecondRackAsync()
+    {
+        var component = Component.Create("ART-002", "Конденсатор 1 мкФ", "Murata", null, 5);
+        var rack = new Rack(2, 1, RackType.R1);
+        var cell = new Cell(rack.Id, 1, 1);
+
+        await using var db = CreateContext();
+        db.Component.Add(component);
+        db.Rack.Add(rack);
+        db.Cell.Add(cell);
+        db.Stock.Add(Stock.Create(component.Id, rack.Id, cell.Id, 7));
+        await db.SaveChangesAsync();
+
+        return (rack, component);
+    }
+
+    [Fact]
+    public async Task GetFilteredStockOrComponentsAsync_RackWithEmptyText_ReturnsWholeRackContent()
+    {
+        await SeedCatalogAsync();
+        await SeedStockAsync(_cell, 2);
+        await SeedStockAsync(_secondCell, 3);
+        await SeedSecondRackAsync();
+
+        var result = await CreateService().GetFilteredStockOrComponentsAsync("", 200, _rack.Id, null, CancellationToken.None);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, r => Assert.Equal(_rack.Id, r.RackId));
+    }
+
+    [Fact]
+    public async Task GetFilteredStockOrComponentsAsync_CellWithEmptyText_ReturnsOnlyThatCell()
+    {
+        await SeedCatalogAsync();
+        await SeedStockAsync(_cell, 2);
+        await SeedStockAsync(_secondCell, 3);
+
+        var result = await CreateService().GetFilteredStockOrComponentsAsync("", 200, _rack.Id, _secondCell.Id, CancellationToken.None);
+
+        var item = Assert.Single(result);
+        Assert.Equal(_secondCell.Id, item.CellId);
+        Assert.Equal(3, item.Quantity);
+    }
+
+    // Поиск по справочнику использует ILike (только PostgreSQL), поэтому справочник здесь подменяется.
+    // Текст поиска — латиницей: lower() в SQLite не переводит кириллицу в нижний регистр (в PostgreSQL переводит).
+    // проверяется фильтр остатков по стеллажу на реальной БД и то, как сервис добавляет компоненты.
+    private StockService CreateServiceWithCatalog(params Component[] catalog)
+    {
+        var holder = new DbContextHolder();
+        var componentRepo = new Mock<IComponentRepository>();
+        componentRepo
+            .Setup(r => r.GetViewFilterAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(catalog.Select(c => new ComponentViewDto(c.Id, c.Article, c.Name, c.Manufacturer)).ToList());
+
+        return new StockService(
+            componentRepo.Object,
+            new StockRepository(holder),
+            new HistoryRepository(holder),
+            NullLogger<StockService>.Instance,
+            new UnitOfWorkFactory(new TestDbContextFactory(DbOptions), holder));
+    }
+
+    [Fact]
+    public async Task GetFilteredStockOrComponentsAsync_RackWithText_ReturnsRackStockAndCatalogComponents()
+    {
+        await SeedCatalogAsync();
+        await SeedStockAsync(_cell, 2);
+        var (_, otherComponent) = await SeedSecondRackAsync();
+
+        // Конденсатор (ART-002) лежит только во втором стеллаже: в первом он найдётся как компонент справочника для приёмки
+        var result = await CreateServiceWithCatalog(otherComponent)
+            .GetFilteredStockOrComponentsAsync("art-002", 200, _rack.Id, null, CancellationToken.None);
+
+        var item = Assert.Single(result);
+        Assert.Equal(otherComponent.Id, item.ComponentId);
+        Assert.Equal(Guid.Empty, item.RackId);
+    }
+
+    [Fact]
+    public async Task GetFilteredStockOrComponentsAsync_NoRack_SearchesWholeWarehouse()
+    {
+        await SeedCatalogAsync();
+        await SeedStockAsync(_cell, 2);
+        var (otherRack, otherComponent) = await SeedSecondRackAsync();
+
+        var result = await CreateServiceWithCatalog(otherComponent)
+            .GetFilteredStockOrComponentsAsync("art-002", 15, null, null, CancellationToken.None);
+
+        // Остаток во втором стеллаже найден, а тот же компонент из справочника повторно не добавлен
+        Assert.Equal(otherRack.Id, Assert.Single(result).RackId);
     }
 }

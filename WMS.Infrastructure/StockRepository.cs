@@ -44,17 +44,6 @@ namespace WMS.Infrastructure
                                             s.CellId == cellId, ct);
         }
 
-        public async Task<IReadOnlyList<Stock>> GetByRackAsync(Guid rackId, CancellationToken ct = default)
-        {
-            return await _db.Stock
-                .AsNoTracking()
-                .Include(s => s.Component)
-                .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .Where(s => s.RackId == rackId)
-                .ToListAsync(ct);
-        }
-
         public async Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default)
         {
             return await _db.Stock
@@ -80,7 +69,8 @@ namespace WMS.Infrastructure
             _db.Stock.Remove(stock);
         }
 
-        public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, CancellationToken ct = default)
+        // rackId / cellId — искать только в этом стеллаже / ячейке. Пустой текст тогда вернёт всё их содержимое.
+        public async Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, Guid? rackId = null, Guid? cellId = null, CancellationToken ct = default)
         {
             var query = _db.Stock
                 .AsNoTracking()
@@ -88,6 +78,12 @@ namespace WMS.Infrastructure
                 .Include(s => s.Rack)
                 .Include(s => s.Cell)
                 .Where(s => s.Quantity > 0);
+
+            if (rackId is Guid rack)
+                query = query.Where(s => s.RackId == rack);
+
+            if (cellId is Guid cell)
+                query = query.Where(s => s.CellId == cell);
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {

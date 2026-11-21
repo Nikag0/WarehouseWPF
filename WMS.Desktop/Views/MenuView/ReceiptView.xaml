@@ -39,11 +39,35 @@
             <TextBlock Text="Приём товаров" 
                        Style="{StaticResource WindowNames}"/>
 
-            <TextBox Grid.Row="1"
-                     Margin="0,5,10,5" 
-                     Tag="Поиск:"
-                     Style="{StaticResource SearchTextBox}"
-                     Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
+            <Grid Grid.Row="1"
+                  Margin="0,5,10,5">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0"
+                         Tag="Поиск:"
+                         Style="{StaticResource SearchTextBox}"
+                         Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <!-- Нажатая кнопка — искать только в месте, выбранном в форме приёмки -->
+                <ToggleButton Grid.Column="1"
+                              Content="Стеллаж"
+                              IsChecked="{Binding IsRackFilterOn}"
+                              ToolTip="Искать только в выбранном стеллаже"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+
+                <ToggleButton Grid.Column="2"
+                              Content="Ячейка"
+                              IsChecked="{Binding IsCellFilterOn}"
+                              ToolTip="Искать только в выбранной ячейке"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+            </Grid>
 
             <Grid Grid.Row="2">
                 
@@ -158,8 +182,10 @@
                         <RowDefinition Height="3*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid.Style>
-                        <Style TargetType="Grid">
+                    <Grid.Resources>
+                        <!-- Пока товар не выбран, ячейку, количество, оператора и комментарий заполнить нельзя.
+                             Стеллаж выбирать можно: с кнопкой «Стеллаж» у поля поиска с него начинается поиск товара. -->
+                        <Style x:Key="RequiresComponent" TargetType="Grid">
                             <Setter Property="IsEnabled" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ReceiptItem.ComponentId}" Value="00000000-0000-0000-0000-000000000000">
@@ -167,7 +193,7 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Grid.Style>
+                    </Grid.Resources>
 
                     <Grid Grid.Row="0">
 
@@ -177,17 +203,20 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:Name="SearchRack" 
-                                 GotKeyboardFocus="SearchRack_GotKeyboardFocus"
-                                 PreviewKeyDown="SearchRack_PreviewKeyDown"
-                                 Grid.Column="0"
-                                 Margin="5,5,5,5"
-                                 IsTabStop="False"
-                                 Style="{StaticResource SearchTextBox}" 
-                                 Tag="Стеллаж:"
-                                 Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
-                                 TextAlignment="Center"
-                                 FontSize="15"/>
+                        <Grid Grid.Column="0" HorizontalAlignment="Left" Width="190">
+
+                            <TextBox x:Name="SearchRack" 
+                                     GotKeyboardFocus="SearchRack_GotKeyboardFocus"
+                                     PreviewKeyDown="SearchRack_PreviewKeyDown"
+                                     Grid.Column="0"
+                                     Margin="5,5,5,5"
+                                     IsTabStop="False"
+                                     Style="{StaticResource SearchTextBox}" 
+                                     Tag="Стеллаж:"
+                                     Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
+                                     TextAlignment="Center"
+                                     FontSize="15"/>
+                        </Grid>
 
                         <Popup x:Name="RackPopup"
                                PlacementTarget="{Binding ElementName=SearchRack}" 
@@ -226,8 +255,17 @@
                             </Border>
                         </Popup>
 
+                        <Grid Grid.Column="1"
+                              Grid.ColumnSpan="2"
+                              Style="{StaticResource RequiresComponent}">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
                         <TextBox x:Name="SearchCell"
-                                 Grid.Column="1"
+                                 Grid.Column="0"
                                  GotKeyboardFocus="SearchCell_GotKeyboardFocus"
                                  PreviewKeyDown="SearchCell_PreviewKeyDown"
                                  Margin="5,5,5,5"
@@ -288,7 +326,7 @@
                             </Border>
                         </Popup>
 
-                        <Border Grid.Column="5"
+                        <Border Grid.Column="1"
                                 Height="Auto"
                                 Margin="5,5,10,5"
                                 CornerRadius="4,0,0,4"
@@ -325,10 +363,21 @@
                                 />
                             </Grid>
                         </Border>
-                        
+
+                        </Grid>
+
                     </Grid>
 
-                    <ComboBox Grid.Row="1"
+                    <Grid Grid.Row="1"
+                          Grid.RowSpan="2"
+                          Style="{StaticResource RequiresComponent}">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <ComboBox Grid.Row="0"
                               Margin="5,5,10,5"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
@@ -343,7 +392,7 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                         
-                    <TextBox Grid.Row="2"
+                    <TextBox Grid.Row="1"
                              Text="{Binding CommentText}"
                              AcceptsReturn="True" 
                              Tag="Комментарий:"
@@ -353,6 +402,8 @@
                              Margin="5,5,10,5"
                              FontSize="15"
                              />
+
+                    </Grid>
 
                 </Grid>
 
@@ -381,50 +432,11 @@
                                     Grid.Row="0"
                                     Racks="{Binding RacksGrid}" />
 
-            <Grid Grid.Row="1">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                
-                <local:CellsGridControl Grid.Column="0"
-                                        Cells="{Binding CellsGrid}"
-                                        RackType="{Binding SelectedRack.Type}"
-                                        SelectedCell="{Binding SelectedCell}"
-                                        Margin="0,0,5,0"/>
-
-                <Grid Grid.Column="1">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="9*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Grid.Row="0"
-                               Text="Товары в стеллаже"
-                               FontSize="25"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
-
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding FilteredItemsInRacks}"
-                              AutoGenerateColumns="False" 
-                              FontSize="15" 
-                              IsReadOnly="True" 
-                              RowHeight="40"
-                              Margin="5,0,0,0">
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Width="5.8*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Ячейка" Width="2*" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Остаток" Width="2.2*" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        </DataGrid.Columns>
-
-                    </DataGrid>
-
-                </Grid>
-            </Grid>
+            <local:CellsGridControl Grid.Row="1"
+                                    Cells="{Binding CellsGrid}"
+                                    RackType="{Binding SelectedRack.Type}"
+                                    SelectedCell="{Binding SelectedCell}"
+                                    Margin="0,5,0,0"/>
         </Grid>
 
     </Grid>
