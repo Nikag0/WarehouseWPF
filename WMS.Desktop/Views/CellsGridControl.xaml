@@ -279,10 +279,6 @@
                                             <DataTrigger Binding="{Binding ItemInCell}" Value="True">
                                                 <Setter Property="Background" Value="#85CDA434"/>
                                             </DataTrigger>
-
-                                            <DataTrigger Binding="{Binding NoItem}" Value="True">
-                                                <Setter Property="Background" Value="#808080"/>
-                                            </DataTrigger>
                                         </Style.Triggers>
                                         
                                     </Style>

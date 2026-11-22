@@ -65,11 +65,10 @@ namespace WMS.Desktop
 
                 if (!ActivateRunningInstance())
                 {
-                    MessageBox.Show(
+                    Views.MessageDialog.Show(
                         "Программа уже запущена. Дождитесь, пока откроется её окно.",
                         "Склад",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                        Views.MessageDialogKind.Info);
                 }
 
                 Shutdown();
@@ -81,6 +80,11 @@ namespace WMS.Desktop
             DispatcherUnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
+
+            // Окна сообщений при запуске (например, об ошибке подсветки) появляются раньше главного окна.
+            // В обычном режиме WPF закрыл бы программу, как только закрылось такое окно — «последнее» на тот момент.
+            // Поэтому до показа главного окна программа завершается только явно (Shutdown).
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // Весь запуск — в одном try: любая ошибка до появления главного окна должна закрывать программу
             // с понятным сообщением. Иначе её погасит глобальный обработчик, и процесс останется висеть без окон.
@@ -94,15 +98,18 @@ namespace WMS.Desktop
                 var window = new Views.MainWindow();
                 window.DataContext = Services.GetRequiredService<MainViewModel>();
                 window.Show();
+
+                // Главным окном WPF считает первое созданное, а им могло стать окно сообщения при запуске
+                MainWindow = window;
+                ShutdownMode = ShutdownMode.OnLastWindowClose;
             }
             catch (Exception ex)
             {
                 // Показываем красивое и информативное окно пользователю
-                MessageBox.Show(
+                Views.MessageDialog.Show(
                     $"Критическая ошибка при запуске приложения:\n\n{ex.Message}\n\nПриложение будет закрыто.",
                     "Ошибка инициализации",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    Views.MessageDialogKind.Error);
 
                 Shutdown(-1);
             }
@@ -316,20 +323,18 @@ namespace WMS.Desktop
 
             if (ledReport.IsConfigured && !ledReport.IsSuccess)
             {
-                MessageBox.Show(
+                Views.MessageDialog.Show(
                     LightingReportFormatter.Describe(ledReport) + "\n\n" +
                     "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
                     "Ошибка подсветки",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    Views.MessageDialogKind.Warning);
             }
             else if (!ledReport.IsConfigured)
             {
-                MessageBox.Show(
+                Views.MessageDialog.Show(
                     "В базе данных нет настроек подсветки. Подсветка ячеек работать не будет.",
                     "Подсветка не настроена",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    Views.MessageDialogKind.Warning);
             }
         }
 
@@ -346,16 +351,15 @@ namespace WMS.Desktop
             {
                 if (e.Exception is BusinessException businessEx)
                 {
-                    MessageBox.Show(businessEx.Message, "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    Views.MessageDialog.Show(businessEx.Message, "Предупреждение", Views.MessageDialogKind.Warning);
                 }
                 else
                 {
-                    MessageBox.Show(
+                    Views.MessageDialog.Show(
                         $"Произошла непредвиденная ошибка:\n\n{e.Exception.Message}\n\n" +
                         "Последняя операция могла не выполниться. Проверьте результат перед повтором.",
                         "Ошибка",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                        Views.MessageDialogKind.Error);
                 }
             }
             finally
@@ -376,6 +380,8 @@ namespace WMS.Desktop
         {
             var message = (e.ExceptionObject as Exception)?.Message ?? e.ExceptionObject?.ToString();
 
+            // Здесь остаётся стандартный MessageBox: обработчик может сработать в фоновом потоке,
+            // где окно WPF создать нельзя, а процесс после него всё равно завершится
             MessageBox.Show(
                 $"Критическая ошибка, приложение будет закрыто:\n\n{message}",
                 "Критическая ошибка",

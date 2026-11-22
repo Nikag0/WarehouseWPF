@@ -162,12 +162,16 @@ namespace WMS.Application.Services
             }
         }
 
-        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, CancellationToken token)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockOrComponentsAsync(string searchText, int maxCount, Guid? rackId, Guid? cellId, CancellationToken token)
         {
             await using var uow = _uowFactory.Create();
-            
-            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, token);
-            var components = await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
+
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, rackId, cellId, token);
+
+            // Компоненты справочника без места хранения доступны в поиске по всему складу.
+            var components = rackId.HasValue || cellId.HasValue || string.IsNullOrWhiteSpace(searchText)
+                ? Array.Empty<ComponentViewDto>()
+                : await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
             var result = new List<StockViewDTO>();
 
@@ -188,22 +192,13 @@ namespace WMS.Application.Services
             return result.Take(maxCount).ToList();
         }
 
-        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default, Guid? rackId = null, Guid? cellId = null)
         {
             await using var uow = _uowFactory.Create();
 
-            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, token);
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, rackId, cellId, token);
 
             return stocks.Select(MappingExtensions.StockToView).ToList();
-        }
-
-        public async Task<IReadOnlyList<StockViewDTO>> GetStocksInRackAsync(Guid rackId)
-        {
-            await using var uow = _uowFactory.Create();
-
-            var result = await _stockRepo.GetByRackAsync(rackId);
-
-            return result.Select(MappingExtensions.StockToView).ToList();
         }
 
         public async Task<StockViewDTO?> GetStockByIdAsync(Guid stokId)

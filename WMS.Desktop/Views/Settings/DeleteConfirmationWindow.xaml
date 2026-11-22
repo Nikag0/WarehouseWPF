@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:WMS.Desktop.Views.Settings"
         mc:Ignorable="d"
         Title="DeleteConfirmationWindow" Height="330" Width="400"
+        FontSize="{StaticResource BodyFontSize}"
         WindowStartupLocation="CenterOwner"
         Background="#36495b"
         ResizeMode="NoResize">
@@ -24,7 +25,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" TextWrapping="Wrap" Style="{StaticResource WindowNames}" Margin="0,0,0,20" FontSize="18">
+        <TextBlock Grid.Row="0" TextWrapping="Wrap" Style="{StaticResource WindowNames}" Margin="0,0,0,20" FontSize="{StaticResource BodyFontSize}">
             <Run Text="Для подтверждения введите текст ниже:"/>
             <LineBreak/>
             <Run Text="{Binding ExpectedConfirmationText, Mode=OneWay}" FontWeight="Bold"/>
@@ -37,7 +38,7 @@
                   VerticalAlignment="Top"
                   Margin="0,5,0,0"
                   Foreground="White"
-                  FontSize="14"
+                  FontSize="{StaticResource BodyFontSize}"
                   Content="Сохранить удаляемую историю в CSV"/>
 
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">

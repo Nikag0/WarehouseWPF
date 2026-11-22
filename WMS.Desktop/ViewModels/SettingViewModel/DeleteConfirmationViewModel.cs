@@ -59,7 +59,7 @@ namespace WMS.Desktop.ViewModels.SettingViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                Views.MessageDialog.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", Views.MessageDialogKind.Error);
             }
             finally
             {

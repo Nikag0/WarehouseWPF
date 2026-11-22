@@ -39,11 +39,35 @@
             <TextBlock Text="Приём товаров" 
                        Style="{StaticResource WindowNames}"/>
 
-            <TextBox Grid.Row="1"
-                     Margin="0,5,10,5" 
-                     Tag="Поиск:"
-                     Style="{StaticResource SearchTextBox}"
-                     Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
+            <Grid Grid.Row="1"
+                  Margin="0,5,10,5">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0"
+                         Tag="Поиск:"
+                         Style="{StaticResource SearchTextBox}"
+                         Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <!-- Нажатая кнопка — искать только в месте, выбранном в форме приёмки -->
+                <ToggleButton Grid.Column="1"
+                              Content="Стеллаж"
+                              IsChecked="{Binding IsRackFilterOn}"
+                              ToolTip="Искать только в выбранном стеллаже"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+
+                <ToggleButton Grid.Column="2"
+                              Content="Ячейка"
+                              IsChecked="{Binding IsCellFilterOn}"
+                              ToolTip="Искать только в выбранной ячейке"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+            </Grid>
 
             <Grid Grid.Row="2">
                 
@@ -52,30 +76,31 @@
                     <ColumnDefinition Width="44*"/>
                 </Grid.ColumnDefinitions>
 
-                <DataGrid ItemsSource="{Binding FilteredStocksOrComponents}" 
+                <DataGrid x:Name="ReceiptSearchGrid"
+                          ItemsSource="{Binding FilteredStocksOrComponents}"
                           Grid.ColumnSpan="2"
                           AutoGenerateColumns="False" 
-                          FontSize="15" 
+                          FontSize="{StaticResource BodyFontSize}"
                           IsReadOnly="True" 
                           RowHeight="40"
                           Margin="0,5,10,5">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Название" Width="50*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Остаток" Width="150" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTemplateColumn Width="150" IsReadOnly="False">
+                        <DataGridTextColumn Header="Артикул" Width="150*" MinWidth="110" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="50*" MinWidth="150" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="150" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="90*" MinWidth="90" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="90*" MinWidth="90" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTemplateColumn Width="110*" IsReadOnly="False" MinWidth="110"> 
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Добавить к приёмке"
+                                    <Button Content="Добавить"
                                         Command="{Binding DataContext.AddItemToReceiptCommand,
                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
                                         Style="{StaticResource ButtonStyle}"
-                                        FontSize="13"
+                                        FontSize="{StaticResource BodyFontSize}"
                                         Margin="3">
                                     </Button>
                                 </DataTemplate>
@@ -83,14 +108,36 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
+
+                <TextBlock Grid.ColumnSpan="2"
+                           Text="Это список товаров на складе&#10;Введите в строку поиска артикул, название или производителя&#10;Для фильтрации по месту хранения выберите фильтры «Стеллаж» и «Ячейка»"
+                           Foreground="#666666"
+                           FontSize="{StaticResource BodyFontSize}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="24,24,34,24"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasItems, ElementName=ReceiptSearchGrid}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 
             </Grid>
 
             <Grid Grid.Row="3">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="4,5*"/>
+                    <ColumnDefinition Width="5,5*"/>
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Row="0"
@@ -114,8 +161,7 @@
                              Foreground="White"
                              BorderThickness="2"
                              BorderBrush="White"
-                             IsEnabled="False"
-                             FontSize="20"/>
+                             IsEnabled="False"/>
 
                     <TextBox Grid.Row="1"
                              Style="{StaticResource InputTextBoxStockStyle}"
@@ -129,8 +175,7 @@
                              Foreground="White"
                              BorderThickness="2"
                              BorderBrush="White"
-                             IsEnabled="False"
-                             FontSize="20"/>
+                             IsEnabled="False"/>
                              
                      <TextBox Grid.Row="2"
                               Style="{StaticResource InputTextBoxStockStyle}"
@@ -144,8 +189,7 @@
                               Foreground="White"
                               BorderThickness="2"
                               BorderBrush="White"
-                              IsEnabled="False"
-                              FontSize="20"/>
+                              IsEnabled="False"/>
 
                 </Grid>
 
@@ -158,8 +202,10 @@
                         <RowDefinition Height="3*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid.Style>
-                        <Style TargetType="Grid">
+                    <Grid.Resources>
+                        <!-- Пока товар не выбран, ячейку, количество, оператора и комментарий заполнить нельзя.
+                             Стеллаж выбирать можно: с кнопкой «Стеллаж» у поля поиска с него начинается поиск товара. -->
+                        <Style x:Key="RequiresComponent" TargetType="Grid">
                             <Setter Property="IsEnabled" Value="True"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ReceiptItem.ComponentId}" Value="00000000-0000-0000-0000-000000000000">
@@ -167,27 +213,29 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Grid.Style>
+                    </Grid.Resources>
 
                     <Grid Grid.Row="0">
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="3.3*"/>
+                            <ColumnDefinition Width="3.3*"/>
+                            <ColumnDefinition Width="3.3*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:Name="SearchRack" 
-                                 GotKeyboardFocus="SearchRack_GotKeyboardFocus"
-                                 PreviewKeyDown="SearchRack_PreviewKeyDown"
-                                 Grid.Column="0"
-                                 Margin="5,5,5,5"
-                                 IsTabStop="False"
-                                 Style="{StaticResource SearchTextBox}" 
-                                 Tag="Стеллаж:"
-                                 Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
-                                 TextAlignment="Center"
-                                 FontSize="15"/>
+                        <Grid Grid.Column="0">
+
+                            <TextBox x:Name="SearchRack" 
+                                     GotKeyboardFocus="SearchRack_GotKeyboardFocus"
+                                     PreviewKeyDown="SearchRack_PreviewKeyDown"
+                                     Grid.Column="0"
+                                     Margin="5,5,5,5"
+                                     IsTabStop="False"
+                                     Style="{StaticResource SearchTextBox}" 
+                                     Tag="Стеллаж:"
+                                     Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
+                                     TextAlignment="Center"/>
+                        </Grid>
 
                         <Popup x:Name="RackPopup"
                                PlacementTarget="{Binding ElementName=SearchRack}" 
@@ -208,13 +256,14 @@
                                 </Border.Effect>
 
                                 <ListBox ItemsSource="{Binding FilteredRacks}"
+                                         ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
                                             BorderThickness="0"
                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
                                                         Command="{Binding DataContext.SelectRackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}">
@@ -226,8 +275,17 @@
                             </Border>
                         </Popup>
 
+                        <Grid Grid.Column="1"
+                              Grid.ColumnSpan="2"
+                              Style="{StaticResource RequiresComponent}">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
                         <TextBox x:Name="SearchCell"
-                                 Grid.Column="1"
+                                 Grid.Column="0"
                                  GotKeyboardFocus="SearchCell_GotKeyboardFocus"
                                  PreviewKeyDown="SearchCell_PreviewKeyDown"
                                  Margin="5,5,5,5"
@@ -235,8 +293,7 @@
                                  IsTabStop="False"
                                  Style="{StaticResource SearchTextBox}"
                                  Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
-                                 TextAlignment="Center"
-                                 FontSize="15"/>
+                                 TextAlignment="Center"/>
 
                         <Popup x:Name="CellPopup"
                                PlacementTarget="{Binding ElementName=SearchCell}" 
@@ -257,13 +314,14 @@
                                 </Border.Effect>
 
                                 <ListBox ItemsSource="{Binding FilteredCells}"
+                                         ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
                                          BorderThickness="0"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding Code}" FontSize="14" VerticalAlignment="Bottom"/>
+                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" VerticalAlignment="Bottom"/>
                                                 <Button Content="Выбрать"
                                                     Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                     CommandParameter="{Binding}">
@@ -288,7 +346,7 @@
                             </Border>
                         </Popup>
 
-                        <Border Grid.Column="5"
+                        <Border Grid.Column="1"
                                 Height="Auto"
                                 Margin="5,5,10,5"
                                 CornerRadius="4,0,0,4"
@@ -299,7 +357,7 @@
 
                             <Grid >
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="75"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
@@ -307,7 +365,7 @@
                                            Grid.Column="0"
                                            Text="кол-во:" 
                                            Foreground="#777"
-                                           FontSize="15"
+                                           FontSize="{StaticResource BodyFontSize}"
                                            Margin="8,0,0,0" 
                                            VerticalAlignment="Center"
                                            IsHitTestVisible="False"/>
@@ -319,16 +377,27 @@
                                                     BorderThickness="0"
                                                     Background="Transparent"
                                                     Padding="8,0,0,0"
-                                                    FontSize="15"
+                                                    FontSize="{StaticResource BodyFontSize}"
                                                     ButtonSpinnerWidth="35"
                                                     VerticalContentAlignment="Center"
                                 />
                             </Grid>
                         </Border>
-                        
+
+                        </Grid>
+
                     </Grid>
 
-                    <ComboBox Grid.Row="1"
+                    <Grid Grid.Row="1"
+                          Grid.RowSpan="2"
+                          Style="{StaticResource RequiresComponent}">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <ComboBox Grid.Row="0"
                               Margin="5,5,10,5"
                               ItemsSource="{Binding Operators}"
                               SelectedItem="{Binding OperatorName}"
@@ -343,28 +412,26 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                         
-                    <TextBox Grid.Row="2"
+                    <TextBox Grid.Row="1"
                              Text="{Binding CommentText}"
                              AcceptsReturn="True" 
                              Tag="Комментарий:"
                              TextWrapping="Wrap"
                              VerticalScrollBarVisibility="Auto"
                              Style="{StaticResource InputTextBoxStyle}"
-                             Margin="5,5,10,5"
-                             FontSize="15"
-                             />
+                             Margin="5,5,10,5"/>
+                    </Grid>
 
                 </Grid>
 
             </Grid>
 
-            <Button Grid.Row="4" 
+            <Button FontSize="{StaticResource EmphasisFontSize}" Grid.Row="4"
                     Command="{Binding ReceiveCommand}"
                     Style="{StaticResource ButtonStyle}"
                     Content="Принять товар"
                     HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center"
-                    FontSize="20"
                     Margin="0,5,10,0">
             </Button>
 
@@ -381,50 +448,11 @@
                                     Grid.Row="0"
                                     Racks="{Binding RacksGrid}" />
 
-            <Grid Grid.Row="1">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                
-                <local:CellsGridControl Grid.Column="0"
-                                        Cells="{Binding CellsGrid}"
-                                        RackType="{Binding SelectedRack.Type}"
-                                        SelectedCell="{Binding SelectedCell}"
-                                        Margin="0,0,5,0"/>
-
-                <Grid Grid.Column="1">
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="9*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <TextBlock Grid.Row="0"
-                               Text="Товары в стеллаже"
-                               FontSize="25"
-                               Foreground="White"
-                               HorizontalAlignment="Center"/>
-
-                    <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding FilteredItemsInRacks}"
-                              AutoGenerateColumns="False" 
-                              FontSize="15" 
-                              IsReadOnly="True" 
-                              RowHeight="40"
-                              Margin="5,0,0,0">
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Название" Width="5.8*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Ячейка" Width="2*" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                            <DataGridTextColumn Header="Остаток" Width="2.2*" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        </DataGrid.Columns>
-
-                    </DataGrid>
-
-                </Grid>
-            </Grid>
+            <local:CellsGridControl Grid.Row="1"
+                                    Cells="{Binding CellsGrid}"
+                                    RackType="{Binding SelectedRack.Type}"
+                                    SelectedCell="{Binding SelectedCell}"
+                                    Margin="0,5,0,0"/>
         </Grid>
 
     </Grid>

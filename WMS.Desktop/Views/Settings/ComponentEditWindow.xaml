@@ -7,7 +7,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="ComponentEditWindow" 
-        Height="300" Width="400"
+        Height="300" Width="440"
+        FontSize="{StaticResource BodyFontSize}"
         WindowStartupLocation="CenterOwner"
         Background="#36495b"
         ResizeMode="NoResize">
@@ -22,28 +23,28 @@
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="155"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Артикул:" VerticalAlignment="Center" Foreground="White" Margin="0,5" />
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Article, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Артикул:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Article, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Название:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Название:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Производитель:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Производитель:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
         <!--<TextBlock Grid.Row="3" Grid.Column="0" Text="Срок годности:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
         <DatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding ExpirationDate, Mode=TwoWay}" Margin="0,5"/>-->
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="Мин. остаток:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <xctk:DecimalUpDown Grid.Row="4" Grid.Column="1" Value="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" FormatString="0.###" Minimum="0" Margin="0,5" Height="25" VerticalContentAlignment="Center" TextAlignment="Center"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Мин. остаток:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}"/>
+        <xctk:DecimalUpDown Grid.Row="4" Grid.Column="1" Value="{Binding MinQuantity, UpdateSourceTrigger=PropertyChanged}" FormatString="0.###" Minimum="0" Margin="0,5" Height="32" VerticalContentAlignment="Center" TextAlignment="Center"/>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-            <Button Content="Применить" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="100" Height="30" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>
-            <Button Content="Отменить" IsCancel="True" Width="100" Height="30" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="Применить" FontSize="{StaticResource BodyFontSize}" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="120" Height="40" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="Отменить" FontSize="{StaticResource BodyFontSize}" IsCancel="True" Width="120" Height="40" Style="{StaticResource ButtonStyle}"/>
         </StackPanel>
     </Grid>
 </Window>

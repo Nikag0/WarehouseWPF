@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:WMS.Desktop.Views"
         mc:Ignorable="d"
         Title="SettingsView" Height="900" Width="1600"
+        FontSize="{StaticResource BodyFontSize}"
         WindowStartupLocation="CenterScreen"
         DataContext="">
 
@@ -16,7 +17,7 @@
             <TabControl.Resources>
                 <!-- Стиль для всех вкладок внутри этого TabControl -->
                 <Style TargetType="TabItem">
-                    <Setter Property="FontSize" Value="16"/>
+                    <Setter Property="FontSize" Value="{StaticResource BodyFontSize}"/>
                     <Setter Property="Padding" Value="10,6"/>
                     <!-- Дефолтный классический серый цвет -->
                     <Setter Property="Background" Value="#F0F0F0"/>
@@ -58,7 +59,7 @@
                 </Style>
             </TabControl.Resources>
 
-            <TabItem Header="Каталог" FontSize="16">
+            <TabItem Header="Каталог" FontSize="{StaticResource BodyFontSize}">
                 
                 <Grid Margin="0,10,0,0">
                     
@@ -92,7 +93,7 @@
 
                     <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredComponents}" 
                               Margin="0,5,0,0" 
-                              AutoGenerateColumns="False" IsReadOnly="True" FontSize="15" RowHeight="40">
+                              AutoGenerateColumns="False" IsReadOnly="True" FontSize="{StaticResource BodyFontSize}" RowHeight="40">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
@@ -105,7 +106,7 @@
                                         <Button Content="Изменить" 
                                         Command="{Binding DataContext.EditComponentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}" 
-                                        Style="{StaticResource ButtonStyle}" FontSize="13" Margin="3"/>
+                                        Style="{StaticResource ButtonStyle}" FontSize="{StaticResource BodyFontSize}" Margin="3"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -116,7 +117,7 @@
                                         <Button Content="Удалить" 
                                         Command="{Binding DataContext.DeleteComponentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}" 
-                                        Style="{StaticResource ButtonStyle}" FontSize="13" Margin="3"/>
+                                        Style="{StaticResource ButtonStyle}" FontSize="{StaticResource BodyFontSize}" Margin="3"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -126,7 +127,7 @@
             </TabItem>
 
             <!-- Вкладка Операторы -->
-            <TabItem Header="Операторы" FontSize="16">
+            <TabItem Header="Операторы" FontSize="{StaticResource BodyFontSize}">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -136,9 +137,9 @@
 
                     <Button Grid.Row="1" Content="Добавить запись" 
                     Command="{Binding AddOperatorCommand}" 
-                    HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                    HorizontalAlignment="Left" MinWidth="250" Height="38" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
 
-                    <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredOperators}" AutoGenerateColumns="False" FontSize="15" IsReadOnly="True" RowHeight="40">
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredOperators}" AutoGenerateColumns="False" FontSize="{StaticResource BodyFontSize}" IsReadOnly="True" RowHeight="40">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Фамилия" Width="150" Binding="{Binding Surname}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                             <DataGridTextColumn Header="Имя" Width="50*" Binding="{Binding Name}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
@@ -149,7 +150,7 @@
                                         <Button Content="Изменить" 
                                         Command="{Binding DataContext.EditOperatorCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}" 
-                                        Style="{StaticResource ButtonStyle}" FontSize="13" Margin="3"/>
+                                        Style="{StaticResource ButtonStyle}" FontSize="{StaticResource BodyFontSize}" Margin="3"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -159,7 +160,7 @@
                                         <Button Content="Удалить" 
                                         Command="{Binding DataContext.DeleteOperatorCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
                                         CommandParameter="{Binding}" 
-                                        Style="{StaticResource ButtonStyle}" FontSize="13" Margin="3"/>
+                                        Style="{StaticResource ButtonStyle}" FontSize="{StaticResource BodyFontSize}" Margin="3"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -168,7 +169,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Действия" FontSize="16">
+            <TabItem Header="Действия" FontSize="{StaticResource BodyFontSize}">
                 <Grid Margin="0,10,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -179,7 +180,7 @@
 
                     <Button Grid.Row="0" Content="Экспорт таблицы остатков в csv" 
                        Command="{Binding ExportStockCsvCommand}" 
-                       HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                       HorizontalAlignment="Left" MinWidth="250" Height="38" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
 
                     <Grid Grid.Row="1">
                         
@@ -194,13 +195,13 @@
                     
                         <Button Grid.Column="0" Content="Очистить историю" 
                             Command="{Binding DeleteHistoryCommand}" 
-                            HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                            HorizontalAlignment="Left" MinWidth="250" Height="38" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
 
-                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="От:" Style="{StaticResource WindowNames}"/>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="От:" Foreground="White" VerticalAlignment="Center"/>
 
                         <DatePicker Grid.Column="2" VerticalAlignment="Center" SelectedDate="{Binding DateFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <TextBlock Grid.Column="3" HorizontalAlignment="Center" Text="До:" Style="{StaticResource WindowNames}"/>
+                        <TextBlock Grid.Column="3" HorizontalAlignment="Center" Text="До:" Foreground="White" VerticalAlignment="Center"/>
 
                         <DatePicker Grid.Column="4" VerticalAlignment="Center" SelectedDate="{Binding DateTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </Grid>
@@ -208,7 +209,7 @@
                     <Button Grid.Row="2" Content="Перезагрузить контроллеры"
                        Command="{Binding ReinitializeControllersCommand}"
                        ToolTip="Заново отправить контроллерам зоны подсветки, если подсветка перестала работать"
-                       HorizontalAlignment="Left" Width="250" Height="35" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
+                       HorizontalAlignment="Left" MinWidth="250" Height="38" Margin="0,0,0,10" Style="{StaticResource ButtonStyle}"/>
 
                 </Grid>
             </TabItem>

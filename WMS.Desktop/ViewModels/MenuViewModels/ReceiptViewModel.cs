@@ -17,7 +17,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         // Список при поиске отсатков или компонентов.
         public ObservableCollection<StockViewDTO> FilteredStocksOrComponents { get; } = new();
         // Список остатков в выбранном стеллаже
-        public ObservableCollection<StockViewDTO> FilteredItemsInRacks { get; } = new();
         // Выпадающий список при вводе стеллажа.
         public ObservableCollection<RackViewModel> FilteredRacks { get; } = new();
         // Выпадающий список при вводе ячейки.
@@ -79,8 +78,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     LoadCells();
                     // Обновляем фильтр.
                     FilterCells(_searchCell);
-                    // Загружаем остатки и обновляем подсветку
-                    _ = RefreshStockInRackAsync();
+                    // При включённой галочке результаты поиска зависят от стеллажа
+                    if (IsRackFilterOn)
+                        RunSearch();
                 }
             }
         }
@@ -127,6 +127,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         OnPropertyChanged(nameof(SearchCell));
                         FilterCells(_searchCell);
                     }
+
+                    if (IsCellFilterOn)
+                        RunSearch();
                 }
             }
         }
@@ -139,16 +142,34 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [ObservableProperty] private string _commentText;
         [ObservableProperty] private string _searchStockOrComponent;
         [ObservableProperty] private bool _isActiveTab;
+        // Где искать товар: на всём складе, в выбранном стеллаже или в выбранной ячейке.
+        // На экране — две кнопки-переключателя «Стеллаж» и «Ячейка» у поля поиска.
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsRackFilterOn), nameof(IsCellFilterOn))]
+        private SearchScope _searchScope;
+
+        // Ячейка лежит внутри стеллажа, поэтому фильтр по ячейке включает и стеллаж,
+        // а выключение стеллажа выключает и ячейку
+        public bool IsRackFilterOn
+        {
+            get => SearchScope != SearchScope.Warehouse;
+            set => SearchScope = value
+                ? (SearchScope == SearchScope.Cell ? SearchScope.Cell : SearchScope.Rack)
+                : SearchScope.Warehouse;
+        }
+
+        public bool IsCellFilterOn
+        {
+            get => SearchScope == SearchScope.Cell;
+            set => SearchScope = value ? SearchScope.Cell : SearchScope.Rack;
+        }
 
 
         private string _searchRacks;
         private string _searchCell;
         private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
-        // У поиска и у загрузки содержимого стеллажа свои токены: иначе ввод в поиске отменял бы загрузку стеллажа
-        // (на экране оставались бы товары предыдущего стеллажа), а выбор стеллажа — поиск
         private CancellationTokenSource? _searchCts;
-        private CancellationTokenSource? _rackStockCts;
         private readonly SemaphoreSlim _lock = new(1, 1);
         private readonly IStockService _stockService;
         private readonly DialogService _dialogService;
@@ -227,8 +248,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             // Если подсветка не включилась, выключать её не нужно — это сэкономит ожидание таймаута
             var isLedAvailable = true;
 
-            SearchStockOrComponent = SelectedCell.Id.ToString();
-
             try
             {
                 isLedAvailable = await SwitchCellLightAsync(SelectedCell.Id, isOn: true);
@@ -242,15 +261,18 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             if (!isLedAvailable)
             {
                 _dialogService.ShowWarning(
-                    "Подсветка ячейки не сработала: контроллер не отвечает.\n\n" +
+                    "Подсветка ячейки не сработала. Контроллер не отвечает.\n\n" +
                     "Приёмка продолжится без подсветки. Находите ячейку по номеру стеллажа и ячейки.");
             }
 
-            var isAccepted = _dialogService.ShowConfirmation("Товар принят? \n" +
-                $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
+            var isAccepted = _dialogService.ShowConfirmation(
+                $"Проверьте информацию:\n\n" +
+                $"Нзвание: {ReceiptItem.ComponentName}\n" +
+                $"Артикул: {ReceiptItem.Article}\n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
-                $"Количество: {ReceiptItem.OperationQuantity:0.###}\n" +
-                $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}");
+                $"Количество: {ReceiptItem.OperationQuantity:0.###}\n\n" +
+                $"Стеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}",
+                "Подтверждение приёмки");
 
             if (isLedAvailable)
                 await SwitchCellLightAsync(SelectedCell.Id, isOn: false);
@@ -298,7 +320,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 _logger.LogError(ex, "Receipt failed unexpectedly");
                 _dialogService.ShowError(
-                    "Приёмка не выполнена: не удалось сохранить данные в базе.\n" +
+                    "Приёмка не выполнена. Не удалось сохранить данные в базе.\n" +
                     "Остатки не изменились — можно повторить попытку.\n\n" +
                     $"Подробности: {ex.Message}");
             }
@@ -345,7 +367,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 await LoadWarehouseAsync();
                 await LoadOperatorsAsync();
                 ReplaceCollection(FilteredRacks, RacksGrid);
-                OnSearchStockOrComponentChanged(SearchStockOrComponent);
+                RunSearch();
             }
             catch (BusinessException ex)
             {
@@ -392,6 +414,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 if (stock.RackId != Guid.Empty)
                 {
                     SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == stock.RackId);
+                }
+                else if (IsRackFilterOn && SelectedRack != null)
+                {
+                    // Новый товар принимаем в уже выбранное место — его не сбрасываем
+                    return;
                 }
                 else
                 {
@@ -448,7 +475,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             ReceiptItem.OperationQuantity = 0;
             CommentText = string.Empty;
 
-            OnSearchStockOrComponentChanged(SearchStockOrComponent);
+            RunSearch();
             ReplaceCollection(FilteredRacks, RacksGrid);
         }
 
@@ -472,12 +499,20 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             var racks = await _warehouseService.GetRacksAsync();
             var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
+            var selectedRackId = SelectedRack?.Id;
+            var selectedCellId = SelectedCell?.Id;
             RacksGrid.Clear();
 
             foreach (var rack in racksView)
             {
                 RacksGrid.Add(rack);
             }
+
+            SelectedRack = RacksGrid.FirstOrDefault(rack => rack.Id == selectedRackId);
+            SelectedCell = CellsGrid.FirstOrDefault(cell => cell.Id == selectedCellId);
+
+            if (selectedRackId.HasValue && SelectedRack is null)
+                SearchRacks = string.Empty;
         }
 
         private void LoadCells()
@@ -500,91 +535,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             foreach (var @operator in data)
                 Operators.Add(@operator);
         }
-
-        private async Task RefreshStockInRackAsync()
-        {
-            _rackStockCts?.Cancel();
-
-            if (SelectedRack == null)
-            {
-                FilteredItemsInRacks.Clear();
-                return;
-            }
-
-            _rackStockCts = new CancellationTokenSource();
-            var token = _rackStockCts.Token;
-
-            try
-            {
-                var stocks = await _stockService.GetStocksInRackAsync(SelectedRack.Id);
-
-                token.ThrowIfCancellationRequested();
-
-                await App.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    FilteredItemsInRacks.Clear();
-
-                    foreach (var stock in stocks)
-                    {
-                        FilteredItemsInRacks.Add(stock);
-                    }
-
-                    UpdateCellHighlights(stocks);
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                // Игнорируем отменённый запрос
-            }
-            catch (Exception ex)
-            {
-                // Метод вызывается без ожидания, поэтому без этого catch ошибка потерялась бы
-                _dialogService.ShowError($"Не удалось загрузить содержимое стеллажа: {ex.Message}");
-            }
-        }
-
-        //private async Task RefreshStockInRackAsync()
-        //{
-        //    _rackStockCts?.Cancel();
-
-        //    if (SelectedRack == null)
-        //    {
-        //        FilteredItemsInRacks.Clear();
-        //        return;
-        //    }
-
-        //    _rackStockCts = new CancellationTokenSource();
-        //    var token = _rackStockCts.Token;
-
-        //    try
-        //    {
-        //        var stocks = await _stockService.GetStocksInRackAsync(SelectedRack.Id);
-        //        var cellWithoutStock = FilteredCells.Where(x => !stocks.Any(s => s.CellId == x.Id)).ToList();
-
-        //        token.ThrowIfCancellationRequested();
-
-        //        await App.Current.Dispatcher.InvokeAsync(() =>
-        //        {
-        //            FilteredItemsInRacks.Clear();
-
-        //            foreach (var stock in stocks)
-        //            {
-        //                FilteredItemsInRacks.Add(stock);
-        //            }
-
-        //            UpdateCellHighlights(cellWithoutStock);
-        //        });
-        //    }
-        //    catch (OperationCanceledException)
-        //    {
-        //        // Игнорируем отменённый запрос
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Метод вызывается без ожидания, поэтому без этого catch ошибка потерялась бы
-        //        _dialogService.ShowError($"Не удалось загрузить содержимое стеллажа: {ex.Message}");
-        //    }
-        //}
 
         private void FilterRacks(string? searchText)
         {
@@ -623,33 +573,26 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             ReplaceCollection(FilteredCells, sortedQuery);
         }
 
-        private void UpdateCellHighlights(IEnumerable<StockViewDTO> stocks)
-        {
-            var occupiedCellIds = stocks
-                .Select(x => x.CellId)
-                .ToHashSet();
+        partial void OnSearchStockOrComponentChanged(string value) => RunSearch();
 
-            foreach (var cell in CellsGrid)
-            {
-                var shouldHighlight =
-                    occupiedCellIds.Contains(cell.Id);
+        partial void OnSearchScopeChanged(SearchScope value) => RunSearch();
 
-                if (cell.ItemInCell != shouldHighlight)
-                {
-                    cell.ItemInCell = shouldHighlight;
-                }
-            }
-        }
-
-        partial void OnSearchStockOrComponentChanged(string value)
+        // Поиск по тексту и, если включены фильтры, по выбранному стеллажу или ячейке.
+        // С фильтром пустой текст показывает содержимое выбранного места.
+        private void RunSearch()
         {
             _searchCts?.Cancel();
+            FilteredStocksOrComponents.Clear();
 
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                FilteredStocksOrComponents.Clear();
+            var value = SearchStockOrComponent ?? string.Empty;
+            var rackId = IsRackFilterOn ? SelectedRack?.Id : null;
+            var cellId = IsCellFilterOn && rackId.HasValue ? SelectedCell?.Id : null;
+
+            if (string.IsNullOrWhiteSpace(value) && rackId is null)
                 return;
-            }
+
+            // В стеллаже товаров может быть больше, чем подсказок при обычном поиске
+            var maxCount = rackId is null ? 15 : 200;
 
             _searchCts = new CancellationTokenSource();
             // Запоминаем токен этого запроса: поле _searchCts к моменту ответа может уже указывать на более новый поиск
@@ -661,13 +604,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _stockService.GetFilteredStockOrComponentsAsync(value, maxCount: 15, token);
+                    var suggestions = await _stockService.GetFilteredStockOrComponentsAsync(value, maxCount, rackId, cellId, token);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
                         if (!token.IsCancellationRequested)
                         {
-                            FilteredStocksOrComponents.Clear();
                             foreach (var item in suggestions)
                             {
                                 FilteredStocksOrComponents.Add(item);
@@ -695,5 +637,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             foreach (var item in source)
                 target.Add(item);
         }
+    }
+
+    public enum SearchScope
+    {
+        Warehouse,
+        Rack,
+        Cell
     }
 }

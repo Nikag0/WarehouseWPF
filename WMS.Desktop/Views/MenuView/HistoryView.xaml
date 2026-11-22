@@ -7,6 +7,16 @@
              mc:Ignorable="d" 
              d:DesignHeight="1008" d:DesignWidth="1920">
 
+    <UserControl.Resources>
+        <Style x:Key="HistoryCalendarStyle" TargetType="Calendar">
+            <Setter Property="LayoutTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="2" ScaleY="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="10"
        Background="#36495b">
 
@@ -22,10 +32,10 @@
         <Grid Grid.Row="1">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="49*"/>
-                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="45*"/>
+                <ColumnDefinition Width="17*"/>
                 <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="17*"/>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="17*"/>
             </Grid.ColumnDefinitions>
@@ -53,15 +63,16 @@
                 HorizontalAlignment="Center"
                 Text="От:"
                 Foreground="White"
-                FontSize="20"/>
+                FontSize="{StaticResource BodyFontSize}"/>
 
             <DatePicker
                 Grid.Column="3"
                 Margin="0,0,5,0"
                 Height="35" 
-                FontSize="20"
+                FontSize="{StaticResource BodyFontSize}"
                 VerticalContentAlignment="Center"
                 HorizontalAlignment="Stretch"
+                CalendarStyle="{StaticResource HistoryCalendarStyle}"
                 SelectedDate="{Binding DateFrom}">
             </DatePicker>
 
@@ -71,13 +82,14 @@
                 HorizontalAlignment="Center"
                 Text="До:"
                 Foreground="White"
-                FontSize="20"/>
+                FontSize="{StaticResource BodyFontSize}"/>
 
             <DatePicker
                 Grid.Column="5"
                 Height="35" 
-                FontSize="20"
+                FontSize="{StaticResource BodyFontSize}"
                 VerticalContentAlignment="Center"
+                CalendarStyle="{StaticResource HistoryCalendarStyle}"
                 SelectedDate="{Binding DateTo}"/>
 
         </Grid>
@@ -94,7 +106,7 @@
             <DataGrid ItemsSource="{Binding History}" 
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
-                      FontSize="15"
+                      FontSize="{StaticResource BodyFontSize}"
                       RowHeight="30"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
@@ -102,11 +114,11 @@
                 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Тип операции" Binding="{Binding Type}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Тип операции" MinWidth="150" Binding="{Binding Type}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Место хранения" Binding="{Binding RackAndCellName}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Было" Binding="{Binding PreviousQuantity, StringFormat={}{0:0.###}}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Изменения" Binding="{Binding QuantityChanged}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Изменения" MinWidth="115" Binding="{Binding QuantityChanged}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Стало" Binding="{Binding NewQuantity, StringFormat={}{0:0.###}}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Комментарий" Binding="{Binding Comment}" Width="100*">
