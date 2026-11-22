@@ -403,19 +403,33 @@ public class StockServiceIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task GetFilteredStockOrComponentsAsync_RackWithText_ReturnsRackStockAndCatalogComponents()
+    public async Task GetFilteredStockOrComponentsAsync_RackWithText_ExcludesCatalogComponentsOutsideRack()
     {
         await SeedCatalogAsync();
         await SeedStockAsync(_cell, 2);
         var (_, otherComponent) = await SeedSecondRackAsync();
 
-        // Конденсатор (ART-002) лежит только во втором стеллаже: в первом он найдётся как компонент справочника для приёмки
         var result = await CreateServiceWithCatalog(otherComponent)
             .GetFilteredStockOrComponentsAsync("art-002", 200, _rack.Id, null, CancellationToken.None);
 
-        var item = Assert.Single(result);
-        Assert.Equal(otherComponent.Id, item.ComponentId);
-        Assert.Equal(Guid.Empty, item.RackId);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task SearchesWithTextAndCell_ReturnOnlyMatchingStockInSelectedCell()
+    {
+        await SeedCatalogAsync();
+        await SeedStockAsync(_cell, 2);
+        await SeedStockAsync(_secondCell, 3);
+        var service = CreateServiceWithCatalog(_component);
+
+        var receipt = await service.GetFilteredStockOrComponentsAsync("art-001", 15, _rack.Id, _secondCell.Id, CancellationToken.None);
+        var issue = await service.GetFilteredStockAsync("art-001", 15, rackId: _rack.Id, cellId: _secondCell.Id);
+        var noMatch = await service.GetFilteredStockAsync("art-002", 15, rackId: _rack.Id, cellId: _secondCell.Id);
+
+        Assert.Equal(_secondCell.Id, Assert.Single(receipt).CellId);
+        Assert.Equal(_secondCell.Id, Assert.Single(issue).CellId);
+        Assert.Empty(noMatch);
     }
 
     [Fact]

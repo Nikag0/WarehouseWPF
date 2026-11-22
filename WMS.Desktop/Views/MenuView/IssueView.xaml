@@ -42,7 +42,14 @@
                        Style="{StaticResource WindowNames}"/>
 
             <Grid Grid.Row="1"
+                  x:Name="IssueSearchPanel"
                   Margin="0,5,10,5">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
                 <TextBox x:Name="SearchToIssue" 
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
@@ -67,6 +74,20 @@
 
                 </TextBox>
 
+                <ToggleButton Grid.Column="1"
+                              Content="Стеллаж"
+                              IsChecked="{Binding IsRackFilterOn}"
+                              ToolTip="Искать только в выбранном стеллаже"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+
+                <ToggleButton Grid.Column="2"
+                              Content="Ячейка"
+                              IsChecked="{Binding IsCellFilterOn}"
+                              ToolTip="Искать только в выбранной ячейке"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+
                 <Popup x:Name="IssuePopup"
                        PlacementTarget="{Binding ElementName=SearchToIssue}" 
                        IsOpen="{Binding IsIssuePopupOpen}"
@@ -79,37 +100,48 @@
                     <Border Background="White" 
                         BorderBrush="#DDD" 
                         BorderThickness="1" 
-                        Width="{Binding ElementName=SearchToIssue, Path=ActualWidth}">
+                        Width="{Binding ElementName=IssueSearchPanel, Path=ActualWidth}"
+                        MaxHeight="350">
 
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.2"/>
                         </Border.Effect>
 
                         <ListBox ItemsSource="{Binding FilteredStocks}"
+                                 ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
+                                 FontSize="{StaticResource BodyFontSize}"
+                                 HorizontalContentAlignment="Stretch"
                                  BorderThickness="0"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  Background="#CCC">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="5">
-                                        <TextBlock Text="Название: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding ComponentName}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="  Артикул: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Article}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="  Производительт: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding Manufacturer}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="  Стеллаж: " Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding RackCodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="    Ячейка:" Foreground="Gray" FontSize="11" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="{Binding CellCodeDisplay}" FontSize="14" VerticalAlignment="Bottom"/>
-                                        <TextBlock Text="    " FontSize="14" VerticalAlignment="Bottom"/>
-                                        <Button Content="Добавить к выдаче"
+                                    <Grid Margin="8,5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding ComponentName}"
+                                                       FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="Артикул: "/><Run Text="{Binding Article, Mode=OneWay}"/>
+                                                <Run Text=" · Производитель: "/><Run Text="{Binding Manufacturer, Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="Стеллаж: "/><Run Text="{Binding RackCodeDisplay, Mode=OneWay}"/>
+                                                <Run Text=" · Ячейка: "/><Run Text="{Binding CellCodeDisplay, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1" Content="Добавить к выдаче"
+                                                VerticalAlignment="Center"
                                                 Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                 CommandParameter="{Binding}"
-                                                Style="{StaticResource ButtonStyle}">
-                                        </Button>
-                                    </StackPanel>
+                                                Style="{StaticResource ButtonStyle}"/>
+                                    </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -125,21 +157,22 @@
                           ItemsSource="{Binding IssueItems}" 
                           AutoGenerateColumns="False" 
                           IsReadOnly="True" 
-                          FontSize="15"
+                          FontSize="{StaticResource BodyFontSize}"
                           RowHeight="40">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Производитель" Width="50*" Binding="{Binding Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="80" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="80" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Остаток" Width="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Stock.Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding Stock.ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="165" Binding="{Binding Stock.Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="105" Binding="{Binding Stock.RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="105" Binding="{Binding Stock.CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Остаток" Width="105" Binding="{Binding Stock.Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
 
-                        <DataGridTemplateColumn Header="К выдаче" Width="100" IsReadOnly="False" >
+                        <DataGridTemplateColumn Header="К выдаче" Width="115" IsReadOnly="False" >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <xctk:DecimalUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                        UpdateValueOnEnterKey="False"
                                                         FormatString="0.###"
                                                         Minimum="0">
                                         <xctk:DecimalUpDown.Style>
@@ -159,7 +192,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Width="115">
+                        <DataGridTemplateColumn Width="145">
 
                             <DataGridTemplateColumn.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -179,7 +212,7 @@
                                     <Button Content="Удалить"
                                         Command="{Binding DataContext.RemoveIssueItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                         CommandParameter="{Binding}"
-                                        FontSize="15"
+                                        FontSize="{StaticResource BodyFontSize}"
                                         Margin="3">
                                         
                                         <Button.Style>
@@ -200,9 +233,30 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
+                <TextBlock Text="Это список товаров для выдачи&#10;Введите в строку поиска артикул, название или производителя&#10;Для фильтрации по месту хранения выберите фильтры «Стеллаж» и «Ячейка»"
+                           Foreground="#666666"
+                           FontSize="{StaticResource BodyFontSize}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="24"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasItems, ElementName=IssueGrid}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
                 <Button Content="Очистить список выдачи"
                         Command="{Binding ClearIssueItemsCommand}"
-                        FontSize="20"
+                        FontSize="{StaticResource BodyFontSize}"
                         Height="50"
                         VerticalAlignment="Bottom"
                         Margin="10"
@@ -267,7 +321,7 @@
                     <TextBox Grid.Column="1"
                              Text="{Binding CommentText}"
                              Tag="Комментарий:"
-                             FontSize="15"
+                             FontSize="{StaticResource BodyFontSize}"
                              Style="{StaticResource InputTextBoxStyle}"
                              Margin="5,5,10,5"/>
 
@@ -277,7 +331,7 @@
                         Content="Начать выдачу" 
                         Command="{Binding IssueCommand}"
                         Style="{StaticResource ButtonStyle}"
-                        FontSize="20"
+                        FontSize="{StaticResource EmphasisFontSize}"
                         Margin="0,5,10,0"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"/>

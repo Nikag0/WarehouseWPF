@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WMS.Desktop.Views"
         mc:Ignorable="d"
-        Title="OperatorEditWindow" Height="300" Width="400"
+        Title="OperatorEditWindow" Height="330" Width="440"
+        FontSize="{StaticResource BodyFontSize}"
         WindowStartupLocation="CenterOwner"
         Background="#36495b"
         ResizeMode="NoResize">
@@ -21,24 +22,24 @@
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="115"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="{Binding WindowTitle}" Style="{StaticResource WindowNames}" Margin="0,0,0,20" FontSize="18"/>
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="{Binding WindowTitle}" Style="{StaticResource WindowNames}" Margin="0,0,0,16" TextWrapping="Wrap"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Фамилия:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Фамилия:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Surname, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Имя:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Имя:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}"/>
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Отчество:" VerticalAlignment="Center" Foreground="White" Margin="0,5"/>
-        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="25" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Отчество:" VerticalAlignment="Center" Foreground="White" Margin="0,5" FontSize="{StaticResource BodyFontSize}"/>
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Patronymic, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Height="32" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
         <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
-            <Button Content="Применить" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="100" Height="30" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>
-            <Button Content="Отменить" IsCancel="True" Width="100" Height="30" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="Применить" FontSize="{StaticResource BodyFontSize}" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Width="120" Height="40" Margin="0,0,10,0" Style="{StaticResource ButtonStyle}"/>
+            <Button Content="Отменить" FontSize="{StaticResource BodyFontSize}" IsCancel="True" Width="120" Height="40" Style="{StaticResource ButtonStyle}"/>
         </StackPanel>
     </Grid>
 </Window>

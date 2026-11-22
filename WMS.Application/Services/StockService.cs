@@ -168,9 +168,8 @@ namespace WMS.Application.Services
 
             var stocks = await _stockRepo.SearchAsync(searchText, maxCount, rackId, cellId, token);
 
-            // Компоненты из справочника нужны, чтобы принять товар, которого ещё нет на складе (или в этом стеллаже / ячейке).
-            // Без текста их не ищем: иначе к содержимому стеллажа добавился бы весь справочник.
-            var components = string.IsNullOrWhiteSpace(searchText)
+            // Компоненты справочника без места хранения доступны в поиске по всему складу.
+            var components = rackId.HasValue || cellId.HasValue || string.IsNullOrWhiteSpace(searchText)
                 ? Array.Empty<ComponentViewDto>()
                 : await _componentRepo.GetViewFilterAsync(searchText, maxCount, token);
 
@@ -193,11 +192,11 @@ namespace WMS.Application.Services
             return result.Take(maxCount).ToList();
         }
 
-        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default)
+        public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default, Guid? rackId = null, Guid? cellId = null)
         {
             await using var uow = _uowFactory.Create();
 
-            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, ct: token);
+            var stocks = await _stockRepo.SearchAsync(searchText, maxCount, rackId, cellId, token);
 
             return stocks.Select(MappingExtensions.StockToView).ToList();
         }

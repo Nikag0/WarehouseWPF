@@ -261,15 +261,18 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             if (!isLedAvailable)
             {
                 _dialogService.ShowWarning(
-                    "Подсветка ячейки не сработала: контроллер не отвечает.\n\n" +
+                    "Подсветка ячейки не сработала. Контроллер не отвечает.\n\n" +
                     "Приёмка продолжится без подсветки. Находите ячейку по номеру стеллажа и ячейки.");
             }
 
-            var isAccepted = _dialogService.ShowConfirmation("Товар принят? \n" +
-                $"• {ReceiptItem.Article} | {ReceiptItem.ComponentName} \n" +
+            var isAccepted = _dialogService.ShowConfirmation(
+                $"Проверьте информацию:\n\n" +
+                $"Нзвание: {ReceiptItem.ComponentName}\n" +
+                $"Артикул: {ReceiptItem.Article}\n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
-                $"Количество: {ReceiptItem.OperationQuantity:0.###}\n" +
-                $"Cтеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}");
+                $"Количество: {ReceiptItem.OperationQuantity:0.###}\n\n" +
+                $"Стеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}",
+                "Подтверждение приёмки");
 
             if (isLedAvailable)
                 await SwitchCellLightAsync(SelectedCell.Id, isOn: false);
@@ -317,7 +320,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 _logger.LogError(ex, "Receipt failed unexpectedly");
                 _dialogService.ShowError(
-                    "Приёмка не выполнена: не удалось сохранить данные в базе.\n" +
+                    "Приёмка не выполнена. Не удалось сохранить данные в базе.\n" +
                     "Остатки не изменились — можно повторить попытку.\n\n" +
                     $"Подробности: {ex.Message}");
             }
@@ -496,12 +499,20 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             var racks = await _warehouseService.GetRacksAsync();
             var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
+            var selectedRackId = SelectedRack?.Id;
+            var selectedCellId = SelectedCell?.Id;
             RacksGrid.Clear();
 
             foreach (var rack in racksView)
             {
                 RacksGrid.Add(rack);
             }
+
+            SelectedRack = RacksGrid.FirstOrDefault(rack => rack.Id == selectedRackId);
+            SelectedCell = CellsGrid.FirstOrDefault(cell => cell.Id == selectedCellId);
+
+            if (selectedRackId.HasValue && SelectedRack is null)
+                SearchRacks = string.Empty;
         }
 
         private void LoadCells()
@@ -567,20 +578,18 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         partial void OnSearchScopeChanged(SearchScope value) => RunSearch();
 
         // Поиск по тексту и, если включены фильтры, по выбранному стеллажу или ячейке.
-        // С фильтром пустой текст показывает всё содержимое места. Пока место не выбрано, фильтр не действует.
+        // С фильтром пустой текст показывает содержимое выбранного места.
         private void RunSearch()
         {
             _searchCts?.Cancel();
+            FilteredStocksOrComponents.Clear();
 
             var value = SearchStockOrComponent ?? string.Empty;
             var rackId = IsRackFilterOn ? SelectedRack?.Id : null;
-            var cellId = IsCellFilterOn ? SelectedCell?.Id : null;
+            var cellId = IsCellFilterOn && rackId.HasValue ? SelectedCell?.Id : null;
 
             if (string.IsNullOrWhiteSpace(value) && rackId is null)
-            {
-                FilteredStocksOrComponents.Clear();
                 return;
-            }
 
             // В стеллаже товаров может быть больше, чем подсказок при обычном поиске
             var maxCount = rackId is null ? 15 : 200;
@@ -601,7 +610,6 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     {
                         if (!token.IsCancellationRequested)
                         {
-                            FilteredStocksOrComponents.Clear();
                             foreach (var item in suggestions)
                             {
                                 FilteredStocksOrComponents.Add(item);

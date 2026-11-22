@@ -44,7 +44,7 @@ namespace WMS.Desktop.Views.MenuView
         {
             if (DataContext is IssueViewModel vm)
             {
-                vm.IsIssuePopupOpen = true;
+                vm.IsIssuePopupOpen = vm.FilteredStocks.Count > 0;
             }
         }
 

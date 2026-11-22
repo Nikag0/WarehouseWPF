@@ -41,7 +41,7 @@
             <DataGrid ItemsSource="{Binding FilteredComponents}" 
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
-                      FontSize="15"
+                      FontSize="{StaticResource BodyFontSize}"
                       RowHeight="30"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"

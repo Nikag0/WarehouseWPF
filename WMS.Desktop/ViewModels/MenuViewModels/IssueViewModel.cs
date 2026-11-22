@@ -23,20 +23,24 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
         public ObservableCollection<CellViewModel> CellsGrid { get; } = new();
         public ObservableCollection<Operator> Operators { get; } = new();
-        public ObservableCollection<StockViewDTO> IssueItems { get; } = new();
+        public ObservableCollection<IssueItemViewModel> IssueItems { get; } = new();
         public RackViewModel SelectedRack 
         {
             get => _selectedRack;
             set
             {
-                _selectedRack = value;
-                OnPropertyChanged();
+                if (!SetProperty(ref _selectedRack, value))
+                    return;
 
                 foreach (var rack in RacksGrid)
                     rack.IsSelected = rack == value;
 
                 LoadCells();
+                SelectedCell = null;
                 UpdateCellHighlights();
+
+                if (IsRackFilterOn)
+                    RunSearch();
             }
         }
         public CellViewModel SelectedCell
@@ -44,14 +48,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             get => _selectedCell;
             set
             {
-                _selectedCell = value;
-                OnPropertyChanged();
+                if (!SetProperty(ref _selectedCell, value))
+                    return;
 
                 if (SelectedRack != null)
                 {
                     foreach (var cell in CellsGrid)
                         cell.IsSelected = cell == value;
                 }
+
+                if (IsCellFilterOn)
+                    RunSearch();
             }
         }
 
@@ -69,6 +76,24 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [ObservableProperty] private Operator? _operatorName;
         [ObservableProperty] private string _searchStock = string.Empty;
         [ObservableProperty] private bool _isActiveTab;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsRackFilterOn), nameof(IsCellFilterOn))]
+        private SearchScope _searchScope;
+
+        public bool IsRackFilterOn
+        {
+            get => SearchScope != SearchScope.Warehouse;
+            set => SearchScope = value
+                ? (SearchScope == SearchScope.Cell ? SearchScope.Cell : SearchScope.Rack)
+                : SearchScope.Warehouse;
+        }
+
+        public bool IsCellFilterOn
+        {
+            get => SearchScope == SearchScope.Cell;
+            set => SearchScope = value ? SearchScope.Cell : SearchScope.Rack;
+        }
 
         private RackViewModel _selectedRack;
         private CellViewModel _selectedCell;
@@ -135,7 +160,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
                 foreach (var item in invalidItems)
                 {
-                    sb.AppendLine($"• {item.ComponentName}");
+                    sb.AppendLine($"Название: {item.Stock.ComponentName} Стеллаж: {item.Stock.RackCodeDisplay} Ячейка: {item.Stock.CellCodeDisplay}");
                 }
 
                 _dialogService.ShowWarning(sb.ToString());
@@ -150,16 +175,21 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             if (tooPreciseItem != null)
             {
                 _dialogService.ShowWarning(
-                    $"{tooPreciseItem.ComponentName}: количество может содержать не более {QuantityRules.Scale} знаков после запятой.");
+                    $"Название: {tooPreciseItem.Stock.ComponentName} " +
+                    $"Стеллаж: {tooPreciseItem.Stock.RackCodeDisplay} Ячейка: {tooPreciseItem.Stock.CellCodeDisplay}\n\n" +
+                    $"В количестве указано более {QuantityRules.Scale} знаков после запятой.");
                 return;
             }
 
             // Проверка кол-ва выдачи в бд
-            var shortagedItems = IssueItems.Where(x => x.Quantity < x.OperationQuantity).ToList();
+            var shortagedItems = IssueItems.Where(x => x.Stock.Quantity < x.OperationQuantity).ToList();
             if (shortagedItems.Any())
             {
                 var firstShort = shortagedItems.First();
-                _dialogService.ShowWarning($"{firstShort.ComponentName} не хватает. Осталось: {firstShort.Quantity:0.###}. В выдаче: {firstShort.OperationQuantity:0.###}");
+                _dialogService.ShowWarning(
+                    $"Название: {firstShort.Stock.ComponentName} " +
+                    $"Стеллаж: {firstShort.Stock.RackCodeDisplay} Ячейка: {firstShort.Stock.CellCodeDisplay}\n\n" +
+                    $"Осталось: {firstShort.Stock.Quantity:0.###}. В выдаче: {firstShort.OperationQuantity:0.###}");
                 return;
             }
 
@@ -172,6 +202,9 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             // Интерактивный обход стеллажей.
             // На схеме: рамка IsSelected, заливка ItemInCell.
             var itemsToReview = IssueItems.ToList();
+            token?.Cancel();
+            FilteredStocks.Clear();
+            IsIssuePopupOpen = false;
 
             // Если контроллер подсветки не ответил один раз, дальше выдача идёт без подсветки,
             // чтобы не ждать таймаут на каждой ячейке.
@@ -181,21 +214,28 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 // Переносим рамку на стеллаж и ячейку текущего товара. Если их нет в схеме,
                 // рамка снимается, чтобы не указывать на место предыдущего товара.
-                SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == item.RackId);
-                SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == item.CellId);
-
-                var question = $"Товар найден?\n\n• {item.ComponentName} Стеллаж:{item.RackCodeDisplay} Ячейка:{item.CellCodeDisplay} Количество: {item.OperationQuantity:0.###}";
+                SelectedRack = RacksGrid.FirstOrDefault(r => r.Id == item.Stock.RackId);
+                SelectedCell = CellsGrid.FirstOrDefault(c => c.Id == item.Stock.CellId);
 
                 // Включили подсветку на ячейке.
-                if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: true))
+                if (isLedAvailable && !await SwitchCellLightAsync(item.Stock.CellId, isOn: true))
                 {
                     isLedAvailable = false;
                     _dialogService.ShowWarning(
-                        "Подсветка ячейки не сработала: контроллер не отвечает.\n\n" +
+                        "Подсветка ячейки не сработала. Контроллер не отвечает.\n\n" +
                         "Выдача продолжится без подсветки. Находите ячейки по номеру стеллажа и ячейки.");
                 }
 
-                if (!_dialogService.ShowConfirmation(question))
+                var isAccepted = _dialogService.ShowConfirmation(
+                    $"Проверьте информацию:\n\n" +
+                    $"Нзвание: {item.Stock.ComponentName}\n" +
+                    $"Артикул: {item.Stock.Article}\n" +
+                    $"Производитель: {item.Stock.Manufacturer}\n" +
+                    $"Количество: {item.OperationQuantity:0.###}\n\n" +
+                    $"Стеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}",
+                    "Подтверждение приёмки");
+
+                if (!isAccepted)
                 {
                     // Товар не найден — убираем его из выдачи и снимаем заливку с его ячейки и стеллажа
                     IssueItems.Remove(item);
@@ -204,11 +244,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 }
 
                 // Выключили подсветку на ячейке.
-                if (isLedAvailable && !await SwitchCellLightAsync(item.CellId, isOn: false))
+                if (isLedAvailable && !await SwitchCellLightAsync(item.Stock.CellId, isOn: false))
                 {
                     isLedAvailable = false;
                     _dialogService.ShowWarning(
-                        $"Не удалось выключить подсветку ячейки {item.CellCodeDisplay}: контроллер не отвечает.\n\n" +
+                        $"Не удалось выключить подсветку ячейки {item.Stock.CellCodeDisplay}: контроллер не отвечает.\n\n" +
                         "Выдача продолжится без подсветки.");
                 }
             }
@@ -225,14 +265,14 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             {
                 var issueOperation = IssueItems
                     .Select(item => new IssueStockDto(
-                        item.StockId,
+                        item.Stock.StockId,
                         item.OperationQuantity,
-                        item.RackId,
-                        item.RackCodeDisplay,
-                        item.CellId,
-                        item.CellCodeDisplay,
-                        item.ComponentId,
-                        item.ComponentName))
+                        item.Stock.RackId,
+                        item.Stock.RackCodeDisplay,
+                        item.Stock.CellId,
+                        item.Stock.CellCodeDisplay,
+                        item.Stock.ComponentId,
+                        item.Stock.ComponentName))
                     .ToList();
 
                 await _stockService.IssueAsync(issueOperation, OperatorName.FullName, CommentText);
@@ -280,7 +320,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     LoadOperatorsAsync()
                 );
 
-                OnSearchStockChanged(SearchStock);
+                RunSearch();
                 UpdateRackHighlights();
                 UpdateCellHighlights();
                 await RefreshIssueItemsAsync();
@@ -298,7 +338,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         [RelayCommand]
         public void RemoveIssueItem(object obj)
         {
-            if (obj is not StockViewDTO item)
+            if (obj is not IssueItemViewModel item)
                 return;
 
             IssueItems.Remove(item);
@@ -330,7 +370,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             if (obj is not StockViewDTO item)
                 return;
 
-            if (IssueItems.Any(x => x.StockId == item.StockId))
+            if (IssueItems.Any(x => x.Stock.StockId == item.StockId))
                 return;
 
             try
@@ -363,10 +403,10 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             var place = GetPlaceKey(stock);
 
             var index = 0;
-            while (index < IssueItems.Count && GetPlaceKey(IssueItems[index]).CompareTo(place) <= 0)
+            while (index < IssueItems.Count && GetPlaceKey(IssueItems[index].Stock).CompareTo(place) <= 0)
                 index++;
 
-            IssueItems.Insert(index, stock);
+            IssueItems.Insert(index, new IssueItemViewModel(stock));
         }
 
         // Ключ сортировки: ряд стеллажа (буква), номер стеллажа, полка (буква), номер ячейки.
@@ -394,12 +434,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             var racks = await _warehouseService.GetRacksAsync();
             var racksView = await _warehouseVisualizationService.GetWarehouseAsync(racks);
 
+            var selectedRackId = SelectedRack?.Id;
+            var selectedCellId = SelectedCell?.Id;
             RacksGrid.Clear();
 
             foreach (var rack in racksView)
             {
                 RacksGrid.Add(rack);
             }
+
+            SelectedRack = RacksGrid.FirstOrDefault(rack => rack.Id == selectedRackId);
+            SelectedCell = CellsGrid.FirstOrDefault(cell => cell.Id == selectedCellId);
         }
 
         private void LoadCells()
@@ -424,17 +469,25 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         }
 
         // Поиск по остаткам.
-        partial void OnSearchStockChanged(string value)
+        partial void OnSearchStockChanged(string value) => RunSearch();
+
+        partial void OnSearchScopeChanged(SearchScope value) => RunSearch();
+
+        private void RunSearch()
         {
             this.token?.Cancel();
+            FilteredStocks.Clear();
+            IsIssuePopupOpen = false;
 
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                FilteredStocks.Clear();
-                IsIssuePopupOpen = false;
+            var value = SearchStock;
+            var rackId = IsRackFilterOn ? SelectedRack?.Id : null;
+            var cellId = IsCellFilterOn && rackId.HasValue ? SelectedCell?.Id : null;
+
+            if (IsIssue || IssueCommand.IsRunning ||
+                (string.IsNullOrWhiteSpace(value) && rackId is null))
                 return;
-            }
 
+            var maxCount = rackId.HasValue ? 200 : 15;
             this.token = new CancellationTokenSource();
             var token = this.token.Token;
 
@@ -444,13 +497,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                 {
                     await Task.Delay(500, token);
 
-                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount: 15, token);
+                    var suggestions = await _stockService.GetFilteredStockAsync(value, maxCount, token, rackId, cellId);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        if (!token.IsCancellationRequested)
+                        if (!token.IsCancellationRequested && !IsIssue && !IssueCommand.IsRunning)
                         {
-                            FilteredStocks.Clear();
                             foreach (var item in suggestions)
                             {
                                 FilteredStocks.Add(item);
@@ -475,7 +527,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private void UpdateCellHighlights()
         {
             var cellIds = IssueItems
-                .Select(x => x.CellId)
+                .Select(x => x.Stock.CellId)
                 .ToHashSet();
 
             foreach (var cell in CellsGrid)
@@ -487,7 +539,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         private void UpdateRackHighlights()
         {
             var rackIds = IssueItems
-                .Select(x => x.RackId)
+                .Select(x => x.Stock.RackId)
                 .ToHashSet();
 
             foreach (var rack in RacksGrid)
@@ -503,20 +555,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             var removedNames = new List<string>();
 
-            for (int i = IssueItems.Count - 1; i >= 0; i--)
+            foreach (var current in IssueItems.ToArray())
             {
-                var current = IssueItems[i];
-                var updated = await _stockService.GetStockByIdAsync(current.StockId);
-
+                var updated = await _stockService.GetStockByIdAsync(current.Stock.StockId);
                 if (updated is null)
                 {
-                    removedNames.Add(current.ComponentName);
-                    IssueItems.RemoveAt(i);
+                    if (IssueItems.Remove(current))
+                        removedNames.Add(current.Stock.ComponentName);
                     continue;
                 }
 
-                // Сохраняем количество, которое оператор уже ввёл для выдачи
-                IssueItems[i] = updated with { OperationQuantity = current.OperationQuantity };
+                current.Stock = updated;
             }
 
             if (removedNames.Count > 0)

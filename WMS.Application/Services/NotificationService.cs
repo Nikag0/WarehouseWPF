@@ -37,12 +37,15 @@ namespace WMS.Application.Services
 
                 var locations = group.Select(s =>
                     $"ст. {MappingExtensions.CodeToDisplay(s.Rack.Column, s.Rack.Row)} " +
-                    $"яч. {MappingExtensions.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({MappingExtensions.FormatQuantity(s.Quantity)} шт.)");
+                    $"яч. {MappingExtensions.CodeToDisplay(s.Cell.Column, s.Cell.Row)} ({MappingExtensions.FormatQuantity(s.Quantity)})");
 
-                return new NotificationItem(
-                    title: $"Критический остаток: {firstStock.Component.Name}.",
-                    description: $"Общий остаток: {MappingExtensions.FormatQuantity(totalQuantity)} шт. (Минимум: {MappingExtensions.FormatQuantity(firstStock.Component.MinQuantity)} шт.)." +
-                                    $"Размещение: {string.Join("; ", locations)}",
+            return new NotificationItem(
+                title:
+                    $"Артикул: {firstStock.Component.Article} Название: {firstStock.Component.Name} Производитель: {firstStock.Component.Manufacturer}\n" +
+                    $"Размещение: {string.Join("; ", locations)}",
+                description: 
+                    $"Общий остаток: {MappingExtensions.FormatQuantity(totalQuantity)}\n" +
+                    $"Минимальный остаток: {MappingExtensions.FormatQuantity(firstStock.Component.MinQuantity)}",
                     type: NotificationType.LowStock
                 );
             })
