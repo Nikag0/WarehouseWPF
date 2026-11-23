@@ -1,0 +1,164 @@
+<UserControl x:Class="WMS.Desktop.Views.MenuView.StockOverviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WMS.Desktop.Views"
+             xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels.MenuViewModels"
+             d:DataContext="{d:DesignInstance Type=viewmodels:StockOverviewViewModel}"
+             mc:Ignorable="d"
+             d:DesignHeight="1008"
+             d:DesignWidth="1920" Loaded="OnLoaded">
+
+    <Grid Margin="10"
+          Background="#36495b">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*"/>
+            <ColumnDefinition Width="4*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Остатки на складе"
+                       Style="{StaticResource WindowNames}"/>
+
+            <Grid Grid.Row="1"
+                  Margin="0,5,10,5">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0"
+                         Tag="Артикул, название или производитель"
+                         Style="{StaticResource SearchTextBox}"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <ToggleButton Grid.Column="1" Content="Минимальный остаток"
+                              IsChecked="{Binding OnlyLowStock}" Margin="5,0,0,0"
+                              Style="{StaticResource FilterToggleStyle}"/>
+
+                <ToggleButton Grid.Column="2" Content="Нет на складе"
+                              IsChecked="{Binding OnlyOutOfStock}" Margin="5,0,0,0"
+                              Style="{StaticResource FilterToggleStyle}"/>
+
+                <ToggleButton Grid.Column="3"
+                              Content="Стеллаж"
+                              IsChecked="{Binding IsRackFilterOn}"
+                              ToolTip="Искать только в выбранном стеллаже"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+
+                <ToggleButton Grid.Column="4"
+                              Content="Ячейка"
+                              IsChecked="{Binding IsCellFilterOn}"
+                              ToolTip="Искать только в выбранной ячейке"
+                              Style="{StaticResource FilterToggleStyle}"
+                              Margin="5,0,0,0"/>
+            </Grid>
+
+            <Grid Grid.Row="2">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13*"/>
+                    <ColumnDefinition Width="44*"/>
+                </Grid.ColumnDefinitions>
+
+                <DataGrid x:Name="StockSearchGrid"
+                          ItemsSource="{Binding Stocks}"
+                          Grid.ColumnSpan="2"
+                          AutoGenerateColumns="False"
+                          FontSize="{StaticResource BodyFontSize}"
+                          IsReadOnly="True"
+                          RowHeight="40"
+                          Margin="0,5,10,5">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Артикул" Width="150*" MinWidth="110" Binding="{Binding Availability.Component.Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="50*" MinWidth="150" Binding="{Binding Availability.Component.Name}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="150" Binding="{Binding Availability.Component.Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="90*" MinWidth="90" Binding="{Binding Location.RackCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="90*" MinWidth="90" Binding="{Binding Location.CellCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTemplateColumn Header="Статус" Width="185">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Status}" Margin="3"
+                                            Command="{Binding DataContext.ShowStockDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding Availability}">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Setter Property="Background" Value="#FFF0CA"/>
+                                                <Setter Property="Foreground" Value="#703C00"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Availability.IsLow}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <TextBlock Grid.ColumnSpan="2"
+                           Text="Товаров по выбранным условиям нет."
+                           Foreground="#666666"
+                           FontSize="{StaticResource BodyFontSize}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="24,24,34,24"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasItems, ElementName=StockSearchGrid}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+            </Grid>
+
+        </Grid>
+
+        <Grid Grid.Column="1">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="4*"/>
+            </Grid.RowDefinitions>
+
+            <local:RacksGridControl x:Name="RacksGrid"
+                                    Grid.Row="0"
+                                    Racks="{Binding RacksGrid}" />
+
+            <local:CellsGridControl Grid.Row="1"
+                                    Cells="{Binding CellsGrid}"
+                                    RackType="{Binding SelectedRack.Type}"
+                                    SelectedCell="{Binding SelectedCell}"
+                                    Margin="0,5,0,0"/>
+        </Grid>
+
+    </Grid>
+</UserControl>

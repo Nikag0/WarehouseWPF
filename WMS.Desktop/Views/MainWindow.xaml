@@ -1,4 +1,4 @@
-﻿<Window x:Class="WMS.Desktop.Views.MainWindow"
+<Window x:Class="WMS.Desktop.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -38,7 +38,7 @@
     <Grid Background="#36495b">
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="112"/>
+            <ColumnDefinition Width="95"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -61,21 +61,20 @@
 
                 <StackPanel VerticalAlignment="Top">
 
-                    <Button Command="{Binding ShowNotificationCommand}" 
-                            CommandParameter="{Binding Notification}"
-                            Style="{StaticResource MenuButtonStyle}">
-                        <StackPanel>
-                            <TextBlock Text="✉️" FontSize="30" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Письма" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Command="{Binding ShowComponentsCommand}" 
+                    <Button Command="{Binding ShowComponentsCommand}"
                             CommandParameter="{Binding Components}"
                             Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📑" FontSize="30" HorizontalAlignment="Center"/>
                             <TextBlock Text="Каталог" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding ShowStockOverviewCommand}"
+                            Style="{StaticResource MenuButtonStyle}">
+                        <StackPanel>
+                            <TextBlock Text="🧮" FontSize="30" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Остатки" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
@@ -93,7 +92,7 @@
                             Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="📥" FontSize="30" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Приёмка" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Приём" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

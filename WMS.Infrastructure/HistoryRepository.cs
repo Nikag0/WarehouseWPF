@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using WMS.Application.Abstractions;
 using WMS.Application.Services;
@@ -30,10 +30,17 @@ namespace WMS.Infrastructure
             DateTime? toUtc,
             OperationType? operationType,
             int maxCount,
-            CancellationToken ct = default)
+            CancellationToken ct = default,
+            string? rackName = null,
+            string? cellName = null)
         {
             IQueryable<OperationHistory> query = _db.OperationHistory
                    .AsNoTracking();
+
+            if (rackName is not null)
+                query = query.Where(operation => operation.RackName == rackName);
+            if (cellName is not null)
+                query = query.Where(operation => operation.CellName == cellName);
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
@@ -43,8 +50,7 @@ namespace WMS.Infrastructure
                 query = query.Where(x =>
                     EF.Functions.ILike(x.ComponentName, pattern) ||
                     EF.Functions.ILike(x.Operator, pattern) ||
-                    EF.Functions.ILike(x.CellName, pattern) ||
-                    EF.Functions.ILike(x.RackName, pattern));
+                    (x.Comment != null && EF.Functions.ILike(x.Comment, pattern)));
             }
 
             if (fromUtc.HasValue)
@@ -68,6 +74,16 @@ namespace WMS.Infrastructure
                  .OrderByDescending(o => o.OccurredAt)
                  .Take(maxCount)
                  .ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<(string Rack, string Cell)>> GetPlacesAsync(CancellationToken ct = default)
+        {
+            var places = await _db.OperationHistory.AsNoTracking()
+                .Select(operation => new { operation.RackName, operation.CellName })
+                .Distinct()
+                .ToListAsync(ct);
+
+            return places.Select(place => (place.RackName, place.CellName)).ToList();
         }
 
         public IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc, CancellationToken ct = default)

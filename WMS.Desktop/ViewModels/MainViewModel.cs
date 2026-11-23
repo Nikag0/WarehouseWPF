@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MvvmHelpers;
 using System;
 using System.Collections.Generic;
@@ -22,12 +22,14 @@ namespace WMS.Desktop.ViewModels
 
         public NotificationViewModel Notification { get; }
         public ComponentsViewModel Components { get; }
+        public StockOverviewViewModel StockOverview { get; }
         public IssueViewModel Issue { get; }
         public ReceiptViewModel Receipt { get; }
         public HistoryViewModel History { get; }
 
         public ICommand ShowNotificationCommand { get; }
         public ICommand ShowComponentsCommand { get; }
+        public ICommand ShowStockOverviewCommand { get; }
         public ICommand ShowIssueCommand { get; }
         public ICommand ShowReceiptCommand { get; }
         public ICommand ShowHistoryCommand { get; }
@@ -37,6 +39,7 @@ namespace WMS.Desktop.ViewModels
         public MainViewModel(
                     NotificationViewModel notification,
                     ComponentsViewModel components,
+                    StockOverviewViewModel stockOverview,
                     IssueViewModel issue,
                     ReceiptViewModel receipt,
                     HistoryViewModel history,
@@ -45,6 +48,7 @@ namespace WMS.Desktop.ViewModels
         {
             Notification = notification;
             Components = components;
+            StockOverview = stockOverview;
             Issue = issue;
             Receipt = receipt;
             History = history;
@@ -54,6 +58,7 @@ namespace WMS.Desktop.ViewModels
 
             ShowNotificationCommand = new RelayCommand(_ => ChangeView(Notification));
             ShowComponentsCommand = new RelayCommand(_ => ChangeView(Components));
+            ShowStockOverviewCommand = new RelayCommand(_ => ChangeView(StockOverview));
             ShowIssueCommand = new RelayCommand(_ => ChangeView(Issue));
             ShowReceiptCommand = new RelayCommand(_ => ChangeView(Receipt));
             ShowHistoryCommand = new RelayCommand(_ => ChangeView(History));

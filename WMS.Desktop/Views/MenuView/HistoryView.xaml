@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="WMS.Desktop.Views.MenuView.HistoryView"
+<UserControl x:Class="WMS.Desktop.Views.MenuView.HistoryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -40,17 +40,32 @@
                 <ColumnDefinition Width="17*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox 
-                Grid.Column="0"
-                Margin="0,5,5,5" 
-                Tag="Поиск:"
-                Style="{StaticResource SearchTextBox}"
-                Text="{Binding SearchHistory, UpdateSourceTrigger=PropertyChanged}">
-            </TextBox>
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Margin="0,5,5,5"
+                         Tag="Товар, оператор или комментарий"
+                         Style="{StaticResource SearchTextBox}"
+                         Text="{Binding SearchHistory, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <ComboBox Grid.Column="1" Margin="5" MinWidth="145" MaxWidth="170"
+                          ItemsSource="{Binding RackOptions}" SelectedItem="{Binding SelectedRack}"
+                          VerticalContentAlignment="Center"
+                          AutomationProperties.Name="Стеллаж"/>
+
+                <ComboBox Grid.Column="2" Margin="5" MinWidth="125" MaxWidth="155"
+                          ItemsSource="{Binding CellOptions}" SelectedItem="{Binding SelectedCell}"
+                          VerticalContentAlignment="Center"
+                          AutomationProperties.Name="Ячейка"/>
+            </Grid>
 
             <ComboBox Grid.Column="1" 
                       ItemsSource="{Binding Type}"
-                      Tag="Тип операции:"
+                      Tag="Операция:"
                       SelectedItem="{Binding SelectedOperationType}"
                       Margin="5"
                       VerticalContentAlignment="Center"
@@ -115,7 +130,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Дата" Binding="{Binding OccurredAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Тип операции" MinWidth="150" Binding="{Binding Type}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Компонент" Binding="{Binding ComponentName}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Название товара" Binding="{Binding ComponentName}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Место хранения" Binding="{Binding RackAndCellName}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Было" Binding="{Binding PreviousQuantity, StringFormat={}{0:0.###}}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Изменения" MinWidth="115" Binding="{Binding QuantityChanged}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>

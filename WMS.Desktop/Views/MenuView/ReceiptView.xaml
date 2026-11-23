@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="WMS.Desktop.Views.MenuView.ReceiptView"
+<UserControl x:Class="WMS.Desktop.Views.MenuView.ReceiptView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -16,6 +16,45 @@
     <UserControl.Resources>
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
         <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
+        <Style x:Key="LocationSearchTextBox" TargetType="TextBox" BasedOn="{StaticResource SearchTextBox}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Outline" CornerRadius="4" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <DockPanel Margin="8,0">
+                                <TextBlock DockPanel.Dock="Left" Text="{TemplateBinding Tag}"
+                                           Foreground="#737373" VerticalAlignment="Center" Margin="0,0,5,0"
+                                           IsHitTestVisible="False"/>
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Outline" Property="BorderBrush" Value="#4FC3F7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="LocationOption" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DCEAF5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CellSearchTextBox" TargetType="TextBox" BasedOn="{StaticResource LocationSearchTextBox}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedRack}" Value="{x:Null}">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="10"
@@ -49,7 +88,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Grid.Column="0"
-                         Tag="Поиск:"
+                         Tag="Артикул, название или производитель"
                          Style="{StaticResource SearchTextBox}"
                          Text="{Binding SearchStockOrComponent, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -203,7 +242,7 @@
                     </Grid.RowDefinitions>
 
                     <Grid.Resources>
-                        <!-- Пока товар не выбран, ячейку, количество, оператора и комментарий заполнить нельзя.
+                        <!-- Пока товар не выбран, количество, оператора и комментарий заполнить нельзя.
                              Стеллаж выбирать можно: с кнопкой «Стеллаж» у поля поиска с него начинается поиск товара. -->
                         <Style x:Key="RequiresComponent" TargetType="Grid">
                             <Setter Property="IsEnabled" Value="True"/>
@@ -231,7 +270,7 @@
                                      Grid.Column="0"
                                      Margin="5,5,5,5"
                                      IsTabStop="False"
-                                     Style="{StaticResource SearchTextBox}" 
+                                     Style="{StaticResource LocationSearchTextBox}"
                                      Tag="Стеллаж:"
                                      Text="{Binding SearchRacks, UpdateSourceTrigger=PropertyChanged}"
                                      TextAlignment="Center"/>
@@ -257,18 +296,19 @@
 
                                 <ListBox ItemsSource="{Binding FilteredRacks}"
                                          ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
-                                            BorderThickness="0"
+                                            HorizontalContentAlignment="Stretch" BorderThickness="0"
                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" VerticalAlignment="Bottom"/>
-                                                <Button Content="Выбрать"
-                                                        Command="{Binding DataContext.SelectRackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                        CommandParameter="{Binding}">
-                                                </Button>
-                                            </StackPanel>
+                                            <Border Style="{StaticResource LocationOption}">
+                                                <Border.InputBindings>
+                                                    <MouseBinding Gesture="LeftClick"
+                                                                  Command="{Binding DataContext.SelectRackCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                  CommandParameter="{Binding}"/>
+                                                </Border.InputBindings>
+                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
+                                            </Border>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -276,8 +316,7 @@
                         </Popup>
 
                         <Grid Grid.Column="1"
-                              Grid.ColumnSpan="2"
-                              Style="{StaticResource RequiresComponent}">
+                              Grid.ColumnSpan="2">
 
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -291,7 +330,7 @@
                                  Margin="5,5,5,5"
                                  Tag="Ячейка:"
                                  IsTabStop="False"
-                                 Style="{StaticResource SearchTextBox}"
+                                 Style="{StaticResource CellSearchTextBox}"
                                  Text="{Binding SearchCell, UpdateSourceTrigger=PropertyChanged}"
                                  TextAlignment="Center"/>
 
@@ -315,30 +354,19 @@
 
                                 <ListBox ItemsSource="{Binding FilteredCells}"
                                          ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
-                                         BorderThickness="0"
+                                         HorizontalContentAlignment="Stretch" BorderThickness="0"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Margin="5">
-                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" VerticalAlignment="Bottom"/>
-                                                <Button Content="Выбрать"
-                                                    Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                    CommandParameter="{Binding}">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                                                                    Path=IsMouseOver}" 
-                                                                    Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                </Button>
-                                            </StackPanel>
+                                            <Border Style="{StaticResource LocationOption}">
+                                                <Border.InputBindings>
+                                                    <MouseBinding Gesture="LeftClick"
+                                                                  Command="{Binding DataContext.SelectCellCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                  CommandParameter="{Binding}"/>
+                                                </Border.InputBindings>
+                                                <TextBlock Text="{Binding Code}" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
+                                            </Border>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -355,7 +383,7 @@
                                 Background="White"
                                 ClipToBounds="True">
 
-                            <Grid >
+                            <Grid Style="{StaticResource RequiresComponent}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="75"/>
                                     <ColumnDefinition Width="*"/>

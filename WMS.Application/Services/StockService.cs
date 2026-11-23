@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using WMS.Domain;
@@ -190,6 +190,20 @@ namespace WMS.Application.Services
             }
 
             return result.Take(maxCount).ToList();
+        }
+
+        public async Task<IReadOnlyList<StockAvailabilityDto>> GetAvailabilityAsync(CancellationToken token)
+        {
+            await using var uow = _uowFactory.Create();
+            var components = await _componentRepo.GetEditFilterAsync(string.Empty, int.MaxValue, token);
+            var stocks = await _stockRepo.SearchAsync(string.Empty, int.MaxValue, ct: token);
+            var locations = stocks.ToLookup(stock => stock.ComponentId, stock => stock.StockToView());
+
+            return components
+                .OrderBy(component => component.Name)
+                .ThenBy(component => component.Article)
+                .Select(component => new StockAvailabilityDto(component, locations[component.Id].ToList()))
+                .ToList();
         }
 
         public async Task<IReadOnlyList<StockViewDTO>> GetFilteredStockAsync(string searchText, int maxCount, CancellationToken token = default, Guid? rackId = null, Guid? cellId = null)

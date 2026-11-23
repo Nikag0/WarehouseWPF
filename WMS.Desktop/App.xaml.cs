@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -281,6 +281,7 @@ namespace WMS.Desktop
             /// 5. View Models и Views
             services.AddSingleton<MainViewModel>(); // Главная
             services.AddTransient<ComponentsViewModel>();
+            services.AddTransient<StockOverviewViewModel>();
             services.AddTransient<ReceiptViewModel>();
             services.AddTransient<IssueViewModel>();
             services.AddTransient<SettingsViewModel>();

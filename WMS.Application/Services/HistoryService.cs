@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using WMS.Application.Abstractions;
 using WMS.Domain;
 
@@ -25,7 +25,9 @@ namespace WMS.Application.Services
             DateTime? dateTo,
             OperationType? operationType,
             int maxCount,
-            CancellationToken token)
+            CancellationToken token,
+            string? rackName = null,
+            string? cellName = null)
         {
             await using var uow = _uowFactory.Create();
 
@@ -35,9 +37,17 @@ namespace WMS.Application.Services
                 dateTo.HasValue ? DayStartUtc(dateTo.Value.AddDays(1)) : null,
                 operationType,
                 maxCount,
-                token);
+                token,
+                rackName,
+                cellName);
 
             return operationItem.Select(o => o.OperationHystoryToViewDTO(_timeZone)).ToList();
+        }
+
+        public async Task<IReadOnlyList<(string Rack, string Cell)>> GetPlacesAsync()
+        {
+            await using var uow = _uowFactory.Create();
+            return await _historyRepository.GetPlacesAsync();
         }
 
         public async Task DeleteHistoryAsync(

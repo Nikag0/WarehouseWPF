@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -85,6 +85,39 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         public ObservableCollection<OperationHystoryViewDto> History { get; } = [];
         public ObservableCollection<string> Type { get; set; } = new();
 
+        private const string AllRacks = "Все стеллажи";
+        private const string AllCells = "Все ячейки";
+        private IReadOnlyList<(string Rack, string Cell)> _places = [];
+
+        [ObservableProperty] private IReadOnlyList<string> _rackOptions = [AllRacks];
+        [ObservableProperty] private IReadOnlyList<string> _cellOptions = [AllCells];
+        [ObservableProperty] private string? _selectedRack = AllRacks;
+        [ObservableProperty] private string? _selectedCell = AllCells;
+
+        partial void OnSelectedRackChanged(string? value)
+        {
+            UpdateCellOptions();
+            SearchHistoryChanged();
+        }
+
+        partial void OnSelectedCellChanged(string? value) => SearchHistoryChanged();
+
+        private void UpdateCellOptions()
+        {
+            var selected = SelectedCell;
+            var cells = _places
+                .Where(place => SelectedRack is null or AllRacks || place.Rack == SelectedRack)
+                .Select(place => place.Cell)
+                .Distinct()
+                .OrderBy(code => code, StringComparer.CurrentCulture)
+                .Prepend(AllCells)
+                .ToList();
+
+            if (!CellOptions.SequenceEqual(cells))
+                CellOptions = cells;
+            SelectedCell = selected is not null && cells.Contains(selected) ? selected : AllCells;
+        }
+
         private readonly DialogService _dialogService;
 
         public HistoryViewModel(
@@ -108,6 +141,17 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             try
             {
                 LoadType();
+                _places = await _historyService.GetPlacesAsync();
+                var selected = SelectedRack;
+                var racks = _places.Select(place => place.Rack)
+                    .Distinct()
+                    .OrderBy(code => code, StringComparer.CurrentCulture)
+                    .Prepend(AllRacks)
+                    .ToList();
+                if (!RackOptions.SequenceEqual(racks))
+                    RackOptions = racks;
+                SelectedRack = selected is not null && racks.Contains(selected) ? selected : AllRacks;
+                UpdateCellOptions();
                 SearchHistoryChanged();
             }
             catch (Exception ex)
@@ -123,6 +167,8 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
             _cts = new CancellationTokenSource();
 
             var token = _cts.Token;
+            var rackName = SelectedRack == AllRacks ? null : SelectedRack;
+            var cellName = SelectedCell == AllCells ? null : SelectedCell;
 
             _ = Task.Run(async () =>
             {
@@ -136,7 +182,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                         DateTo,
                         operationType: MappingExtensions.StrToOperation(SelectedOperationType),
                         maxCount: 100,
-                        _cts.Token);
+                        token, rackName, cellName);
 
                     App.Current.Dispatcher.Invoke(() =>
                     {

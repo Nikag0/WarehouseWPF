@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="WMS.Desktop.Views.MenuView.IssueView"
+<UserControl x:Class="WMS.Desktop.Views.MenuView.IssueView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -55,7 +55,7 @@
                          GotKeyboardFocus="SearchToIssue_GotKeyboardFocus"
                          PreviewKeyDown="SearchToIssue_PreviewKeyDown"
                          Grid.Column="0"
-                         Tag="Поиск:"
+                         Tag="Артикул, название или производитель"
                          Text="{Binding SearchStock, UpdateSourceTrigger=PropertyChanged}"
                          IsTabStop="False">
 
@@ -161,14 +161,14 @@
                           RowHeight="40">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул" Width="150" Binding="{Binding Stock.Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Название" Width="20*" Binding="{Binding Stock.ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="165" Binding="{Binding Stock.Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="105" Binding="{Binding Stock.RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="105" Binding="{Binding Stock.CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Остаток" Width="105" Binding="{Binding Stock.Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Артикул" Width="150*" MinWidth="110" Binding="{Binding Stock.Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Название" Width="50*" MinWidth="150" Binding="{Binding Stock.ComponentName}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="150" Binding="{Binding Stock.Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Стеллаж" Width="80*" MinWidth="80" Binding="{Binding Stock.RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Ячейка" Width="80*" MinWidth="80" Binding="{Binding Stock.CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Stock.Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
 
-                        <DataGridTemplateColumn Header="К выдаче" Width="115" IsReadOnly="False" >
+                        <DataGridTemplateColumn Header="К выдаче" Width="110*" IsReadOnly="False" MinWidth="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <xctk:DecimalUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"

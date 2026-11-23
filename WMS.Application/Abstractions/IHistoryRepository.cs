@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,11 @@ namespace WMS.Application.Abstractions
             DateTime? toUtc,
             OperationType? operationType,
             int maxCount,
-            CancellationToken ct = default);
+            CancellationToken ct = default,
+            string? rackName = null,
+            string? cellName = null);
+
+        Task<IReadOnlyList<(string Rack, string Cell)>> GetPlacesAsync(CancellationToken ct = default);
 
         IAsyncEnumerable<OperationHistory> GetForPeriodAsync(DateTime fromUtc, DateTime toUtc, CancellationToken ct = default);
 
