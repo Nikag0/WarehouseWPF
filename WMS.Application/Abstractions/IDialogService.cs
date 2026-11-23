@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +11,7 @@ namespace WMS.Application.Abstractions
         void ShowInfo(string message, string title = "Информация");
         void ShowWarning(string message, string title = "Предупреждение");
         void ShowError(string message, string title = "Ошибка");
-        bool ShowConfirmation(string message, string title = "Подтверждение");
+        bool ShowConfirmation(string message, string title, string confirmText, string cancelText = "Отмена");
 
         // Возвращает выбранный путь или null, если пользователь закрыл окно
         string? ShowSaveCsvDialog(string title, string defaultFileName);

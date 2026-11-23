@@ -4,4 +4,5 @@
     string Name,
     string Manufacturer,
     DateOnly? ExpirationDate,
-    decimal MinQuantity);
+    decimal MinQuantity,
+    bool HasStock = false);

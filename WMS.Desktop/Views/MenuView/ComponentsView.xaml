@@ -11,38 +11,48 @@
              d:DesignHeight="1008" d:DesignWidth="1920">
 
 
-    <Grid Margin="10"
-        Background="#36495b">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="EditVisibility"/>
+    </UserControl.Resources>
 
+    <Grid Margin="10" Background="#36495b">
         <Grid.RowDefinitions>
             <RowDefinition Height="45"/>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Каталог товаров"
-                   Style="{StaticResource WindowNames}"/>
+        <DockPanel Margin="0,0,0,5">
+            <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding IsEditing}">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource FilterToggleStyle}">
+                        <Setter Property="Content" Value="Режим: просмотр"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Content" Value="Режим: редактирование"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <TextBlock Text="Каталог товаров" Style="{StaticResource WindowNames}"/>
+        </DockPanel>
 
-        <TextBox Grid.Row="1"
-                 Margin="0,5,10,5" 
-                 Tag="Артикул, название или производитель"
-                 Style="{StaticResource SearchTextBox}"
-                 Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>
+        <DockPanel Grid.Row="1" Margin="0,5">
+            <Button DockPanel.Dock="Right" Content="Добавить товар" Margin="8,0,0,0"
+                    Command="{Binding AddComponentCommand}" Style="{StaticResource ButtonStyle}"
+                    Visibility="{Binding IsEditing, Converter={StaticResource EditVisibility}}"/>
+            <TextBox Tag="Артикул, название или производитель"
+                     Style="{StaticResource SearchTextBox}"
+                     Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>
+        </DockPanel>
 
-        <Grid Grid.Row="2"
-              Width="300"
-              HorizontalAlignment="Left"
-              Margin="0,5,0,5">
-        </Grid>
-
-        <Grid Grid.Row="3"
-              Margin="0,5,0,0">
-
-            <DataGrid ItemsSource="{Binding FilteredComponents}" 
+        <Grid Grid.Row="2" Margin="0,5,0,0">
+            <DataGrid x:Name="CatalogGrid" ItemsSource="{Binding FilteredComponents}"
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
                       FontSize="{StaticResource BodyFontSize}"
-                      RowHeight="30"
+                      RowHeight="44"
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       ScrollViewer.CanContentScroll="True">
@@ -51,6 +61,34 @@
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTextColumn Header="Минимальный остаток" MinWidth="205"
+                                        Binding="{Binding MinQuantity, StringFormat={}{0:0.###}}"
+                                        ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                    <DataGridTemplateColumn x:Name="ActionsColumn" CellStyle="{StaticResource DataGridActionCell}" Header="Действия" Width="245" Visibility="Collapsed">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Изменить" Margin="3" Style="{StaticResource ButtonStyle}"
+                                            Command="{Binding DataContext.EditComponentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Удалить" Margin="3" ToolTipService.ShowOnDisabled="True"
+                                            Command="{Binding DataContext.DeleteComponentCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasStock}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                        <Setter Property="ToolTip" Value="На складе есть остаток"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

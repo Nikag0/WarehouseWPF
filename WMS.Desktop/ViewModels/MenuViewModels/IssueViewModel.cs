@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -228,12 +228,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
                 var isAccepted = _dialogService.ShowConfirmation(
                     $"Проверьте информацию:\n\n" +
-                    $"Нзвание: {item.Stock.ComponentName}\n" +
+                    $"Название: {item.Stock.ComponentName}\n" +
                     $"Артикул: {item.Stock.Article}\n" +
                     $"Производитель: {item.Stock.Manufacturer}\n" +
                     $"Количество: {item.OperationQuantity:0.###}\n\n" +
                     $"Стеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}",
-                    "Подтверждение приёмки");
+                    "Подтверждение выдачи", "Выдать товар", "Пропустить товар");
 
                 if (!isAccepted)
                 {

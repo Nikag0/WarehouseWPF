@@ -38,7 +38,8 @@ namespace WMS.Infrastructure
             return await query
                 .OrderByDescending(s => s.CreatedAt)
                 .Take(maxCount)
-                .Select(x => new ComponentEditDto(x.Id, x.Article, x.Name, x.Manufacturer, x.ExpirationDate, x.MinQuantity))
+                .Select(x => new ComponentEditDto(x.Id, x.Article, x.Name, x.Manufacturer, x.ExpirationDate,
+                    x.MinQuantity, _db.Stock.Any(stock => stock.ComponentId == x.Id)))
                 .ToListAsync(ct);
         }
 

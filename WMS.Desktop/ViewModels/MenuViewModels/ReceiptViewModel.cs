@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
@@ -267,12 +267,12 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
 
             var isAccepted = _dialogService.ShowConfirmation(
                 $"Проверьте информацию:\n\n" +
-                $"Нзвание: {ReceiptItem.ComponentName}\n" +
+                $"Название: {ReceiptItem.ComponentName}\n" +
                 $"Артикул: {ReceiptItem.Article}\n" +
                 $"Производитель: {ReceiptItem.Manufacturer}\n" +
                 $"Количество: {ReceiptItem.OperationQuantity:0.###}\n\n" +
                 $"Стеллаж: {SelectedRack.Code} Ячейка: {SelectedCell.Code}",
-                "Подтверждение приёмки");
+                "Подтверждение приёмки", "Принять товар");
 
             if (isLedAvailable)
                 await SwitchCellLightAsync(SelectedCell.Id, isOn: false);

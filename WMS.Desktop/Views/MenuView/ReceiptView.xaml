@@ -131,7 +131,7 @@
                         <DataGridTextColumn Header="Стеллаж" Width="90*" MinWidth="90" Binding="{Binding RackCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Ячейка" Width="90*" MinWidth="90" Binding="{Binding CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTemplateColumn Width="110*" IsReadOnly="False" MinWidth="110"> 
+                        <DataGridTemplateColumn Width="110*" IsReadOnly="False" CellStyle="{StaticResource DataGridActionCell}" MinWidth="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="Добавить"

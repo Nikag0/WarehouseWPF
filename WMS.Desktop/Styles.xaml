@@ -8,6 +8,7 @@
     <sys:Double x:Key="EmphasisFontSize">20</sys:Double>
     <sys:Double x:Key="SectionTitleFontSize">24</sys:Double>
     <sys:Double x:Key="ScreenTitleFontSize">30</sys:Double>
+    <SolidColorBrush x:Key="WarehouseStockHighlightBrush" Color="#B84DDB76"/>
 
     <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
 
@@ -172,6 +173,18 @@
                             <Setter TargetName="CellBorder" Property="BorderBrush" Value="#747B84"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DataGridActionCell" TargetType="DataGridCell"
+           BasedOn="{StaticResource {x:Type DataGridCell}}">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <ContentPresenter/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -145,7 +145,7 @@
                                             </DataTrigger>
 
                                             <DataTrigger Binding="{Binding ItemInCell}" Value="True">
-                                                <Setter Property="Background" Value="#85CDA434"/>
+                                                <Setter Property="Background" Value="{StaticResource WarehouseStockHighlightBrush}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                         

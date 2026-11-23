@@ -12,15 +12,16 @@ namespace WMS.Desktop.Views
         Question
     }
 
-    // Окно сообщения с крупным шрифтом. Для вопроса — кнопки «Да» / «Нет», для остальных — «ОК».
-    // Enter нажимает «Да» / «ОК», Esc — «Нет» / закрывает окно.
     public partial class MessageDialog : Window
     {
-        private MessageDialog(string message, string title, MessageDialogKind kind)
+        private MessageDialog(string message, string title, MessageDialogKind kind, string? confirmText, string cancelText)
         {
             InitializeComponent();
 
             Title = title;
+            HeadingText.Text = title;
+            YesButton.Content = confirmText;
+            NoButton.Content = cancelText;
             MessageText.Text = message;
 
             var isQuestion = kind == MessageDialogKind.Question;
@@ -37,10 +38,9 @@ namespace WMS.Desktop.Views
             };
         }
 
-        // Возвращает true, если нажата «Да» / «ОК»
-        public static bool Show(string message, string title, MessageDialogKind kind)
+        public static bool Show(string message, string title, MessageDialogKind kind, string? confirmText = null, string cancelText = "Отмена")
         {
-            var dialog = new MessageDialog(message, title, kind);
+            var dialog = new MessageDialog(message, title, kind, confirmText, cancelText);
 
             // Пока главное окно не показано (ошибки при запуске), владельца нет — окно по центру экрана
             var owner = WindowOwner.Current;

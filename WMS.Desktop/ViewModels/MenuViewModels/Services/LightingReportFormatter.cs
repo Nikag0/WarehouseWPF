@@ -1,4 +1,3 @@
-using System.Text;
 using WMS.Application.Services;
 
 namespace WMS.Desktop.Services
@@ -9,15 +8,8 @@ namespace WMS.Desktop.Services
     {
         public static string Describe(LightingInitReport report)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("Подсветка инициализирована с ошибками. Ряды с ошибкой горят красным.");
-            sb.AppendLine("Проверьте, что платы включены и подключены к сети.");
-            sb.AppendLine();
-
-            foreach (var error in report.Errors)
-                sb.AppendLine($"• {error}");
-
-            return sb.ToString().TrimEnd();
+            return $"Не удалось инициализировать контроллеры ({report.Errors.Count}).\n" +
+                   "Проверьте питание и подключение к сети.";
         }
     }
 }

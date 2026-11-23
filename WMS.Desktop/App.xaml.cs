@@ -326,7 +326,7 @@ namespace WMS.Desktop
             {
                 Views.MessageDialog.Show(
                     LightingReportFormatter.Describe(ledReport) + "\n\n" +
-                    "После устранения проблемы нажмите «Перезагрузить контроллеры» в Настройки → Действия.",
+                    "Повторите попытку в настройках подсветки.",
                     "Ошибка подсветки",
                     Views.MessageDialogKind.Warning);
             }

@@ -91,7 +91,7 @@
                         <DataGridTextColumn Header="Стеллаж" Width="90*" MinWidth="90" Binding="{Binding Location.RackCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Ячейка" Width="90*" MinWidth="90" Binding="{Binding Location.CellCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTemplateColumn Header="Статус" Width="185">
+                        <DataGridTemplateColumn Header="Статус" CellStyle="{StaticResource DataGridActionCell}" Width="185">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="{Binding Status}" Margin="3"

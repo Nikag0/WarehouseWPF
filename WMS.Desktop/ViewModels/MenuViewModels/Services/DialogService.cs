@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using WMS.Application.Abstractions;
 using WMS.Desktop.Views;
 
@@ -16,20 +16,20 @@ namespace WMS.Desktop.Services
         public void ShowError(string message, string title = "Ошибка")
             => Show(message, title, MessageDialogKind.Error);
 
-        public bool ShowConfirmation(string message, string title = "Подтверждение")
-            => Show(message, title, MessageDialogKind.Question);
+        public bool ShowConfirmation(string message, string title, string confirmText, string cancelText = "Отмена")
+            => Show(message, title, MessageDialogKind.Question, confirmText, cancelText);
 
         // Можно вызывать из фонового потока (например, из Task.Run в поиске): окно всё равно покажется в потоке интерфейса
-        private static bool Show(string message, string title, MessageDialogKind kind)
+        private static bool Show(string message, string title, MessageDialogKind kind, string? confirmText = null, string cancelText = "Отмена")
         {
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
             if (dispatcher is null)
                 return false; // Приложение уже закрывается
 
             if (!dispatcher.CheckAccess())
-                return dispatcher.Invoke(() => Show(message, title, kind));
+                return dispatcher.Invoke(() => Show(message, title, kind, confirmText, cancelText));
 
-            return MessageDialog.Show(message, title, kind);
+            return MessageDialog.Show(message, title, kind, confirmText, cancelText);
         }
 
         public string? ShowSaveCsvDialog(string title, string defaultFileName)

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm;
+using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -24,9 +24,7 @@ namespace WMS.Desktop.ViewModels
 {
     public partial class SettingsViewModel : ObservableObject
     {
-        [ObservableProperty] private ObservableCollection<ComponentEditDto> _filteredComponents = new();
         [ObservableProperty] private ObservableCollection<Operator> _filteredOperators = new();
-        [ObservableProperty] private string _searchComponent = string.Empty;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
@@ -36,10 +34,8 @@ namespace WMS.Desktop.ViewModels
         [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
         private DateTime? _dateTo = DateTime.Today;
 
-        private CancellationTokenSource? _cts;
 
 
-        private readonly ComponentService _componentService;
         private readonly OperatorService _operatorService;
         private readonly DialogService _dialogService;
         private readonly HistoryService _historyService;
@@ -48,14 +44,12 @@ namespace WMS.Desktop.ViewModels
 
 
         public SettingsViewModel(
-            ComponentService componentService,
             OperatorService operatorService,
             DialogService dialogService,
             HistoryService historyService,
             IStockService stockService,
             LedStripService ledStripService)
         {
-            _componentService = componentService;
             _operatorService = operatorService;
             _dialogService = dialogService;
             _historyService = historyService;
@@ -95,7 +89,6 @@ namespace WMS.Desktop.ViewModels
         {
             try
             {
-                OnSearchComponentChanged(_searchComponent);
                 var operatorsList = await _operatorService.GetAllAsync();
 
                 FilteredOperators = new ObservableCollection<Operator>(operatorsList);
@@ -103,60 +96,6 @@ namespace WMS.Desktop.ViewModels
             catch (Exception ex)
             {
                 _dialogService.ShowError($"Критический сбой при загрузке данных: {ex.Message}");
-            }
-        }
-
-        [RelayCommand]
-        private void AddComponent()
-        {
-            var vm = new ComponentEditViewModel(_componentService, _dialogService);
-            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
-
-            if (window.ShowDialog() == true)
-            {
-                _ = LoadDataAsync();
-            }
-        }
-
-        [RelayCommand]
-        private void EditComponent(ComponentEditDto component)
-        {
-            if (component == null) return;
-
-            var vm = new ComponentEditViewModel(_componentService, _dialogService, component);
-            var window = new ComponentEditWindow(vm) { Owner = WindowOwner.Current };
-
-            if (window.ShowDialog() == true)
-            {
-                _ = LoadDataAsync();
-            }
-        }
-
-        [RelayCommand]
-        private async Task DeleteComponent(ComponentEditDto component)
-        {
-            if (component == null) return;
-
-            if (!_dialogService.ShowConfirmation($"Удалить компонент {component.Name}?", "Удаление"))
-                return;
-
-            try
-            {
-                await _componentService.DeleteAsync(component.Id);
-
-                FilteredComponents.Remove(component);
-                WeakReferenceMessenger.Default.Send(new MessageService(true));
-                _dialogService.ShowInfo("Компонент успешно удален.");
-            }
-            catch (BusinessException ex)
-            {
-                _dialogService.ShowWarning(ex.Message, "Предупреждение");
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError(
-                    $"Компонент {component.Name} не удалён: не удалось сохранить изменения в базе.\n\n" +
-                    $"Подробности: {ex.Message}");
             }
         }
 
@@ -191,7 +130,7 @@ namespace WMS.Desktop.ViewModels
         {
             if (op == null) return;
 
-            if (!_dialogService.ShowConfirmation($"Удалить оператора {op.Surname} {op.Name}?", "Удаление"))
+            if (!_dialogService.ShowConfirmation($"Удалить оператора {op.Surname} {op.Name}?", "Удаление", "Удалить оператора"))
                 return;
 
             try
@@ -308,40 +247,5 @@ namespace WMS.Desktop.ViewModels
             }
         }
 
-        partial void OnSearchComponentChanged(string value)
-        {
-            _cts?.Cancel();
-            _cts = new CancellationTokenSource();
-            // Запоминаем токен этого запроса: поле _cts к моменту ответа может уже указывать на более новый поиск
-            var token = _cts.Token;
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(500, token);
-
-                    var result = await _componentService.GetEditFilterAsync(searchText: value, maxCount: 100, token);
-
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        if (!token.IsCancellationRequested)
-                        {
-                            FilteredComponents.Clear();
-                            foreach (var component in result)
-                            {
-                                FilteredComponents.Add(component);
-                            }
-                        }
-                    });
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    // Без этого ошибка фоновой задачи потерялась бы, и пользователь просто не увидел бы результатов
-                    _dialogService.ShowError($"Не удалось выполнить поиск: {ex.Message}");
-                }
-            });
-        }
     }
 }
