@@ -20,14 +20,12 @@ namespace WMS.Desktop.ViewModels
     {
         [ObservableProperty] private object _currentView;
 
-        public NotificationViewModel Notification { get; }
         public ComponentsViewModel Components { get; }
         public StockOverviewViewModel StockOverview { get; }
         public IssueViewModel Issue { get; }
         public ReceiptViewModel Receipt { get; }
         public HistoryViewModel History { get; }
 
-        public ICommand ShowNotificationCommand { get; }
         public ICommand ShowComponentsCommand { get; }
         public ICommand ShowStockOverviewCommand { get; }
         public ICommand ShowIssueCommand { get; }
@@ -37,7 +35,6 @@ namespace WMS.Desktop.ViewModels
         public ICommand ShowWarehouseCommand { get; }
 
         public MainViewModel(
-                    NotificationViewModel notification,
                     ComponentsViewModel components,
                     StockOverviewViewModel stockOverview,
                     IssueViewModel issue,
@@ -46,7 +43,6 @@ namespace WMS.Desktop.ViewModels
                     Func<SettingsView> settingsWindowFactory,
                     Func<WarehouseView> warehouseFactory)
         {
-            Notification = notification;
             Components = components;
             StockOverview = stockOverview;
             Issue = issue;
@@ -56,7 +52,6 @@ namespace WMS.Desktop.ViewModels
             _currentView = Components;
             Components.IsActiveTab = true;
 
-            ShowNotificationCommand = new RelayCommand(_ => ChangeView(Notification));
             ShowComponentsCommand = new RelayCommand(_ => ChangeView(Components));
             ShowStockOverviewCommand = new RelayCommand(_ => ChangeView(StockOverview));
             ShowIssueCommand = new RelayCommand(_ => ChangeView(Issue));
@@ -81,15 +76,13 @@ namespace WMS.Desktop.ViewModels
         private void ChangeView(object newView)
         {
             // 1. Сначала жестко гасим флаги активности у ВСЕХ вкладок
-            Notification.IsActiveTab = false;
             Components.IsActiveTab = false;
             Issue.IsActiveTab = false;
             Receipt.IsActiveTab = false;
             History.IsActiveTab = false;
 
             // 2. Включаем флаг только у той ViewModel, которую открываем
-            if (newView is NotificationViewModel n) n.IsActiveTab = true;
-            else if (newView is ComponentsViewModel c) c.IsActiveTab = true;
+            if (newView is ComponentsViewModel c) c.IsActiveTab = true;
             else if (newView is IssueViewModel i) i.IsActiveTab = true;
             else if (newView is ReceiptViewModel r) r.IsActiveTab = true;
             else if (newView is HistoryViewModel h) h.IsActiveTab = true;

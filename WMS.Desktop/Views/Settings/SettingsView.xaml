@@ -67,7 +67,7 @@
                         <DockPanel Margin="0,0,0,14">
                             <Button DockPanel.Dock="Right" Content="Экспортировать CSV"
                                     Command="{Binding ExportStockCsvCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <TextBlock Text="Таблица остатков" Foreground="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="Таблица наличия товаров" Foreground="White" VerticalAlignment="Center"/>
                         </DockPanel>
                         <Separator Margin="0,0,0,12"/>
                         <TextBlock Text="Очистка истории за период" Foreground="White" Margin="0,0,0,8"/>
@@ -76,21 +76,59 @@
                                     Command="{Binding DeleteHistoryCommand}" Style="{StaticResource ButtonStyle}"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="С" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <DatePicker Width="155" SelectedDate="{Binding DateFrom}"/>
+                                <Border Padding="2" CornerRadius="4" BorderThickness="2">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DateFromInvalid}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#FF8D96"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <DatePicker Width="155" SelectedDate="{Binding DateFrom}"
+                                                Style="{StaticResource LargeCalendarDatePicker}"/>
+                                </Border>
                                 <TextBlock Text="По" Foreground="White" VerticalAlignment="Center" Margin="16,0,8,0"/>
-                                <DatePicker Width="155" SelectedDate="{Binding DateTo}"/>
+                                <Border Padding="2" CornerRadius="4" BorderThickness="2">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DateToInvalid}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#FF8D96"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <DatePicker Width="155" SelectedDate="{Binding DateTo}"
+                                                Style="{StaticResource LargeCalendarDatePicker}"/>
+                                </Border>
                             </StackPanel>
                         </DockPanel>
+                        <TextBlock Text="{Binding DateRangeError}" Foreground="#FFB9BF"
+                                   TextWrapping="Wrap" Margin="0,6,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DateRangeError}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource SettingsSection}">
                     <StackPanel>
-                        <TextBlock Text="Контроллеры подсветки" Style="{StaticResource SettingsHeading}" Margin="0,0,0,14"/>
+                        <TextBlock Text="Подсветка стеллажей" Style="{StaticResource SettingsHeading}" Margin="0,0,0,14"/>
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="Инициализировать"
+                            <Button DockPanel.Dock="Right" Content="Перезагрузить"
                                     Command="{Binding ReinitializeControllersCommand}" Style="{StaticResource ButtonStyle}"/>
-                            <TextBlock Text="Заново отправить контроллерам настройки зон подсветки."
+                            <TextBlock Text="Перезагружает подсветку на стеллажах"
                                        Foreground="White" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"/>
                         </DockPanel>
                     </StackPanel>

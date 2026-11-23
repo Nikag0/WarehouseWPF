@@ -7,16 +7,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="1008" d:DesignWidth="1920">
 
-    <UserControl.Resources>
-        <Style x:Key="HistoryCalendarStyle" TargetType="Calendar">
-            <Setter Property="LayoutTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="2" ScaleY="2"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
     <Grid Margin="10"
        Background="#36495b">
 
@@ -82,12 +72,11 @@
 
             <DatePicker
                 Grid.Column="3"
-                Margin="0,0,5,0"
-                Height="35" 
+                Margin="5"
                 FontSize="{StaticResource BodyFontSize}"
                 VerticalContentAlignment="Center"
                 HorizontalAlignment="Stretch"
-                CalendarStyle="{StaticResource HistoryCalendarStyle}"
+                Style="{StaticResource LargeCalendarDatePicker}"
                 SelectedDate="{Binding DateFrom}">
             </DatePicker>
 
@@ -101,10 +90,10 @@
 
             <DatePicker
                 Grid.Column="5"
-                Height="35" 
+                Margin="5"
                 FontSize="{StaticResource BodyFontSize}"
                 VerticalContentAlignment="Center"
-                CalendarStyle="{StaticResource HistoryCalendarStyle}"
+                Style="{StaticResource LargeCalendarDatePicker}"
                 SelectedDate="{Binding DateTo}"/>
 
         </Grid>
@@ -136,23 +125,7 @@
                     <DataGridTextColumn Header="Изменения" MinWidth="115" Binding="{Binding QuantityChanged}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Стало" Binding="{Binding NewQuantity, StringFormat={}{0:0.###}}" Width="50*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Оператор" Binding="{Binding Operator}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Комментарий" Binding="{Binding Comment}" Width="100*">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <!-- Обрезка текста в самой таблице, если он не влезает -->
-                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-
-                                <!-- Настройка всплывающей подсказки -->
-                                <Setter Property="ToolTip">
-                                    <Setter.Value>
-                                        <ToolTip MaxWidth="400">
-                                            <TextBlock Text="{Binding Comment}" TextWrapping="Wrap"/>
-                                        </ToolTip>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Комментарий" Binding="{Binding Comment}" Width="100*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

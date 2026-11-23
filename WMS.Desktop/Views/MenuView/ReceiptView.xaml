@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS.Desktop.Views"
-             xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels.MenuViewModels" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
              d:DataContext="{d:DesignInstance Type=viewmodels:ReceiptViewModel}"
@@ -14,8 +13,6 @@
              PreviewMouseDown="Root_PreviewMouseDown">
 
     <UserControl.Resources>
-        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-        <converters:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
         <Style x:Key="LocationSearchTextBox" TargetType="TextBox" BasedOn="{StaticResource SearchTextBox}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -23,6 +20,7 @@
                         <Border x:Name="Outline" CornerRadius="4" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <DockPanel Margin="8,0">
+                                <Button DockPanel.Dock="Right" Style="{StaticResource ClearSearchButton}"/>
                                 <TextBlock DockPanel.Dock="Left" Text="{TemplateBinding Tag}"
                                            Foreground="#737373" VerticalAlignment="Center" Margin="0,0,5,0"
                                            IsHitTestVisible="False"/>

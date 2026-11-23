@@ -12,7 +12,6 @@ namespace WMS.Application.Abstractions
         Task<Stock?> GetByIdAsync(Guid stockId, CancellationToken ct = default);
         Task<Stock?> GetByLocationAsync(Guid componentId, Guid rackId, Guid cellId, CancellationToken ct = default);
         Task<IReadOnlyList<Stock>> SearchAsync(string searchText, int maxCount, Guid? rackId = null, Guid? cellId = null, CancellationToken ct = default);
-        Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default);
         Task<IReadOnlyList<Stock>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct);
         void Add(Stock stock, CancellationToken ct = default);
         void Update(Stock stock, CancellationToken ct = default);

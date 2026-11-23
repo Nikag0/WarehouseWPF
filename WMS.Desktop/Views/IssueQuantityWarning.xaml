@@ -1,0 +1,25 @@
+<Window x:Class="WMS.Desktop.Views.IssueQuantityWarning"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Укажите количество к выдаче" Width="560" SizeToContent="Height"
+        ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
+        Background="#36495b" FontSize="{StaticResource BodyFontSize}">
+    <StackPanel Margin="16">
+        <Border Background="#465E74" CornerRadius="8" Padding="14">
+            <StackPanel>
+                <TextBlock Text="Укажите количество к выдаче" Foreground="White"
+                           FontSize="{StaticResource EmphasisFontSize}" FontWeight="SemiBold"/>
+                <TextBlock Text="В столбце «К выдаче» введите число больше 0 для этих позиций."
+                           Foreground="White" TextWrapping="Wrap" Margin="0,6,0,12"/>
+                <ScrollViewer MaxHeight="280" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <TextBlock Text="{Binding}" Foreground="White" TextWrapping="Wrap"
+                               Margin="0,0,12,0"/>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+        <Button Content="Вернуться к выдаче" IsCancel="True" IsDefault="True"
+                HorizontalAlignment="Right" Margin="0,14,0,0" MinHeight="42"
+                Background="#E2EDF6" Style="{StaticResource ButtonStyle}"/>
+    </StackPanel>
+</Window>

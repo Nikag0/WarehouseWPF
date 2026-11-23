@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Text;
 using WMS.Application.Abstractions;
 using WMS.Application.DTO;
 using WMS.Application.Services;
 using WMS.Desktop.Models;
 using WMS.Desktop.Services;
+using WMS.Desktop.Views;
 using WMS.Domain;
 using WMS.Domain.ExceptionControl;
 using Component = WMS.Domain.Component;
@@ -18,6 +18,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
     public partial class IssueViewModel : ObservableObject
     {
         private readonly IStockService _stockService;
+        public event Action<IssueItemViewModel>? QuantityFocusRequested;
 
         public ObservableCollection<StockViewDTO> FilteredStocks { get; } = new();
         public ObservableCollection<RackViewModel> RacksGrid { get; } = new();
@@ -151,20 +152,11 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                               .Where(x => x.OperationQuantity <= 0)
                               .ToList();
 
-            // Проверка на количесвто выдачи.
-            if (invalidItems.Any())
+            if (invalidItems.Count > 0)
             {
-                var sb = new StringBuilder();
-                sb.AppendLine("Количество товаров для выдачи должно быть больше 0:");
-                sb.AppendLine();
-
-                foreach (var item in invalidItems)
-                {
-                    sb.AppendLine($"Название: {item.Stock.ComponentName} Стеллаж: {item.Stock.RackCodeDisplay} Ячейка: {item.Stock.CellCodeDisplay}");
-                }
-
-                _dialogService.ShowWarning(sb.ToString());
-                sb.Clear();
+                var warning = new IssueQuantityWarning(invalidItems) { Owner = WindowOwner.Current };
+                warning.ShowDialog();
+                QuantityFocusRequested?.Invoke(invalidItems[0]);
                 return;
             }
 
@@ -400,34 +392,16 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
         // В этом же порядке идёт обход при выдаче. Товары из одной ячейки остаются в порядке добавления.
         private void InsertIssueItemByPlace(StockViewDTO stock)
         {
-            var place = GetPlaceKey(stock);
+            var place = StockLocationOrder.GetPlaceKey(stock);
 
             var index = 0;
-            while (index < IssueItems.Count && GetPlaceKey(IssueItems[index].Stock).CompareTo(place) <= 0)
+            while (index < IssueItems.Count && StockLocationOrder.GetPlaceKey(IssueItems[index].Stock).CompareTo(place) <= 0)
                 index++;
 
             IssueItems.Insert(index, new IssueItemViewModel(stock));
         }
 
-        // Ключ сортировки: ряд стеллажа (буква), номер стеллажа, полка (буква), номер ячейки.
-        private static (int RackRow, int RackNumber, int Shelf, int CellNumber) GetPlaceKey(StockViewDTO stock)
-        {
-            var (rackNumber, rackRow) = ParsePlaceCode(stock.RackCode);
-            var (cellNumber, shelf) = ParsePlaceCode(stock.CellCode);
 
-            return (rackRow, rackNumber, shelf, cellNumber);
-        }
-
-        // RackCode и CellCode имеют вид «номер-ряд» числами (см. MappingExtensions.StockToView): «2-1» — это А-2.
-        // Код, который не удалось разобрать, уходит в конец списка.
-        private static (int Number, int Row) ParsePlaceCode(string code)
-        {
-            var parts = code?.Split('-');
-
-            return parts is { Length: 2 } && int.TryParse(parts[0], out var number) && int.TryParse(parts[1], out var row)
-                ? (number, row)
-                : (int.MaxValue, int.MaxValue);
-        }
 
         private async Task LoadWarehouseAsync()
         {
@@ -503,7 +477,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     {
                         if (!token.IsCancellationRequested && !IsIssue && !IssueCommand.IsRunning)
                         {
-                            foreach (var item in suggestions)
+                            foreach (var item in suggestions.OrderBy(StockLocationOrder.GetPlaceKey))
                             {
                                 FilteredStocks.Add(item);
                             }

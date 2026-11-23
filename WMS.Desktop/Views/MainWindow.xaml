@@ -71,10 +71,11 @@
                     </Button>
 
                     <Button Command="{Binding ShowStockOverviewCommand}"
+                            CommandParameter="{Binding StockOverview}"
                             Style="{StaticResource MenuButtonStyle}">
                         <StackPanel>
                             <TextBlock Text="🧮" FontSize="30" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Остатки" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Наличие" FontSize="{StaticResource BodyFontSize}" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

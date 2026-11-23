@@ -26,7 +26,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Остатки на складе"
+            <TextBlock Text="Наличие на складе"
                        Style="{StaticResource WindowNames}"/>
 
             <Grid Grid.Row="1"
@@ -45,7 +45,7 @@
                          Style="{StaticResource SearchTextBox}"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <ToggleButton Grid.Column="1" Content="Минимальный остаток"
+                <ToggleButton Grid.Column="1" Content="Заканчивается"
                               IsChecked="{Binding OnlyLowStock}" Margin="5,0,0,0"
                               Style="{StaticResource FilterToggleStyle}"/>
 
@@ -88,10 +88,32 @@
                         <DataGridTextColumn Header="Артикул" Width="150*" MinWidth="110" Binding="{Binding Availability.Component.Article}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Название" Width="50*" MinWidth="150" Binding="{Binding Availability.Component.Name}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Производитель" Width="50*" MinWidth="150" Binding="{Binding Availability.Component.Manufacturer}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Стеллаж" Width="90*" MinWidth="90" Binding="{Binding Location.RackCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Ячейка" Width="90*" MinWidth="90" Binding="{Binding Location.CellCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                        <DataGridTemplateColumn Header="Статус" CellStyle="{StaticResource DataGridActionCell}" Width="185">
+                        <DataGridTextColumn Header="Стеллаж" Width="70*" MinWidth="70" Binding="{Binding Location.RackCodeDisplay, FallbackValue=—}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTemplateColumn Header="Ячейка" Width="70*" MinWidth="70"
+                                                ClipboardContentBinding="{Binding Location.CellCodeDisplay, FallbackValue=—}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock x:Name="LocationLink">
+                                            <Hyperlink Foreground="#245D8B" ToolTip="Показать на схеме склада"
+                                                       Command="{Binding DataContext.ShowLocationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                       CommandParameter="{Binding Location}">
+                                                <Run Text="{Binding Location.CellCodeDisplay, Mode=OneWay}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock x:Name="NoLocation" Text="—" Visibility="Collapsed"/>
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Location}" Value="{x:Null}">
+                                            <Setter TargetName="LocationLink" Property="Visibility" Value="Collapsed"/>
+                                            <Setter TargetName="NoLocation" Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Кол-во" Width="70*" MinWidth="70" Binding="{Binding Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
+                        <DataGridTemplateColumn Header="Статус" CellStyle="{StaticResource DataGridActionCell}" Width="230">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="{Binding Status}" Margin="3"

@@ -13,11 +13,6 @@
                 <ResourceDictionary Source="Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
-            <!-- Notification -->
-            <DataTemplate DataType="{x:Type viewmodels:NotificationViewModel}">
-                <views:NotificationView/>
-            </DataTemplate>
-            
             <!-- Components -->
             <DataTemplate DataType="{x:Type viewmodels:ComponentsViewModel}">
                 <views:ComponentsView/>

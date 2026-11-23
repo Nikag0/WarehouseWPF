@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WMS.Desktop.Views" 
-             xmlns:converters="clr-namespace:WMS.Desktop.Converters"
              xmlns:viewmodels="clr-namespace:WMS.Desktop.ViewModels.MenuViewModels" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{d:DesignInstance Type=viewmodels:IssueViewModel}"
@@ -12,13 +11,6 @@
              d:DesignWidth="1920"
              d:DesignHeight="1008"
              PreviewMouseDown="Root_PreviewMouseDown">
-
-
-    <UserControl.Resources>
-
-        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
-
-    </UserControl.Resources>
 
 
     <Grid Margin="10"
@@ -97,9 +89,10 @@
                        HorizontalOffset="0"
                        VerticalOffset="2">
 
-                    <Border Background="White" 
-                        BorderBrush="#DDD" 
-                        BorderThickness="1" 
+                    <Border Background="White"
+                        BorderBrush="#617C94"
+                        BorderThickness="2"
+                        Padding="3"
                         Width="{Binding ElementName=IssueSearchPanel, Path=ActualWidth}"
                         MaxHeight="350">
 
@@ -108,40 +101,44 @@
                         </Border.Effect>
 
                         <ListBox ItemsSource="{Binding FilteredStocks}"
+                                 VirtualizingPanel.ScrollUnit="Pixel"
                                  ItemContainerStyle="{StaticResource WarehouseListItemStyle}"
                                  FontSize="{StaticResource BodyFontSize}"
                                  HorizontalContentAlignment="Stretch"
                                  BorderThickness="0"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                 Background="#CCC">
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 Background="White">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="8,5">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                                    <Border BorderBrush="#CBD8E3" BorderThickness="0,0,0,1">
+                                        <Grid Margin="8,5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <StackPanel Margin="0,0,12,0">
-                                            <TextBlock Text="{Binding ComponentName}"
-                                                       FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                            <TextBlock TextWrapping="Wrap">
-                                                <Run Text="Артикул: "/><Run Text="{Binding Article, Mode=OneWay}"/>
-                                                <Run Text=" · Производитель: "/><Run Text="{Binding Manufacturer, Mode=OneWay}"/>
-                                            </TextBlock>
-                                            <TextBlock TextWrapping="Wrap">
-                                                <Run Text="Стеллаж: "/><Run Text="{Binding RackCodeDisplay, Mode=OneWay}"/>
-                                                <Run Text=" · Ячейка: "/><Run Text="{Binding CellCodeDisplay, Mode=OneWay}"/>
-                                            </TextBlock>
-                                        </StackPanel>
+                                            <StackPanel Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding ComponentName}"
+                                                           FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                                <TextBlock TextWrapping="Wrap">
+                                                    <Run Text="Артикул: "/><Run Text="{Binding Article, Mode=OneWay}"/>
+                                                    <Run Text=" · Производитель: "/><Run Text="{Binding Manufacturer, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock TextWrapping="Wrap">
+                                                    <Run Text="Стеллаж: "/><Run Text="{Binding RackCodeDisplay, Mode=OneWay}"/>
+                                                    <Run Text=" · Ячейка: "/><Run Text="{Binding CellCodeDisplay, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
 
-                                        <Button Grid.Column="1" Content="Добавить к выдаче"
-                                                VerticalAlignment="Center"
-                                                Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                CommandParameter="{Binding}"
-                                                Style="{StaticResource ButtonStyle}"/>
-                                    </Grid>
+                                            <Button Grid.Column="1" Content="Добавить к выдаче"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.AddIssueItemCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource ButtonStyle}"/>
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -168,7 +165,7 @@
                         <DataGridTextColumn Header="Ячейка" Width="80*" MinWidth="80" Binding="{Binding Stock.CellCodeDisplay}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                         <DataGridTextColumn Header="Кол-во" Width="80*" MinWidth="80" Binding="{Binding Stock.Quantity, StringFormat={}{0:0.###}}" ElementStyle="{StaticResource TextDataInDataGrid}"/>
 
-                        <DataGridTemplateColumn Header="К выдаче" Width="110*" IsReadOnly="False" MinWidth="110">
+                        <DataGridTemplateColumn x:Name="QuantityColumn" Header="К выдаче" Width="110*" IsReadOnly="False" MinWidth="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <xctk:DecimalUpDown Value="{Binding OperationQuantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"

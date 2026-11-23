@@ -77,6 +77,24 @@ public partial class StockOverviewViewModel(
     [RelayCommand]
     private void SelectCell(CellViewModel cell) => SelectedCell = cell;
 
+    [RelayCommand]
+    private void ShowLocation(StockViewDTO? location)
+    {
+        if (location is null)
+            return;
+
+        var rack = RacksGrid.FirstOrDefault(rack => rack.Id == location.RackId);
+        var cell = rack?.Cells.FirstOrDefault(cell => cell.Id == location.CellId);
+        if (rack is null || cell is null)
+        {
+            dialogs.ShowWarning("Это место хранения не найдено на схеме склада.");
+            return;
+        }
+
+        SelectedRack = rack;
+        SelectedCell = cell;
+    }
+
     partial void OnSelectedRackChanged(RackViewModel? oldValue, RackViewModel? newValue)
     {
         if (oldValue is not null)

@@ -19,6 +19,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="45"/>
             <RowDefinition Height="60"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -38,16 +39,16 @@
             <TextBlock Text="Каталог товаров" Style="{StaticResource WindowNames}"/>
         </DockPanel>
 
-        <DockPanel Grid.Row="1" Margin="0,5">
-            <Button DockPanel.Dock="Right" Content="Добавить товар" Margin="8,0,0,0"
-                    Command="{Binding AddComponentCommand}" Style="{StaticResource ButtonStyle}"
-                    Visibility="{Binding IsEditing, Converter={StaticResource EditVisibility}}"/>
-            <TextBox Tag="Артикул, название или производитель"
-                     Style="{StaticResource SearchTextBox}"
-                     Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>
-        </DockPanel>
+        <TextBox Grid.Row="1" Margin="0,5" Tag="Артикул, название или производитель"
+                 Style="{StaticResource SearchTextBox}"
+                 Text="{Binding SearchComponent, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <Grid Grid.Row="2" Margin="0,5,0,0">
+        <Button Grid.Row="2" HorizontalAlignment="Left" Content="+ Добавить товар"
+                Margin="0,4,0,4" MinHeight="38"
+                Command="{Binding AddComponentCommand}" Style="{StaticResource ButtonStyle}"
+                Visibility="{Binding IsEditing, Converter={StaticResource EditVisibility}}"/>
+
+        <Grid Grid.Row="3" Margin="0,5,0,0">
             <DataGrid x:Name="CatalogGrid" ItemsSource="{Binding FilteredComponents}"
                       AutoGenerateColumns="False" 
                       IsReadOnly="True"
@@ -61,7 +62,7 @@
                     <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="150*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="400*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer}" Width="300*" ElementStyle="{StaticResource TextDataInDataGrid}"/>
-                    <DataGridTextColumn Header="Минимальный остаток" MinWidth="205"
+                    <DataGridTextColumn Header="Минимальное кол-во" MinWidth="205"
                                         Binding="{Binding MinQuantity, StringFormat={}{0:0.###}}"
                                         ElementStyle="{StaticResource TextDataInDataGrid}"/>
                     <DataGridTemplateColumn x:Name="ActionsColumn" CellStyle="{StaticResource DataGridActionCell}" Header="Действия" Width="245" Visibility="Collapsed">
@@ -79,7 +80,7 @@
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding HasStock}" Value="True">
                                                         <Setter Property="IsEnabled" Value="False"/>
-                                                        <Setter Property="ToolTip" Value="На складе есть остаток"/>
+                                                        <Setter Property="ToolTip" Value="На складе остались товары"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>

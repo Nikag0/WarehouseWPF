@@ -68,14 +68,25 @@ namespace WMS.Application.Services
                 await CheckSectorsAsync(session, failedLampIds, ct);
 
             foreach (var lamp in lamps)
-                await SetLampAsync(session, lamp, failedLampIds.Contains(lamp.Id) ? LampSignal.Red : LampSignal.Green, ct);
+            {
+                if (!await SetLampAsync(session, lamp, failedLampIds.Contains(lamp.Id) ? LampSignal.Red : LampSignal.Green, ct))
+                    failedLampIds.Add(lamp.Id);
+            }
 
             await Task.Delay(_options.ResultHoldTime, ct);
 
             foreach (var lamp in lamps.Where(l => !failedLampIds.Contains(l.Id)))
-                await SetLampAsync(session, lamp, LampSignal.Off, ct);
+            {
+                if (!await SetLampAsync(session, lamp, LampSignal.Off, ct))
+                    failedLampIds.Add(lamp.Id);
+            }
 
-            return new LightingInitReport(isConfigured: true, session.Errors);
+            var affectedRows = lamps.Where(lamp => failedLampIds.Contains(lamp.Id))
+                .Select(lamp => lamp.Name)
+                .Distinct()
+                .ToList();
+
+            return new LightingInitReport(isConfigured: true, session.Errors, affectedRows);
         }
 
         // Отправляет зоны контроллер за контроллером. Возвращает false, если хотя бы один контроллер группы не ответил.

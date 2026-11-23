@@ -294,6 +294,7 @@ public class LedStripServiceTests
         Assert.False(report.IsSuccess);
         var error = Assert.Single(report.Errors);
         Assert.Contains(RowController.Ip, error);
+        Assert.Equal(lamp.Name, Assert.Single(report.AffectedRows));
 
         // После первой неудачи контроллеру больше ничего не отправляется — один таймаут вместо трёх
         Assert.Single(sender.WithCommand(CreateSectorCommand));
@@ -315,6 +316,7 @@ public class LedStripServiceTests
 
         var error = Assert.Single(report.Errors);
         Assert.Contains(LampController.Ip, error);
+        Assert.Equal(lamp.Name, Assert.Single(report.AffectedRows));
 
         // Зоны ряда всё равно настроены — контроллер ряда исправен
         Assert.Single(sender.WithCommand(CreateSectorCommand));

@@ -102,29 +102,6 @@ namespace WMS.Infrastructure
                 .ToListAsync(ct);
         }
 
-        public async Task<IReadOnlyList<Stock>> GetMinQuantityAsync(CancellationToken ct = default)
-        {
-            // Экранируем кавычки для PostgreSQL, чтобы сохранить оригинальный регистр EF Core
-            var query = @"
-                SELECT s.""Id"", s.""ComponentId"", s.""RackId"", s.""CellId"", s.""Quantity""
-                FROM (
-                    SELECT st.*, 
-                            SUM(st.""Quantity"") OVER(PARTITION BY st.""ComponentId"") as ""TotalComponentQuantity""
-                    FROM ""stock"" st
-                ) s
-                INNER JOIN ""component"" c ON s.""ComponentId"" = c.""Id""
-                WHERE s.""TotalComponentQuantity"" <= c.""MinQuantity""";
-
-
-            return await _db.Stock
-                .FromSqlRaw(query)
-                .AsNoTracking()
-                .Include(s => s.Component)
-                .Include(s => s.Rack)
-                .Include(s => s.Cell)
-                .ToListAsync(ct);
-        }
-
         public IAsyncEnumerable<Stock> GetAllForExportAsync(CancellationToken ct = default)
         {
             var query = _db.Stock

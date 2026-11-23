@@ -16,6 +16,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WMS.Desktop.ViewModels;
 using WMS.Desktop.ViewModels.MenuViewModels;
+using WMS.Desktop.Models;
+using Xceed.Wpf.Toolkit;
 using WMS.Domain;
 
 namespace WMS.Desktop.Views.MenuView
@@ -25,19 +27,63 @@ namespace WMS.Desktop.Views.MenuView
     /// </summary>
     public partial class IssueView : UserControl
     { 
+        private IssueViewModel? _loadedViewModel;
 
         public IssueView()
         {
             InitializeComponent();
             this.Loaded += IssueViewLoaded;
+            Unloaded += (_, _) =>
+            {
+                if (_loadedViewModel is not null)
+                    _loadedViewModel.QuantityFocusRequested -= FocusQuantity;
+                _loadedViewModel = null;
+            };
         }
 
         private async void IssueViewLoaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is IssueViewModel viewModel)
             {
+                _loadedViewModel = viewModel;
+                viewModel.QuantityFocusRequested += FocusQuantity;
                 await viewModel.LoadDataAsync();
             }
+        }
+
+        private void FocusQuantity(IssueItemViewModel item)
+        {
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, new Action(() =>
+            {
+                if (!IsLoaded || !IssueGrid.Items.Contains(item))
+                    return;
+
+                IssueGrid.ScrollIntoView(item, QuantityColumn);
+                IssueGrid.UpdateLayout();
+                if (QuantityColumn.GetCellContent(item) is DependencyObject content &&
+                    FindQuantityEditor(content) is { } editor)
+                {
+                    editor.ApplyTemplate();
+                    if (editor.Template?.FindName("PART_TextBox", editor) is TextBox input && input.Focus())
+                        input.SelectAll();
+                    else
+                        editor.Focus();
+                }
+            }));
+        }
+
+        private static DecimalUpDown? FindQuantityEditor(DependencyObject element)
+        {
+            if (element is DecimalUpDown editor)
+                return editor;
+
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                if (FindQuantityEditor(VisualTreeHelper.GetChild(element, i)) is { } childEditor)
+                    return childEditor;
+            }
+
+            return null;
         }
 
         private void SearchToIssue_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

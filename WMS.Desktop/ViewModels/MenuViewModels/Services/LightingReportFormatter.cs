@@ -8,8 +8,11 @@ namespace WMS.Desktop.Services
     {
         public static string Describe(LightingInitReport report)
         {
-            return $"Не удалось инициализировать контроллеры ({report.Errors.Count}).\n" +
-                   "Проверьте питание и подключение к сети.";
+            var affected = report.AffectedRows.Count == 0
+                ? "Часть подсветки может не работать."
+                : $"Подсветка может не работать в следующих рядах: {string.Join(", ", report.AffectedRows)}.";
+
+            return affected + "\nПроверьте питание и подключение к сети.";
         }
     }
 }

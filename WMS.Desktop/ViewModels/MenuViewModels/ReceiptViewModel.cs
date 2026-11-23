@@ -610,7 +610,7 @@ namespace WMS.Desktop.ViewModels.MenuViewModels
                     {
                         if (!token.IsCancellationRequested)
                         {
-                            foreach (var item in suggestions)
+                            foreach (var item in suggestions.OrderBy(StockLocationOrder.GetPlaceKey))
                             {
                                 FilteredStocksOrComponents.Add(item);
                             }

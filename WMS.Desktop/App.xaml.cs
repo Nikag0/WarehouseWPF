@@ -271,7 +271,6 @@ namespace WMS.Desktop
             services.AddTransient<WarehouseService>();
             services.AddTransient<WarehouseVisualizationService>();
             services.AddTransient<HistoryService>();
-            services.AddTransient<NotificationService>();
             services.AddTransient<LedStripService>();
 
             var lightingOptions = LoadLightingOptions(config);
@@ -288,7 +287,6 @@ namespace WMS.Desktop
             services.AddTransient<ComponentEditViewModel>();
             services.AddTransient<OperatorEditViewModel>();
             services.AddTransient<HistoryViewModel>();
-            services.AddTransient<NotificationViewModel>();
 
             services.AddTransient<Views.SettingsView>();
             services.AddTransient<Views.WarehouseView>();

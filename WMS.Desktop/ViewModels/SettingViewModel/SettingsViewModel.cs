@@ -28,11 +28,29 @@ namespace WMS.Desktop.ViewModels
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
+        [NotifyPropertyChangedFor(nameof(DateFromInvalid), nameof(DateToInvalid), nameof(DateRangeError))]
         private DateTime? _dateFrom = DateTime.Today.AddDays(-7);
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(DeleteHistoryCommand))]
+        [NotifyPropertyChangedFor(nameof(DateFromInvalid), nameof(DateToInvalid), nameof(DateRangeError))]
         private DateTime? _dateTo = DateTime.Today;
+
+        private bool DatesOutOfOrder => DateFrom.HasValue && DateTo.HasValue && DateFrom.Value.Date > DateTo.Value.Date;
+        public bool DateFromInvalid => !DateFrom.HasValue || DateFrom.Value.Date > DateTime.Today || DatesOutOfOrder;
+        public bool DateToInvalid => !DateTo.HasValue || DateTo.Value.Date > DateTime.Today || DatesOutOfOrder;
+
+        public string DateRangeError
+        {
+            get
+            {
+                if (!DateFrom.HasValue || !DateTo.HasValue)
+                    return "Укажите обе даты.";
+                if (DateFrom.Value.Date > DateTime.Today || DateTo.Value.Date > DateTime.Today)
+                    return "Даты периода не могут быть в будущем.";
+                return DatesOutOfOrder ? "Дата «С» должна быть не позже даты «По»." : string.Empty;
+            }
+        }
 
 
 
@@ -214,7 +232,7 @@ namespace WMS.Desktop.ViewModels
 
         private bool CanDeleteHistory()
         {
-            return DateFrom.HasValue && DateTo.HasValue && DateFrom <= DateTo;
+            return !DateFromInvalid && !DateToInvalid;
         }
 
         // Общий сценарий выгрузки таблицы в CSV.
